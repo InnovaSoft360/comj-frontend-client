@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+@import "tailwindcss";
+
+
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-size: var(--font-size-base);
+    font-family: "Playfair Display", serif;
+    font-style: normal;
+}
+body{
+    overflow-x: hidden;
+    background-color: var(--color-text-primary)
+}
+.style-Main{
+    padding: 0 20px;
+    margin: auto;
+    max-width: 1100px;
+}
+
+
+:root {
+  /* COLORES*/
+  --color-text-primary: #0D0D0D;  
+  --color-text-light: #FFFFFF;  
+  --color-text-dark: #0000004d;; 
+  --color-text-shadow: #000; 
+/* BACKGROUNDS*/
+  --color-background-light: #F9F9F9; 
+  --color-background-dark: #222222;
+  --color-overlay: #CCC7A5A4;
+  --color-surface-dark: #333333;  
+  --color-accent: #D9782C; 
+  --color-accent-primary: #d9772cb4;
+  --color-trasparent: #d4b37f36;  
+  --color-shadow: #000000e5; 
+  --color-btnTop-hover: #d4b37f; 
+  --color-btnNot: #d10808; 
+  --color-btnYes: #7fd4cd;     
+        
+  /* FONTS SIZES*/
+    --font-size-base: 22px; 
+    --font-size-primary: 16px;
+    --font-size-title: 37px       
+}
