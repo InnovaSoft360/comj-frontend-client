@@ -1,6 +1,7 @@
 import HeroSection from "./hero-section";
 import LocalizatioSection from "./localization-section"
 import InformationSection from "./information-section"
+import ProcessoSection from "./processo-section";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <HeroSection />
       <LocalizatioSection/>
       <InformationSection/>
+      <ProcessoSection />
     </section>
   );
 }

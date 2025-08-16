@@ -39,18 +39,18 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link to="/informacoes" className="navLink" onClick={closeMenu}>
+              <Link to="/informacao" className="navLink" onClick={closeMenu}>
                 <IconInfo /> Informações
               </Link>
             </li>
             <li>
-              <Link to="/galerias" className="navLink" onClick={closeMenu}>
+              <Link to="/galeria" className="navLink" onClick={closeMenu}>
                 <IconGallery /> Galerias
               </Link>
             </li>
             <div className="navBtn">
               <button>
-                <Link to="/" onClick={closeMenu}>
+                <Link to="/login" onClick={closeMenu}>
                   Entrar
                 </Link>
               </button>
