@@ -11,6 +11,7 @@ export default function Home() {
         style={{ backgroundImage: `url(${heroBg})` }}
       >
         <div className="hero-section-content">
+          <div className="style-Main">
           <div className="hero-section-info">
             <h2>Condomínio Osvaldo MJ</h2>
             <p>
@@ -18,6 +19,7 @@ export default function Home() {
               para receber você e sua família! Localizadas no coração do
               Zango-4, Icolo e Bengo.
             </p>
+          </div>
           </div>
         </div>
       </section>
