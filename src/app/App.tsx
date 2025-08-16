@@ -3,8 +3,12 @@ import { Header, Footer, Home, Dashboard, Informacao, Galeria, Login, RegisterMi
 
 function App() {
   const location = useLocation();
-  const hideLayout = location.pathname.startsWith("/dashboard"); 
-  // Qualquer rota que comece com /dashboard não terá header/footer
+
+  // Esconde header/footer para login, register e dashboard
+  const hideLayout =
+    location.pathname.startsWith("/dashboard") ||
+    location.pathname === "/login" ||
+    location.pathname === "/registerMilitar";
 
   return (
     <div>
@@ -29,5 +33,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
