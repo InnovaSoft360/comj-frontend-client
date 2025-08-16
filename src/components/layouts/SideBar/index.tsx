@@ -1,8 +1,8 @@
 import * as styles from "./style";
-export default function Footer ()  {
+export default function SideBar ()  {
   return (
     <h1 className={styles.sectionTitle}>
-      footer
+      SideBar
     </h1>
   )
 }

@@ -1,0 +1,48 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.style-Main {
+  padding: 0 20px;
+  margin: auto;
+  max-width: 1200px;
+}
+
+:root {
+  --color-white-001: #f7fef9;
+  --color-white-002: #f5fef8;
+  --color-white-003: #f6fef8;
+  --color-white-004: #f4fef7;
+  --color-white-005: #f6fef9;
+  --color-white-006: #f4fdf7;
+
+  --color-black-001: #000;
+  --color-black-002: #111;
+  --color-black-003: #222;
+  --color-black-004: #333;
+  --color-black-005: #444;
+  --color-black-006: #555;
+
+  --color-green-001: #166b36;
+  --color-green-002: #157539;
+  --color-green-003: #157439;
+  --color-green-004: #166d37;
+  --color-green-005: #166c36;
+  --color-green-006: #166a36;
+  --color-green-007:#03A66A;
+  --color-green-008:#09734C;
+  --color-green-009:#7ABF92;
+
+  --color-orange-001: #f97316;
+  --color-orange-002: #f97011;
+  --color-orange-003: #f88737;
+
+  --color-shadow-001: #00000026; 
+
+  --font-size-base: 15px;
+  --font-size-footer: 13px;
+  --font-size-primary: 16px;
+  --font-size-title: 37px;
+  --font-size-subtitle: 20px;
+}
