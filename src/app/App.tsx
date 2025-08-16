@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Header, Footer, Home, Dashboard } from "./imports";
+import { Header, Footer, Home, Dashboard, Informacao, Galeria, Login, RegisterMilitar } from "./imports";
 
 function App() {
   const location = useLocation();
@@ -13,6 +13,10 @@ function App() {
       <Routes>
         {/* Rotas públicas */}
         <Route path="/" element={<Home />} />
+        <Route path="/informacao" element={<Informacao />} />
+        <Route path="/galeria" element={<Galeria />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registerMilitar" element={<RegisterMilitar />} />
 
         {/* Rotas da Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />

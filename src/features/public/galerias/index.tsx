@@ -1,4 +1,4 @@
-export default function Galerias() {
+export default function Galeria() {
   return (
     <div>Galerias</div>
   )

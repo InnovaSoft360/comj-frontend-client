@@ -1,7 +1,7 @@
 .localizacao {
   padding: 60px 0;
   display: flex;
-  gap: 40px;
+  gap: 10px;
   align-items: stretch;
   justify-content: space-between;
 }
@@ -10,7 +10,7 @@
   flex: 1;
   background: var(--color-white-001);
   padding: 30px;
-  border-radius: 20px;
+  border-radius: 10px;
   box-shadow: 0 5px 15px var(--color-shadow-001);
 }
 
