@@ -10,14 +10,12 @@ export default function Home() {
         className="hero-section"
         style={{ backgroundImage: `url(${heroBg})` }}
       >
+        <div className="style-Main">
         <div className="hero-section-content">
-          <div className="style-Main">
           <div className="hero-section-info">
-            <h2>Condomínio Osvaldo MJ</h2>
+            <h2>Condomínio <span>Osvaldo MJ</span></h2>
             <p>
-              Seu novo lar está aqui: Casas T3 modernas, seguras e perfeitas
-              para receber você e sua família! Localizadas no coração do
-              Zango-4, Icolo e Bengo.
+              Residências T3 modernas e seguras para militares e suas famílias, localizadas na Província do Icolo e Bengo, Bairro Zango-4.
             </p>
           </div>
           </div>
