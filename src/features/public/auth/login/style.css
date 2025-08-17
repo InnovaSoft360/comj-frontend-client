@@ -56,6 +56,20 @@
   background-color: var(--color-green-009);
 }
 
+.forgot-password-text {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.forgot-password-link {
+  color: var(--color-green-008);
+  text-decoration: none;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
 .register-text {
   margin-top: 15px;
   font-size: 14px;

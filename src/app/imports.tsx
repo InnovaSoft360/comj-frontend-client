@@ -7,6 +7,8 @@ export { default as Informacao} from "../features/public/informacao";
 export { default as Galeria} from "../features/public/galerias";
 export { default as Login} from "../features/public/auth/login";
 export { default as RegisterMilitar} from "../features/public/auth/register";
+export { default as ForgotPassword} from "../features/public/auth/forgot-password";
+export { default as ResetPassword} from "../features/public/auth/reset-password";
 
 
 import "./App.css";
