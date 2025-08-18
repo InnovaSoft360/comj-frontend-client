@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Header, Footer, Home, Dashboard, Informacao, Galeria, Login, RegisterMilitar, ForgotPassword, ResetPassword } from "./imports";
+import { Header, Footer, Home, Dashboard, Informacao, Galeria, Login, RegisterMilitar, ForgotPassword, ResetPassword, Militar } from "./imports";
 
 function App() {
   const location = useLocation();
@@ -24,6 +24,9 @@ function App() {
         <Route path="/registerMilitar" element={<RegisterMilitar />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        
+        {/* Rotas privado */}
+        <Route path="/militar/*" element={<Militar />} />
 
         {/* Rotas da Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />

@@ -7,8 +7,9 @@ import { useState } from "react";
 import {
   HiOutlineHome as IconHome,
   HiOutlineInformationCircle as IconInfo,
-  HiOutlinePhotograph as IconGallery,
 } from "react-icons/hi";
+import { MdPhotoLibrary as IconGallery } from "react-icons/md";
+import { GiRank3 as IconMilitary } from "react-icons/gi";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -31,7 +32,6 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* aqui já corrigi */}
           <ul className={`navMenu ${menuOpen ? "active" : ""}`}>
             <li>
               <Link to="/" className="navLink" onClick={closeMenu}>
@@ -45,7 +45,12 @@ export default function Header() {
             </li>
             <li>
               <Link to="/galeria" className="navLink" onClick={closeMenu}>
-                <IconGallery /> Galerias
+                <IconGallery /> Galeria
+              </Link>
+            </li>
+            <li>
+              <Link to="/militar" className="navLink" onClick={closeMenu}>
+                <IconMilitary /> Militar
               </Link>
             </li>
             <div className="navBtn">
