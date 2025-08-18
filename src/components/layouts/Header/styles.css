@@ -35,7 +35,7 @@ header{
 .navBtn{
     margin-left: 20px;
     & button{
-        border: 1px solid var(--color-green-007);
+border: 1px solid #f88737;
         padding: 5px 20px;
         border-radius: 10px;
         transition: all .5s ease-in-out;
