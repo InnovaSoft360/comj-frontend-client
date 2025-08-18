@@ -62,7 +62,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #d61c1cf3;
 }
 
 .form-group input:disabled {
@@ -73,7 +73,7 @@
 .reset-password-btn {
   width: 100%;
   padding: 12px;
-  background: #667eea;
+  background: #166b36;
   color: white;
   border: none;
   border-radius: 5px;
@@ -83,7 +83,7 @@
 }
 
 .reset-password-btn:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #157539;
 }
 
 .reset-password-btn:disabled {
@@ -101,7 +101,7 @@
 }
 
 .success-message {
-  color: #27ae60;
+  color: #d61c1cf3;
   background-color: #f2fdf2;
   padding: 10px;
   border-radius: 5px;
@@ -115,7 +115,7 @@
 
 .success-icon {
   font-size: 48px;
-  color: #27ae60;
+  color: #d61c1cf3;
   margin-bottom: 20px;
 }
 
@@ -140,7 +140,7 @@
 }
 
 .back-link {
-  color: #667eea;
+  color: #d61c1cf3;
   text-decoration: none;
 }
 

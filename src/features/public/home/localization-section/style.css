@@ -21,7 +21,7 @@
   color: var(--color-black-005);
 }
 .localizacao-inf h3 span {
-  color: var(--color-green-007);
+  color: #f88737; /* Substituição feita aqui */
 }
 .localizacao-inf-div{
   padding: 10px 0;
@@ -38,7 +38,7 @@
 }
 
 .localizacao-inf-div h4 .icon {
-  color: var(--color-green-007);
+  color: #f88737; /* Substituição feita aqui */
   font-size: 1.2em;
 }
 

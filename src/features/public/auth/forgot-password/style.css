@@ -33,7 +33,7 @@
 }
 
 .forgot-password-description {
-  color: #666;
+  color: #4caf50;;
   margin-bottom: 30px;
   font-size: 14px;
   line-height: 1.5;
@@ -62,7 +62,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #d61c1cf3;
 }
 
 .form-group input:disabled {
@@ -73,7 +73,7 @@
 .forgot-password-btn {
   width: 100%;
   padding: 12px;
-  background: #4b5C3C;
+  background: #d61c1cf3;
   color: white;
   border: none;
   border-radius: 5px;
@@ -103,7 +103,7 @@
 
 .success-message {
   background-color: #efe;
-  color: #3c3;
+  color: #d61c1cf3;
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 15px;
@@ -116,12 +116,12 @@
 
 .success-icon {
   font-size: 48px;
-  color: #4caf50;
+  color: #d61c1cf3;
   margin-bottom: 20px;
 }
 
 .success-description {
-  color: #666;
+  color: #d61c1cf3;
   margin-bottom: 20px;
   font-size: 14px;
   line-height: 1.5;
@@ -132,7 +132,7 @@
 }
 
 .back-link {
-  color: #667eea;
+  color: #d61c1cf3;
   text-decoration: none;
   font-size: 14px;
 }
