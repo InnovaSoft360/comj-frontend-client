@@ -1,4 +1,4 @@
-import heroBg from "../../../../assets/section/1 Image 2025-08-16 at 10.55.38.png";
+import heroBg from "../../../../assets/section/img4.png";
 import "./style.css";
 export default function HeroSection() {
   return (
