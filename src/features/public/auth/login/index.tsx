@@ -21,6 +21,12 @@ export default function Login() {
           <button type="submit" className="login-btn">Entrar</button>
         </form>
 
+        <p className="forgot-password-text">
+          <Link to="/forgot-password" className="forgot-password-link">
+            Esqueceu sua senha?
+          </Link>
+        </p>
+
         <p className="register-text">
           Não tem uma conta?{" "}
           <Link to="/registerMilitar" className="register-link">
