@@ -32,7 +32,6 @@ export default function RegisterMilitar() {
         [name]: file
       });
       
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewFoto(reader.result as string);
@@ -44,7 +43,6 @@ export default function RegisterMilitar() {
         [name]: value
       });
       
-      // Validação em tempo real para campos específicos
       if (name === 'senha' || name === 'nip' || name === 'confirmarSenha') {
         validateField(name, value);
       }
@@ -56,30 +54,19 @@ export default function RegisterMilitar() {
     
     switch (fieldName) {
       case 'senha':
-        if (value.length < 4) {
-          newErrors.senha = 'A senha deve ter no mínimo 4 caracteres';
-        } else {
-          delete newErrors.senha;
-        }
+        if (value.length < 4) newErrors.senha = 'A senha deve ter no mínimo 4 caracteres';
+        else delete newErrors.senha;
         break;
       case 'nip':
         const nipLimpo = value.replace(/\s/g, '');
-        if (!nipLimpo) {
-          newErrors.nip = 'NIP é obrigatório';
-        } else if (!/^\d+$/.test(nipLimpo)) {
-          newErrors.nip = 'NIP deve conter apenas números';
-        } else if (nipLimpo.length > 7) {
-          newErrors.nip = 'NIP deve ter no máximo 7 dígitos';
-        } else {
-          delete newErrors.nip;
-        }
+        if (!nipLimpo) newErrors.nip = 'NIP é obrigatório';
+        else if (!/^\d+$/.test(nipLimpo)) newErrors.nip = 'NIP deve conter apenas números';
+        else if (nipLimpo.length > 7) newErrors.nip = 'NIP deve ter no máximo 7 dígitos';
+        else delete newErrors.nip;
         break;
       case 'confirmarSenha':
-        if (value !== formData.senha) {
-          newErrors.confirmarSenha = 'As senhas não coincidem';
-        } else {
-          delete newErrors.confirmarSenha;
-        }
+        if (value !== formData.senha) newErrors.confirmarSenha = 'As senhas não coincidem';
+        else delete newErrors.confirmarSenha;
         break;
     }
     
@@ -90,7 +77,6 @@ export default function RegisterMilitar() {
     e.preventDefault();
     setError(null);
     
-    // Validação usando os utilitários
     const validationErrors = validarFormularioCadastro({
       nome: formData.nome,
       sobrenome: formData.sobrenome,
@@ -101,8 +87,7 @@ export default function RegisterMilitar() {
     });
 
     if (Object.keys(validationErrors).length > 0) {
-      const firstError = Object.values(validationErrors)[0];
-      setError(firstError);
+      setError(Object.values(validationErrors)[0]);
       return;
     }
 
@@ -124,7 +109,7 @@ export default function RegisterMilitar() {
       } else {
         setError(response.message || "Erro ao realizar cadastro");
       }
-    } catch (error) {
+    } catch {
       setError("Erro de conexão. Tente novamente.");
     } finally {
       setIsLoading(false);
@@ -138,7 +123,9 @@ export default function RegisterMilitar() {
           <img src={Logo} alt="Logo" />
         </h2>
         <h3>Cadastro de Militar</h3>
-        
+
+        {error && <div className="error-message">{error}</div>}
+
         <form onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="form-group">
@@ -247,8 +234,8 @@ export default function RegisterMilitar() {
             </div>
           </div>
 
-          <button type="submit" className="register-btn">
-            Criar Conta
+          <button type="submit" className="register-btn" disabled={isLoading}>
+            {isLoading ? "Cadastrando..." : "Criar Conta"}
           </button>
         </form>
 
