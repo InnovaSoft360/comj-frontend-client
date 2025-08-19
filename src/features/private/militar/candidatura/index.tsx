@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import './style.css';
 import './style-responsive.css';
 
+
+
 export default function Candidatura() {
-  const [isLoading] = useState(false); // removi setIsLoading pq não tava sendo usado
+  const [isLoading] = useState(false);
 
   const [documents, setDocuments] = useState<{
     bi: File | null;
@@ -58,6 +60,7 @@ export default function Candidatura() {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validação básica
     if (!documents.bi || !documents.declaracaoRemuneracao || 
         !documents.comprovativoBancario || documents.recibosSalario.length === 0) {
       alert('Por favor, faça upload de todos os documentos obrigatórios.');
@@ -65,9 +68,12 @@ export default function Candidatura() {
       return;
     }
 
+    // Simulação de envio - aqui você faria o upload real para o servidor
     setTimeout(() => {
       setSuccessMessage('Candidatura submetida com sucesso! Aguarde a análise dos documentos.');
       setIsSubmitting(false);
+      
+      // Limpar apenas documentos
       setDocuments({
         bi: null,
         declaracaoRemuneracao: null,
@@ -116,7 +122,6 @@ export default function Candidatura() {
         <div className="form-section">
           <h2>Documentos Necessários</h2>
           
-          {/* BI */}
           <div className="form-group">
             <label>Cópia do BI <span className="required">*</span></label>
             <div className="document-upload">
@@ -124,12 +129,20 @@ export default function Candidatura() {
               <p className="upload-text">
                 {documents.bi ? documents.bi.name : 'Arraste o arquivo ou clique para selecionar'}
               </p>
+              <p className="upload-hint">Formatos aceitos: PDF, JPG, PNG (máx. 5MB)</p>
               <input
                 type="file"
                 className="file-input"
                 accept=".pdf,.jpg,.jpeg,.png"
                 onChange={(e) => handleFileUpload('bi', e.target.files)}
               />
+              <button
+                type="button"
+                className="upload-button"
+                onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+              >
+                Escolher Arquivo
+              </button>
             </div>
             {documents.bi && (
               <div className="file-list">
@@ -147,20 +160,27 @@ export default function Candidatura() {
             )}
           </div>
 
-          {/* Declaração de Remuneração */}
           <div className="form-group">
             <label>Declaração de Remuneração <span className="required">*</span></label>
             <div className="document-upload">
               <div className="upload-icon">💰</div>
               <p className="upload-text">
-                {documents.declaracaoRemuneracao ? documents.declaracaoRemuneracao.name : 'Selecione um arquivo'}
+                {documents.declaracaoRemuneracao ? documents.declaracaoRemuneracao.name : 'Arraste o arquivo ou clique para selecionar'}
               </p>
+              <p className="upload-hint">Formatos aceitos: PDF (máx. 5MB)</p>
               <input
                 type="file"
                 className="file-input"
                 accept=".pdf"
                 onChange={(e) => handleFileUpload('declaracaoRemuneracao', e.target.files)}
               />
+              <button
+                type="button"
+                className="upload-button"
+                onClick={() => document.querySelectorAll<HTMLInputElement>('input[type="file"]')[1]?.click()}
+              >
+                Escolher Arquivo
+              </button>
             </div>
             {documents.declaracaoRemuneracao && (
               <div className="file-list">
@@ -178,20 +198,27 @@ export default function Candidatura() {
             )}
           </div>
 
-          {/* Comprovativo Bancário */}
           <div className="form-group">
             <label>Comprovativo Bancário <span className="required">*</span></label>
             <div className="document-upload">
               <div className="upload-icon">🏦</div>
               <p className="upload-text">
-                {documents.comprovativoBancario ? documents.comprovativoBancario.name : 'Selecione um arquivo'}
+                {documents.comprovativoBancario ? documents.comprovativoBancario.name : 'Arraste o arquivo ou clique para selecionar'}
               </p>
+              <p className="upload-hint">Formatos aceitos: PDF, JPG, PNG (máx. 5MB)</p>
               <input
                 type="file"
                 className="file-input"
                 accept=".pdf,.jpg,.jpeg,.png"
                 onChange={(e) => handleFileUpload('comprovativoBancario', e.target.files)}
               />
+              <button
+                type="button"
+                className="upload-button"
+                onClick={() => document.querySelectorAll<HTMLInputElement>('input[type="file"]')[2]?.click()}
+              >
+                Escolher Arquivo
+              </button>
             </div>
             {documents.comprovativoBancario && (
               <div className="file-list">
@@ -209,7 +236,6 @@ export default function Candidatura() {
             )}
           </div>
 
-          {/* Recibos */}
           <div className="form-group">
             <label>Últimos 3 Recibos de Salário <span className="required">*</span></label>
             <div className="document-upload">
@@ -217,8 +243,9 @@ export default function Candidatura() {
               <p className="upload-text">
                 {documents.recibosSalario.length > 0 
                   ? `${documents.recibosSalario.length} arquivo(s) selecionado(s)` 
-                  : 'Selecione até 3 arquivos'}
+                  : 'Arraste os arquivos ou clique para selecionar'}
               </p>
+              <p className="upload-hint">Formatos aceitos: PDF, JPG, PNG (máx. 5MB cada)</p>
               <input
                 type="file"
                 className="file-input"
@@ -227,6 +254,14 @@ export default function Candidatura() {
                 onChange={(e) => handleFileUpload('recibos', e.target.files)}
                 disabled={documents.recibosSalario.length >= 3}
               />
+              <button
+                type="button"
+                className="upload-button"
+                onClick={() => document.querySelectorAll<HTMLInputElement>('input[type="file"]')[3]?.click()}
+                disabled={documents.recibosSalario.length >= 3}
+              >
+                Escolher Arquivos
+              </button>
             </div>
             {documents.recibosSalario.length > 0 && (
               <div className="file-list">
