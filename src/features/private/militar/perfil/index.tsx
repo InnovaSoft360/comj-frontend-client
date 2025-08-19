@@ -9,7 +9,7 @@ export default function Perfil() {
     <div className="perfil-container">
       <div className="perfil-card">
         <div className="perfil-header">
-          <h2>Perfil do Militar</h2>
+          <h2>Perfil</h2>
         </div>
 
         <div className="perfil-content">
