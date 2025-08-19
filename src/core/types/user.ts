@@ -2,6 +2,7 @@ export interface UserRegistration {
   nome: string;
   sobrenome: string;
   email: string;
+  telefone?: string;
   senha: string;
   foto?: File | null;
   nip: string;
@@ -15,6 +16,7 @@ export interface UserRegistrationResponse {
     nome: string;
     sobrenome: string;
     email: string;
+    telefone?: string;
     nip: string;
   };
 }
@@ -23,6 +25,7 @@ export interface RegisterFormData {
   nome: string;
   sobrenome: string;
   email: string;
+  telefone?: string;
   senha: string;
   confirmarSenha: string;
   foto: File | null;

@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './style.css';
 import './style-responsive.css';
 
-interface DocumentFile {
-  file: File;
-  type: string;
-}
+// Interface removida pois não está sendo utilizada
 
 export default function Candidatura() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const [documents, setDocuments] = useState<{
     bi: File | null;

@@ -38,6 +38,7 @@ export const validarFormularioCadastro = (dados: {
   nome: string;
   sobrenome: string;
   email: string;
+  telefone?: string;
   senha: string;
   confirmarSenha: string;
   nip: string;
@@ -68,6 +69,10 @@ export const validarFormularioCadastro = (dados: {
   const validacaoNIP = validarNIP(dados.nip);
   if (!validacaoNIP.valido) {
     erros.nip = validacaoNIP.mensagem || 'NIP inválido';
+  }
+
+  if (dados.telefone && !validarTelefone(dados.telefone)) {
+    erros.telefone = 'Telefone inválido. Use o formato (XX) XXXXX-XXXX';
   }
 
   return erros;
