@@ -1,10 +1,11 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Header, Footer, Home, Dashboard, Informacao, Galeria, Login, RegisterMilitar, ForgotPassword, ResetPassword, Militar } from "./imports";
+import { AuthProvider } from "../contexts/AuthContext";
 
 function App() {
   const location = useLocation();
 
-  // Esconde header/footer para login, register, forgot-password e dashboard
+  // Hide header/footer for login, register, forgot-password and dashboard
   const hideLayout =
     location.pathname.startsWith("/dashboard") ||
     location.pathname === "/login" ||
@@ -12,31 +13,33 @@ function App() {
     location.pathname === "/forgot-password";
 
   return (
-    <div>
-      {!hideLayout && <Header />}
+    <AuthProvider>
+      <div>
+        {!hideLayout && <Header />}
 
-      <Routes>
-        {/* Rotas públicas */}
-        <Route path="/" element={<Home />} />
-        <Route path="/informacao" element={<Informacao />} />
-        <Route path="/galeria" element={<Galeria />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/registerMilitar" element={<RegisterMilitar />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        
-        {/* Rotas privado */}
-        <Route path="/militar/*" element={<Militar />} />
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/informacao" element={<Informacao />} />
+          <Route path="/galeria" element={<Galeria />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/registerMilitar" element={<RegisterMilitar />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
+          {/* Private routes */}
+          <Route path="/militar/*" element={<Militar />} />
 
-        {/* Rotas da Dashboard */}
-        <Route path="/dashboard" element={<Dashboard />} />
+          {/* Dashboard routes */}
+          <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Redireciona rotas inexistentes */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Redirect non-existent routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
 
-      {!hideLayout && <Footer />}
-    </div>
+        {!hideLayout && <Footer />}
+      </div>
+    </AuthProvider>
   );
 }
 export default App;

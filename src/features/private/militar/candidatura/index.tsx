@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import './style.css';
 import './style-responsive.css';
 
-
-
+// Interface removida pois não está sendo utilizada
 export default function Candidatura() {
   const [isLoading] = useState(false);
 
