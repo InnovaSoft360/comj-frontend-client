@@ -4,8 +4,7 @@ import {
   FaUserShield,
   FaFileAlt,
   FaBell,
-  FaTasks,
-  FaSignOutAlt,
+  FaTasks
 } from "react-icons/fa";
 
 // Subpáginas
@@ -48,10 +47,6 @@ export default function Militar() {
             className={({ isActive }) => (isActive ? "link-active" : "")}
           >
             <FaUserShield /> Perfil
-          </NavLink>
-
-          <NavLink to="/logout">
-            <FaSignOutAlt /> Logout
           </NavLink>
         </nav>
       </aside>

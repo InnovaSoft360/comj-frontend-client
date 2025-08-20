@@ -1,0 +1,72 @@
+.status-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: Arial, sans-serif;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+/* Cores do status */
+.status-pendente {
+  background-color: #fff9e6;
+  color: #e6b800;
+}
+
+.status-aprovado {
+  background-color: #e6f8ed;
+  color: #28a745;
+}
+
+.status-negado {
+  background-color: #fdecea;
+  color: #dc3545;
+}
+
+/* Ícones */
+.icon {
+  font-size: 18px;
+}
+
+/* Botões de teste */
+.status-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.status-buttons button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.status-buttons button:hover {
+  opacity: 0.85;
+}
+
+.status-buttons button:nth-child(1) {
+  background-color: #fff9e6;
+  color: #e6b800;
+}
+
+.status-buttons button:nth-child(2) {
+  background-color: #e6f8ed;
+  color: #28a745;
+}
+
+.status-buttons button:nth-child(3) {
+  background-color: #fdecea;
+  color: #dc3545;
+}
