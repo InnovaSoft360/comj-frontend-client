@@ -81,6 +81,7 @@ export default function RegisterMilitar() {
       nome: formData.nome,
       sobrenome: formData.sobrenome,
       email: formData.email,
+      telefone: formData.telefone,
       senha: formData.senha,
       confirmarSenha: formData.confirmarSenha,
       nip: formData.nip
@@ -104,8 +105,20 @@ export default function RegisterMilitar() {
       });
 
       if (response.success) {
+        // Store user data in localStorage for profile access
+        const userData = {
+          id: response.user?.id || '',
+          nome: formData.nome,
+          sobrenome: formData.sobrenome,
+          email: formData.email,
+          telefone: formData.telefone,
+          nip: formData.nip,
+          foto: previewFoto
+        };
+        
+        localStorage.setItem('militaryUser', JSON.stringify(userData));
         alert(response.message || "Cadastro realizado com sucesso!");
-        navigate("/login");
+        navigate("/militar/perfil");
       } else {
         setError(response.message || "Erro ao realizar cadastro");
       }
@@ -181,6 +194,18 @@ export default function RegisterMilitar() {
               className={fieldErrors.nip ? 'error' : ''}
             />
             {fieldErrors.nip && <span className="error-message">{fieldErrors.nip}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="telefone">Telefone</label>
+            <input
+              type="tel"
+              id="telefone"
+              name="telefone"
+              placeholder="(XX) XXXXX-XXXX"
+              value={formData.telefone}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">

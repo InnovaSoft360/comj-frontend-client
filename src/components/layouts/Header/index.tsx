@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import "./styles.css";
 import logo from "../../../assets/logo/logo.png";
 import { useState } from "react";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // Ícones
 import {
@@ -10,9 +11,12 @@ import {
 } from "react-icons/hi";
 import { MdPhotoLibrary as IconGallery } from "react-icons/md";
 import { GiRank3 as IconMilitary } from "react-icons/gi";
+import { FaUserCircle as IconProfile } from "react-icons/fa";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -53,13 +57,21 @@ export default function Header() {
                 <IconMilitary /> Militar
               </Link>
             </li>
-            <div className="navBtn">
-              <button>
-                <Link to="/login" onClick={closeMenu}>
-                  Entrar
+            {isAuthenticated ? (
+              <li>
+                <Link to="/militar/perfil" className="navLink" onClick={closeMenu}>
+                  <IconProfile /> Perfil
                 </Link>
-              </button>
-            </div>
+              </li>
+            ) : (
+              <div className="navBtn">
+                <button>
+                  <Link to="/login" onClick={closeMenu}>
+                    Entrar
+                  </Link>
+                </button>
+              </div>
+            )}
           </ul>
 
           <div
