@@ -1,0 +1,10 @@
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-white-005);
+}
+
+.main-content {
+  flex: 1;
+  padding: 24px;
+}
