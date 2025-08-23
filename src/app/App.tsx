@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Header, Footer, Home, Dashboard, Informacao, Galeria, Login, RegisterMilitar, ForgotPassword, ResetPassword, Militar } from "./imports";
+import { ProtectedRoute, Header, Footer, Home, Dashboard, Informacao, Galeria, Login, RegisterMilitar, ForgotPassword, ResetPassword, Militar } from "./imports";
 import { AuthProvider } from "../contexts/AuthContext";
 
 function App() {
@@ -27,11 +27,18 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
-          {/* Private routes */}
-          <Route path="/militar/*" element={<Militar />} />
+          {/* Rotas protegidas */}
+          <Route path="/militar/*" element={
+            <ProtectedRoute>
+              <Militar />
+            </ProtectedRoute>
+          } />
 
-          {/* Dashboard routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
 
           {/* Redirect non-existent routes */}
           <Route path="*" element={<Navigate to="/" replace />} />

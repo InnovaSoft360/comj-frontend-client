@@ -10,6 +10,7 @@ export { default as Login} from "../features/public/auth/login";
 export { default as RegisterMilitar} from "../features/public/auth/register";
 export { default as ForgotPassword} from "../features/public/auth/forgot-password";
 export { default as ResetPassword} from "../features/public/auth/reset-password";
+export { default as ProtectedRoute} from "./ProtectedRoute";
 
 
 

@@ -1,94 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import api from '../../../../core/api';
 import './style.css';
-import './style-responsive.css';
 
-// Interface removida pois não está sendo utilizada
 export default function Candidatura() {
-  const [isLoading] = useState(false);
-
-  const [documents, setDocuments] = useState<{
-    bi: File | null;
-    declaracaoRemuneracao: File | null;
-    comprovativoBancario: File | null;
-    recibosSalario: File[];
-  }>({
-    bi: null,
-    declaracaoRemuneracao: null,
-    comprovativoBancario: null,
-    recibosSalario: []
-  });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [militarId, setMilitarId] = useState<number | null>(null);
 
-  const handleFileUpload = (type: string, files: FileList | null) => {
-    if (!files) return;
+  // Refs para os arquivos
+  const biRef = useRef<HTMLInputElement>(null);
+  const declRemuneracaoRef = useRef<HTMLInputElement>(null);
+  const compBancariaRef = useRef<HTMLInputElement>(null);
+  const ultReciboRef = useRef<HTMLInputElement>(null);
 
-    if (type === 'recibos') {
-      const newRecibos = Array.from(files).slice(0, 3 - documents.recibosSalario.length);
-      setDocuments(prev => ({
-        ...prev,
-        recibosSalario: [...prev.recibosSalario, ...newRecibos]
-      }));
-    } else {
-      const file = files[0];
-      if (file) {
-        setDocuments(prev => ({
-          ...prev,
-          [type]: file
-        }));
+  // Buscar o ID do militar logado
+  useEffect(() => {
+    const fetchMilitarId = async () => {
+      try {
+        const response = await api.get('/v1/Usuarios/GetCurrentUser');
+        if (response.data.code === 200 && response.data.data) {
+          setMilitarId(response.data.data.id);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar ID do militar:', error);
       }
-    }
-  };
+    };
 
-  const removeFile = (type: string, index?: number) => {
-    if (type === 'recibos' && index !== undefined) {
-      setDocuments(prev => ({
-        ...prev,
-        recibosSalario: prev.recibosSalario.filter((_, i) => i !== index)
-      }));
-    } else {
-      setDocuments(prev => ({
-        ...prev,
-        [type]: null
-      }));
-    }
-  };
+    fetchMilitarId();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Validação básica
-    if (!documents.bi || !documents.declaracaoRemuneracao || 
-        !documents.comprovativoBancario || documents.recibosSalario.length === 0) {
-      alert('Por favor, faça upload de todos os documentos obrigatórios.');
+    // Verificar se temos o ID do militar
+    if (!militarId) {
+      alert('Erro: Não foi possível identificar o militar. Faça login novamente.');
       setIsSubmitting(false);
       return;
     }
 
-    // Simulação de envio - aqui você faria o upload real para o servidor
-    setTimeout(() => {
-      setSuccessMessage('Candidatura submetida com sucesso! Aguarde a análise dos documentos.');
+    // Verificar se todos os arquivos foram selecionados
+    if (!biRef.current?.files?.[0] || 
+        !declRemuneracaoRef.current?.files?.[0] || 
+        !compBancariaRef.current?.files?.[0] || 
+        !ultReciboRef.current?.files?.[0]) {
+      alert('Por favor, selecione todos os documentos obrigatórios.');
       setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
       
-      // Limpar apenas documentos
-      setDocuments({
-        bi: null,
-        declaracaoRemuneracao: null,
-        comprovativoBancario: null,
-        recibosSalario: []
+      // Adicionar campos obrigatórios
+      formData.append('MilitarID', militarId.toString());
+      formData.append('Status', '0'); // Status 0 = Pendente
+      
+      // Adicionar os arquivos
+      formData.append('DocBIUrl', biRef.current.files[0]);
+      formData.append('DocDeclRemuneracaoUrl', declRemuneracaoRef.current.files[0]);
+      formData.append('DocDeclCompBancariaUrl', compBancariaRef.current.files[0]);
+      formData.append('DocUltmRecBncarioUrl', ultReciboRef.current.files[0]);
+
+      // Fazer a requisição para a API
+      const response = await api.post('/v1/Candidaturas/Create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
-    }, 2000);
+
+      if (response.status === 200) {
+        setSuccessMessage('Candidatura submetida com sucesso!');
+        
+        // Limpar os arquivos
+        if (biRef.current) biRef.current.value = '';
+        if (declRemuneracaoRef.current) declRemuneracaoRef.current.value = '';
+        if (compBancariaRef.current) compBancariaRef.current.value = '';
+        if (ultReciboRef.current) ultReciboRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Erro ao enviar candidatura:', error);
+      alert('Erro ao enviar candidatura. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (isLoading) {
+  if (!militarId) {
     return (
       <div className="candidatura-container">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Carregando dados...</p>
-        </div>
+        <div className="loading">Carregando...</div>
       </div>
     );
   }
@@ -96,8 +98,8 @@ export default function Candidatura() {
   return (
     <div className="candidatura-container">
       <div className="candidatura-header">
-        <h1>Candidatura para Militares</h1>
-        <p>Faça upload dos documentos necessários para análise da sua candidatura</p>
+        <h1>Candidatura</h1>
+        <p>Faça upload dos documentos necessários</p>
       </div>
 
       {successMessage && (
@@ -107,189 +109,49 @@ export default function Candidatura() {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="form-section">
-          <h2>Informações Importantes</h2>
-          <div className="info-note">
-            <p>
-              <strong>Atenção:</strong> Os seus dados militares já estão registados no sistema e serão 
-              automaticamente associados à sua candidatura. Para visualizar ou atualizar seus dados pessoais, 
-              acesse a página de <strong>Perfil</strong> após o login.
-            </p>
-          </div>
+        <div className="form-group">
+          <label>Cópia do BI *</label>
+          <input
+            type="file"
+            ref={biRef}
+            accept=".pdf,.jpg,.jpeg,.png"
+            required
+          />
         </div>
 
-        <div className="form-section">
-          <h2>Documentos Necessários</h2>
-          
-          <div className="form-group">
-            <label>Cópia do BI <span className="required">*</span></label>
-            <div className="document-upload">
-              <div className="upload-icon">📄</div>
-              <p className="upload-text">
-                {documents.bi ? documents.bi.name : 'Arraste o arquivo ou clique para selecionar'}
-              </p>
-              <p className="upload-hint">Formatos aceitos: PDF, JPG, PNG (máx. 5MB)</p>
-              <input
-                type="file"
-                className="file-input"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => handleFileUpload('bi', e.target.files)}
-              />
-              <button
-                type="button"
-                className="upload-button"
-                onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
-              >
-                Escolher Arquivo
-              </button>
-            </div>
-            {documents.bi && (
-              <div className="file-list">
-                <div className="file-item">
-                  <span className="file-name">{documents.bi.name}</span>
-                  <button
-                    type="button"
-                    className="remove-file"
-                    onClick={() => removeFile('bi')}
-                  >
-                    Remover
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Declaração de Remuneração <span className="required">*</span></label>
-            <div className="document-upload">
-              <div className="upload-icon">💰</div>
-              <p className="upload-text">
-                {documents.declaracaoRemuneracao ? documents.declaracaoRemuneracao.name : 'Arraste o arquivo ou clique para selecionar'}
-              </p>
-              <p className="upload-hint">Formatos aceitos: PDF (máx. 5MB)</p>
-              <input
-                type="file"
-                className="file-input"
-                accept=".pdf"
-                onChange={(e) => handleFileUpload('declaracaoRemuneracao', e.target.files)}
-              />
-              <button
-                type="button"
-                className="upload-button"
-                onClick={() => document.querySelectorAll<HTMLInputElement>('input[type="file"]')[1]?.click()}
-              >
-                Escolher Arquivo
-              </button>
-            </div>
-            {documents.declaracaoRemuneracao && (
-              <div className="file-list">
-                <div className="file-item">
-                  <span className="file-name">{documents.declaracaoRemuneracao.name}</span>
-                  <button
-                    type="button"
-                    className="remove-file"
-                    onClick={() => removeFile('declaracaoRemuneracao')}
-                  >
-                    Remover
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Comprovativo Bancário <span className="required">*</span></label>
-            <div className="document-upload">
-              <div className="upload-icon">🏦</div>
-              <p className="upload-text">
-                {documents.comprovativoBancario ? documents.comprovativoBancario.name : 'Arraste o arquivo ou clique para selecionar'}
-              </p>
-              <p className="upload-hint">Formatos aceitos: PDF, JPG, PNG (máx. 5MB)</p>
-              <input
-                type="file"
-                className="file-input"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => handleFileUpload('comprovativoBancario', e.target.files)}
-              />
-              <button
-                type="button"
-                className="upload-button"
-                onClick={() => document.querySelectorAll<HTMLInputElement>('input[type="file"]')[2]?.click()}
-              >
-                Escolher Arquivo
-              </button>
-            </div>
-            {documents.comprovativoBancario && (
-              <div className="file-list">
-                <div className="file-item">
-                  <span className="file-name">{documents.comprovativoBancario.name}</span>
-                  <button
-                    type="button"
-                    className="remove-file"
-                    onClick={() => removeFile('comprovativoBancario')}
-                  >
-                    Remover
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Últimos 3 Recibos de Salário <span className="required">*</span></label>
-            <div className="document-upload">
-              <div className="upload-icon">📋</div>
-              <p className="upload-text">
-                {documents.recibosSalario.length > 0 
-                  ? `${documents.recibosSalario.length} arquivo(s) selecionado(s)` 
-                  : 'Arraste os arquivos ou clique para selecionar'}
-              </p>
-              <p className="upload-hint">Formatos aceitos: PDF, JPG, PNG (máx. 5MB cada)</p>
-              <input
-                type="file"
-                className="file-input"
-                accept=".pdf,.jpg,.jpeg,.png"
-                multiple
-                onChange={(e) => handleFileUpload('recibos', e.target.files)}
-                disabled={documents.recibosSalario.length >= 3}
-              />
-              <button
-                type="button"
-                className="upload-button"
-                onClick={() => document.querySelectorAll<HTMLInputElement>('input[type="file"]')[3]?.click()}
-                disabled={documents.recibosSalario.length >= 3}
-              >
-                Escolher Arquivos
-              </button>
-            </div>
-            {documents.recibosSalario.length > 0 && (
-              <div className="file-list">
-                {documents.recibosSalario.map((file, index) => (
-                  <div key={index} className="file-item">
-                    <span className="file-name">{file.name}</span>
-                    <button
-                      type="button"
-                      className="remove-file"
-                      onClick={() => removeFile('recibos', index)}
-                    >
-                      Remover
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="form-group">
+          <label>Declaração de Remuneração *</label>
+          <input
+            type="file"
+            ref={declRemuneracaoRef}
+            accept=".pdf,.jpg,.jpeg,.png"
+            required
+          />
         </div>
 
-        <div className="submit-section">
-          <button 
-            type="submit" 
-            className="submit-button"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Enviando...' : 'Submeter Candidatura'}
-          </button>
+        <div className="form-group">
+          <label>Comprovativo Bancário *</label>
+          <input
+            type="file"
+            ref={compBancariaRef}
+            accept=".pdf,.jpg,.jpeg,.png"
+            required
+          />
         </div>
+
+        <div className="form-group">
+          <label>Último Recibo Bancário *</label>
+          <input
+            type="file"
+            ref={ultReciboRef}
+            accept=".pdf,.jpg,.jpeg,.png"
+            required
+          />
+        </div>
+
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Enviando...' : 'Submeter Candidatura'}
+        </button>
       </form>
     </div>
   );

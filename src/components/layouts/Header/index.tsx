@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./styles.css";
 import logo from "../../../assets/logo/logo.png";
-import { useState } from "react";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useState, useEffect } from "react";
+import api from "../../../core/api"
 
 // Ícones
 import {
@@ -11,12 +11,31 @@ import {
 } from "react-icons/hi";
 import { MdPhotoLibrary as IconGallery } from "react-icons/md";
 import { GiRank3 as IconMilitary } from "react-icons/gi";
-import { FaUserCircle as IconProfile } from "react-icons/fa";
+import { FaSignOutAlt as IconLogout } from "react-icons/fa";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user } = useAuth();
-  const isAuthenticated = !!user;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const navigate = useNavigate();
+
+  // Verificar autenticação ao carregar o componente
+  useEffect(() => {
+    checkAuthentication();
+  }, []);
+
+  const checkAuthentication = async () => {
+    try {
+      setIsCheckingAuth(true);
+      const response = await api.get("/v1/Auth/CheckAuth");
+      setIsAuthenticated(response.data.authenticated);
+    } catch (error) {
+      console.error("Erro ao verificar autenticação:", error);
+      setIsAuthenticated(false);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -25,6 +44,36 @@ export default function Header() {
   const closeMenu = () => {
     setMenuOpen(false);
   };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/v1/Auth/Logout");
+      setIsAuthenticated(false);
+      closeMenu();
+      navigate("/");
+      alert("Logout realizado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      alert("Erro ao fazer logout.");
+    }
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <header>
+        <div className="style-Main">
+          <nav className="navBar">
+            <div className="navBarLogo">
+              <Link to="/" className="navLink">
+                <img src={logo} alt="logo" width={90} className="logo" />
+              </Link>
+            </div>
+            <div>Carregando...</div>
+          </nav>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header>
@@ -52,26 +101,44 @@ export default function Header() {
                 <IconGallery /> Galeria
               </Link>
             </li>
+
             <li>
-              <Link to="/militar" className="navLink" onClick={closeMenu}>
-                <IconMilitary /> Militar
+              <Link to="/galeria" className="navLink" onClick={closeMenu}>
+                <IconGallery /> Candidatar
               </Link>
             </li>
-            {isAuthenticated ? (
+
+            <li>
+              <Link to="/galeria" className="navLink" onClick={closeMenu}>
+                <IconGallery /> Perfil
+              </Link>
+            </li>
+            
+            {/* Link Militar - APENAS quando logado */}
+            {isAuthenticated && (
               <li>
-                <Link to="/militar/perfil" className="navLink" onClick={closeMenu}>
-                  <IconProfile /> Perfil
+                <Link to="/militar" className="navLink" onClick={closeMenu}>
+                  <IconMilitary /> Militar
                 </Link>
               </li>
-            ) : (
-              <div className="navBtn">
+            )}
+
+            {/* Botão Entrar/Sair */}
+            <li className="navBtn">
+              {isAuthenticated ? (
+                // Botão Sair quando logado
+                <button onClick={handleLogout} className="logout-btn">
+                  <IconLogout /> Sair
+                </button>
+              ) : (
+                // Botão Entrar quando deslogado
                 <button>
                   <Link to="/login" onClick={closeMenu}>
                     Entrar
                   </Link>
                 </button>
-              </div>
-            )}
+              )}
+            </li>
           </ul>
 
           <div

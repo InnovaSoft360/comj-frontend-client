@@ -61,6 +61,44 @@ border: 1px solid #f88737;
     transition: all 0.3s ease-in-out;
 }
 
+/* styles.css */
+.logout-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: opacity 0.2s;
+}
+
+.logout-btn:hover {
+  opacity: 0.8;
+}
+.navBtn button {
+  /* Mantenha os estilos existentes do botão */
+  background: var(--color-green-001);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.navBtn button:hover {
+  background: var(--color-green-002)
+}
+.navBtn button a {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 
 @media(max-width: 768px){
     
