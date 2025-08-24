@@ -1,133 +1,63 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import api from "../../../../core/api";
 import Logo from "../../../../assets/logo/logo.png";
-import { userService } from "../../../../core/api/userService";
-import { validarFormularioCadastro } from "../../../../core/utils/validation";
-import type { RegisterFormData } from "../../../../core/types/user";
 import "./style.css";
 
 export default function RegisterMilitar() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState<RegisterFormData>({
-    nome: "",
-    sobrenome: "",
-    email: "",
-    senha: "",
-    confirmarSenha: "",
-    foto: null,
-    nip: ""
-  });
-  const [previewFoto, setPreviewFoto] = useState<string | null>(null);
+  
+  //#region Refs
+  const nomeRef = useRef<HTMLInputElement>(null);
+  const sobreNomeRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const senhaRef = useRef<HTMLInputElement>(null);
+  const confirmarSenhaRef = useRef<HTMLInputElement>(null);
+  const nipRef = useRef<HTMLInputElement>(null);
+  const telefoneRef = useRef<HTMLInputElement>(null);
+  //#endregion
+
+  //#region Method Post
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, files } = e.target;
-    
-    if (type === 'file' && files) {
-      const file = files[0];
-      setFormData({
-        ...formData,
-        [name]: file
-      });
-      
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewFoto(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
-      
-      if (name === 'senha' || name === 'nip' || name === 'confirmarSenha') {
-        validateField(name, value);
-      }
-    }
-  };
-
-  const validateField = (fieldName: string, value: string) => {
-    const newErrors = { ...fieldErrors };
-    
-    switch (fieldName) {
-      case 'senha':
-        if (value.length < 4) newErrors.senha = 'A senha deve ter no mínimo 4 caracteres';
-        else delete newErrors.senha;
-        break;
-      case 'nip':
-        const nipLimpo = value.replace(/\s/g, '');
-        if (!nipLimpo) newErrors.nip = 'NIP é obrigatório';
-        else if (!/^\d+$/.test(nipLimpo)) newErrors.nip = 'NIP deve conter apenas números';
-        else if (nipLimpo.length > 7) newErrors.nip = 'NIP deve ter no máximo 7 dígitos';
-        else delete newErrors.nip;
-        break;
-      case 'confirmarSenha':
-        if (value !== formData.senha) newErrors.confirmarSenha = 'As senhas não coincidem';
-        else delete newErrors.confirmarSenha;
-        break;
-    }
-    
-    setFieldErrors(newErrors);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
-    
-    const validationErrors = validarFormularioCadastro({
-      nome: formData.nome,
-      sobrenome: formData.sobrenome,
-      email: formData.email,
-      telefone: formData.telefone,
-      senha: formData.senha,
-      confirmarSenha: formData.confirmarSenha,
-      nip: formData.nip
-    });
+    setIsLoading(true);
 
-    if (Object.keys(validationErrors).length > 0) {
-      setError(Object.values(validationErrors)[0]);
+    if (
+      !nomeRef.current?.value ||
+      !sobreNomeRef.current?.value ||
+      !emailRef.current?.value ||
+      !senhaRef.current?.value ||
+      !confirmarSenhaRef.current?.value ||
+      !nipRef.current?.value ||
+      !telefoneRef.current?.value
+    ) {
+      alert("Preencha todos os campos obrigatórios!");
+      setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      const response = await userService.cadastrarUsuario({
-        nome: formData.nome,
-        sobrenome: formData.sobrenome,
-        email: formData.email,
-        senha: formData.senha,
-        nip: formData.nip,
-        foto: formData.foto
+      await api.post("/v1/Auth/RegisterMilitar", {
+        nome: nomeRef.current?.value,
+        sobreNome: sobreNomeRef.current?.value,
+        email: emailRef.current?.value,
+        senha: senhaRef.current?.value,
+        confirmarSenha: confirmarSenhaRef.current?.value,
+        militarInfo: {
+          nip: nipRef.current?.value,
+          telefone: telefoneRef.current?.value,
+        }
       });
 
-      if (response.success) {
-        // Store user data in localStorage for profile access
-        const userData = {
-          id: response.user?.id || '',
-          nome: formData.nome,
-          sobrenome: formData.sobrenome,
-          email: formData.email,
-          telefone: formData.telefone,
-          nip: formData.nip,
-          foto: previewFoto
-        };
-        
-        localStorage.setItem('militaryUser', JSON.stringify(userData));
-        alert(response.message || "Cadastro realizado com sucesso!");
-        navigate("/militar/perfil");
-      } else {
-        setError(response.message || "Erro ao realizar cadastro");
-      }
-    } catch {
-      setError("Erro de conexão. Tente novamente.");
+      alert("Cadastro realizado!");
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao cadastrar.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }
+  //#endregion
 
   return (
     <div className="register-container">
@@ -137,125 +67,48 @@ export default function RegisterMilitar() {
         </h2>
         <h3>Cadastro de Militar</h3>
 
-        {error && <div className="error-message">{error}</div>}
-
         <form onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="nome">Nome</label>
-              <input
-                type="text"
-                id="nome"
-                name="nome"
-                placeholder="Digite seu nome"
-                value={formData.nome}
-                onChange={handleChange}
-                required
-              />
+              <input type="text" id="nome" placeholder="Digite seu nome" ref={nomeRef} />
             </div>
-
             <div className="form-group">
               <label htmlFor="sobrenome">Sobre-Nome</label>
-              <input
-                type="text"
-                id="sobrenome"
-                name="sobrenome"
-                placeholder="Digite seu sobrenome"
-                value={formData.sobrenome}
-                onChange={handleChange}
-                required
-              />
+              <input type="text" id="sobrenome" placeholder="Digite seu sobrenome" ref={sobreNomeRef} />
             </div>
           </div>
 
           <div className="form-group">
             <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Digite seu email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+            <input type="email" id="email" placeholder="Digite seu email" ref={emailRef} />
           </div>
 
           <div className="form-group">
             <label htmlFor="nip">NIP</label>
-            <input
-              type="text"
-              id="nip"
-              name="nip"
-              placeholder="Digite seu NIP"
-              value={formData.nip}
-              onChange={handleChange}
-              required
-              className={fieldErrors.nip ? 'error' : ''}
-            />
-            {fieldErrors.nip && <span className="error-message">{fieldErrors.nip}</span>}
+            <input type="text" id="nip" placeholder="Digite seu NIP" ref={nipRef} />
           </div>
 
           <div className="form-group">
             <label htmlFor="telefone">Telefone</label>
-            <input
-              type="tel"
-              id="telefone"
-              name="telefone"
-              placeholder="(XX) XXXXX-XXXX"
-              value={formData.telefone}
-              onChange={handleChange}
-            />
+            <input type="tel" id="telefone" ref={telefoneRef} />
           </div>
 
           <div className="form-group">
             <label htmlFor="foto">Foto</label>
             <div className="file-upload-container">
-              <input
-                type="file"
-                id="foto"
-                name="foto"
-                accept="image/*"
-                onChange={handleChange}
-                className="file-input"
-              />
-              {previewFoto && (
-                <div className="photo-preview">
-                  <img src={previewFoto} alt="Preview" />
-                </div>
-              )}
+              <input type="file" id="foto" accept="image/*" className="file-input" />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="senha">Senha</label>
-              <input
-                type="password"
-                id="senha"
-                name="senha"
-                placeholder="Digite sua senha"
-                value={formData.senha}
-                onChange={handleChange}
-                required
-                className={fieldErrors.senha ? 'error' : ''}
-              />
-              {fieldErrors.senha && <span className="error-message">{fieldErrors.senha}</span>}
+              <input type="password" id="senha" placeholder="Digite sua senha" ref={senhaRef} />
             </div>
-
             <div className="form-group">
               <label htmlFor="confirmarSenha">Confirmar Senha</label>
-              <input
-                type="password"
-                id="confirmarSenha"
-                name="confirmarSenha"
-                placeholder="Confirme sua senha"
-                value={formData.confirmarSenha}
-                onChange={handleChange}
-                required
-                className={fieldErrors.confirmarSenha ? 'error' : ''}
-              />
-              {fieldErrors.confirmarSenha && <span className="error-message">{fieldErrors.confirmarSenha}</span>}
+              <input type="password" id="confirmarSenha" placeholder="Confirme sua senha" ref={confirmarSenhaRef} />
             </div>
           </div>
 
@@ -265,10 +118,7 @@ export default function RegisterMilitar() {
         </form>
 
         <p className="login-text">
-          Já tem uma conta?{" "}
-          <Link to="/login" className="login-link">
-            Faça login
-          </Link>
+          Já tem uma conta? <Link to="/login" className="login-link">Faça login</Link>
         </p>
       </div>
     </div>

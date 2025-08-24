@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import img1 from "../../../assets/section/img.png";
-import img2 from "../../../assets/section/img2.png";
-import img3 from "../../../assets/section/img3.png";
-import img4 from "../../../assets/section/img4.png";
-import img5 from "../../../assets/section/img5.jpeg";
-import img7 from "../../../assets/section/img7.jpeg";
-import img8 from "../../../assets/section/img8.jpeg";
-import video from "../../../assets/section/videogeral.mp4";
+import img1 from "../../../../assets/section/img.png"
+import img2 from "../../../..//assets/section/img2.png";
+import img3 from "../../../../assets/section/img3.png";
+import img5 from "../../../../assets/section/img5.jpeg";
+import img7 from "../../../../assets/section/img7.jpeg";
 
 import './style.css';
 
@@ -24,14 +21,11 @@ const galleryItems: GalleryItem[] = [
   { id: 1, src: img1, title: 'Casa Modelo', description: 'Espaço completo para sua família desfrutar momentos especiais', category: 'lazer', type: 'image' },
   { id: 2, src: img2, title: 'Vista Superior', description: 'Vista superior do condomínio, com residências por acabar', category: 'lazer', type: 'image' },
   { id: 3, src: img3, title: 'Fachada Principal', description: 'Entrada imponente e acolhedora do condomínio', category: 'Fachada', type: 'image' },
-  { id: 4, src: img4, title: 'Área Externa', description: 'Áreas verdes bem cuidadas para momentos de tranquilidade', category: 'areas-verdes', type: 'image' },
   { id: 5, src: img5, title: 'Vista Frontal', description: 'Vista Frontal da Casa Modelo', category: 'Vista', type: 'image' },
   { id: 7, src: img7, title: 'Cozinha Gourmet', description: 'Cozinha completa com ilha central e área de serviço', category: 'residence', type: 'image' },
-  { id: 8, src: img8, title: 'Banheiro', description: 'Banheiro moderno com acabamento em porcelanato', category: 'residence', type: 'image' },
-  { id: 9, src: video, title: 'Tour do Condomínio', description: 'Conheça todas as áreas do nosso condomínio', category: 'tour', type: 'video' },
 ];
 
-export default function Galeria() {
+export default function GaleriaImagem() {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filter, setFilter] = useState<'all' | 'image' | 'video' | 'residence'>('all');

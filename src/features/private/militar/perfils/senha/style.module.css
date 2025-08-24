@@ -1,0 +1,128 @@
+.perfilSection {
+  padding: 2rem;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.main {
+  padding: 0 20px;
+  margin: auto;
+  max-width: 1200px;
+}
+
+.title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.checkbox {
+  margin-right: 0.5rem;
+  width: 16px;
+  height: 16px;
+}
+
+.checkboxLabel {
+  font-size: 0.875rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.checkboxLabel:hover {
+  color: #333;
+}
+
+.button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--color-green-001);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover:not(:disabled) {
+  background-color: var(--color-green-002);
+}
+
+.button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.success {
+  color: #28a745;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  text-align: center;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 480px) {
+  .perfilSection {
+    padding: 1rem;
+  }
+
+  
+  .title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .input {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+  
+  .button {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+  
+  .checkboxLabel {
+    font-size: 0.8rem;
+  }
+}
