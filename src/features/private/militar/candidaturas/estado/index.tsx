@@ -1,5 +1,9 @@
 export default function Estado (){
   return (
-    <div>Estado</div>
+    <section>
+      <div className='style-Main'>
+        Estado
+      </div>
+    </section>
   )
 }

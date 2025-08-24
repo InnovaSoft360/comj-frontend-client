@@ -1,0 +1,11 @@
+.galeriaSection {
+  padding: 50px 0;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.mainGaleria {
+  padding: 0 20px;
+  margin: auto;
+  max-width: 1200px;
+}
