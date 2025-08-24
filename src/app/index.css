@@ -1,3 +1,7 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+
 * {
   padding: 0;
   margin: 0;
@@ -24,7 +28,7 @@
   --color-black-005: #444;
   --color-black-006: #555;
 
---color-green-001: #f88737;
+  --color-green-001: #f88737;
   --color-green-002: #d61c1cf3;
   --color-green-003: #d61c1cf3;
   --color-green-004: #d61c1cf3;

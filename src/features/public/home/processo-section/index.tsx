@@ -4,7 +4,7 @@ export default function ProcessoSection() {
     <section>
       <div className="style-Main">
         <section className="processo-section">
-          hhhh
+          
         </section>
       </div>
     </section>
