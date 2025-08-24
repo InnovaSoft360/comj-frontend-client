@@ -1,11 +1,11 @@
 // Perfil.tsx
 import { useState, useEffect } from 'react';
-import api from '../../../../core/api';
+import api from '../../../../../core/api';
 import type { UserData, ApiResponse } from './user';
 import './style.css';
 import { FaUser, FaEnvelope, FaIdCard, FaPhone, FaSpinner } from 'react-icons/fa';
 
-export default function Perfil() {
+export default function DadosMilitar() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,9 +77,6 @@ export default function Perfil() {
   return (
     <div className="perfil-container">
       <div className="perfil-card">
-        <div className="perfil-header">
-          <h2>Perfil</h2>
-        </div>
 
         <div className="perfil-content">
           <div className="perfil-photo-section">

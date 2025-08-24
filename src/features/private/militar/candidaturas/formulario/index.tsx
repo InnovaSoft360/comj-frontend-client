@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import api from '../../../../core/api';
+import api from '../../../../../core/api';
 import './style.css';
 
-export default function Candidatura() {
+export default function Candidaturas() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [militarId, setMilitarId] = useState<number | null>(null);
@@ -149,7 +149,7 @@ export default function Candidatura() {
           />
         </div>
 
-        <button type="submit" disabled={isSubmitting}>
+        <button className='btn-candidatar' type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Enviando...' : 'Submeter Candidatura'}
         </button>
       </form>

@@ -26,7 +26,7 @@
   border-radius: 4px;
 }
 
-button {
+.btn-candidatar {
   width: 100%;
   padding: 12px;
   background-color: #007bff;
@@ -36,7 +36,7 @@ button {
   cursor: pointer;
 }
 
-button:disabled {
+.btn-candidatar:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
 }

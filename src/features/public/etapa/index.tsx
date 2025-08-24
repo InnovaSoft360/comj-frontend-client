@@ -2,7 +2,7 @@ import "./style.css"
 
 import { useNavigate } from 'react-router-dom'
 
-export default function Informacao() {
+export default function Etapas() {
   const navigate = useNavigate()
 
   return (
