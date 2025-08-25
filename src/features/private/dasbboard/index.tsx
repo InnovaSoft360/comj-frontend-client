@@ -201,7 +201,6 @@ export default function Dashboard() {
               <div className={styles.chartContainer}>
                 {candleData.map((candle, index) => {
                   const isPositive = candle.close >= candle.open;
-                  const candleHeight = 180 * (candle.high - candle.low) / (maxValue - minValue);
                   const bodyHeight = 180 * Math.abs(candle.close - candle.open) / (maxValue - minValue);
                   const bodyOffset = 180 * (Math.max(candle.open, candle.close) - minValue) / (maxValue - minValue);
                   const wickOffset = 180 * (candle.high - minValue) / (maxValue - minValue);
