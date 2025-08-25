@@ -2,11 +2,10 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../../core/api";
 import Logo from "../../../../assets/logo/logo.png";
-import "./style.css";
+import styles from "./style.module.css";
 
 export default function RegisterMilitar() {
   
-  //#region Refs
   const nomeRef = useRef<HTMLInputElement>(null);
   const sobreNomeRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -14,10 +13,10 @@ export default function RegisterMilitar() {
   const confirmarSenhaRef = useRef<HTMLInputElement>(null);
   const nipRef = useRef<HTMLInputElement>(null);
   const telefoneRef = useRef<HTMLInputElement>(null);
-  //#endregion
-
-  //#region Method Post
+  
   const [isLoading, setIsLoading] = useState(false);
+
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoading(true);
@@ -36,20 +35,30 @@ export default function RegisterMilitar() {
       return;
     }
 
+    if (senhaRef.current.value !== confirmarSenhaRef.current.value) {
+      alert("As senhas não coincidem!");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      await api.post("/v1/Auth/RegisterMilitar", {
-        nome: nomeRef.current?.value,
-        sobreNome: sobreNomeRef.current?.value,
-        email: emailRef.current?.value,
-        senha: senhaRef.current?.value,
-        confirmarSenha: confirmarSenhaRef.current?.value,
-        militarInfo: {
-          nip: nipRef.current?.value,
-          telefone: telefoneRef.current?.value,
-        }
+      const formData = new FormData();
+      formData.append("nome", nomeRef.current.value);
+      formData.append("sobreNome", sobreNomeRef.current.value);
+      formData.append("email", emailRef.current.value);
+      formData.append("senha", senhaRef.current.value);
+      formData.append("confirmarSenha", confirmarSenhaRef.current.value);
+      formData.append("militarInfo[nip]", nipRef.current.value);
+      formData.append("militarInfo[telefone]", telefoneRef.current.value);
+
+
+      await api.post("/v1/Auth/RegisterMilitar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      alert("Cadastro realizado!");
+      alert("Cadastro realizado com sucesso!");
     } catch (error) {
       console.error(error);
       alert("Erro ao cadastrar.");
@@ -57,69 +66,118 @@ export default function RegisterMilitar() {
       setIsLoading(false);
     }
   }
-  //#endregion
 
   return (
-    <div className="register-container">
-      <div className="register-box">
-        <h2>
-          <img src={Logo} alt="Logo" />
-        </h2>
-        <h3>Cadastro de Militar</h3>
+    <div className={styles.registerContainer}>
+      <div className={styles.registerBox}>
+        <div className={styles.logoTop}>
+          <img src={Logo} alt="Logo Condomínio Osvaldo MJ" className={styles.logo} />
+        </div>
+        
+        <div className={styles.formContainer}>
+          <h1 className={styles.title}>Cadastro Militar</h1>
+          <p className={styles.subtitle}>Preencha seus dados para criar sua conta</p>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="nome">Nome</label>
-              <input type="text" id="nome" placeholder="Digite seu nome" ref={nomeRef} />
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <input 
+                  type="text" 
+                  placeholder="Nome" 
+                  ref={nomeRef} 
+                  required 
+                  className={styles.input}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <input 
+                  type="text" 
+                  placeholder="Sobrenome" 
+                  ref={sobreNomeRef} 
+                  required 
+                  className={styles.input}
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="sobrenome">Sobre-Nome</label>
-              <input type="text" id="sobrenome" placeholder="Digite seu sobrenome" ref={sobreNomeRef} />
+
+            <div className={styles.formGroup}>
+              <input 
+                type="email" 
+                placeholder="E-mail" 
+                ref={emailRef} 
+                required 
+                className={styles.input}
+                disabled={isLoading}
+              />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input type="email" id="email" placeholder="Digite seu email" ref={emailRef} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="nip">NIP</label>
-            <input type="text" id="nip" placeholder="Digite seu NIP" ref={nipRef} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="telefone">Telefone</label>
-            <input type="tel" id="telefone" ref={telefoneRef} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="foto">Foto</label>
-            <div className="file-upload-container">
-              <input type="file" id="foto" accept="image/*" className="file-input" />
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <input 
+                  type="text" 
+                  placeholder="NIP" 
+                  ref={nipRef} 
+                  required 
+                  className={styles.input}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <input 
+                  type="tel" 
+                  placeholder="Telefone" 
+                  ref={telefoneRef} 
+                  required 
+                  className={styles.input}
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="senha">Senha</label>
-              <input type="password" id="senha" placeholder="Digite sua senha" ref={senhaRef} />
+
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <input 
+                  type="password" 
+                  placeholder="Senha" 
+                  ref={senhaRef} 
+                  required 
+                  className={styles.input}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <input 
+                  type="password" 
+                  placeholder="Confirmar Senha" 
+                  ref={confirmarSenhaRef} 
+                  required 
+                  className={styles.input}
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="confirmarSenha">Confirmar Senha</label>
-              <input type="password" id="confirmarSenha" placeholder="Confirme sua senha" ref={confirmarSenhaRef} />
-            </div>
+
+            <button 
+              type="submit" 
+              className={`${styles.registerBtn} ${isLoading ? styles.loading : ''}`} 
+              disabled={isLoading}
+            >
+              {isLoading ? "Cadastrando..." : "Criar Conta"}
+            </button>
+          </form>
+
+          <div className={styles.linksContainer}>
+            <p className={styles.loginText}>
+              Já tem uma conta?{" "}
+              <Link to="/login" className={styles.loginLink}>
+                Faça login
+              </Link>
+            </p>
           </div>
-
-          <button type="submit" className="register-btn" disabled={isLoading}>
-            {isLoading ? "Cadastrando..." : "Criar Conta"}
-          </button>
-        </form>
-
-        <p className="login-text">
-          Já tem uma conta? <Link to="/login" className="login-link">Faça login</Link>
-        </p>
+        </div>
       </div>
     </div>
   );
