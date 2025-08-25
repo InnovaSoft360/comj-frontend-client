@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
-import heroBg from "../../../../assets/section/img.png";
-import "./style.css";
+import heroBg from "../../../../assets/section/img2.png";
+import styles from "./style.module.css";
+
 export default function HeroSection() {
   return (
-    <section className="hero-section" style={{ backgroundImage: `url(${heroBg})` }}>
-      <div className="style-Main">
-        <div className="hero-section-content">
-          <div className="hero-section-info">
+    <section className={styles.heroSection} style={{ backgroundImage: `url(${heroBg})` }}>
+      <div className={styles.styleMain}>
+        <div className={styles.heroSectionContent}>
+          <div className={styles.heroSectionInfo}>
             <h2>
               Condomínio <span>Osvaldo MJ</span>
             </h2>
@@ -14,11 +15,11 @@ export default function HeroSection() {
               Residências T3 modernas e seguras para militares e suas famílias,
               localizadas na Província do Icolo e Bengo, <br />Bairro Zango-4.
             </p>
-            <div className="nav-inf">
-                <button className="btn-nav-inf candidatar">
+            <div className={styles.navInf}>
+                <button className={`${styles.btnNavInf} ${styles.candidatar}`}>
                     <Link to="/">Candidatar-se</Link>
                 </button>
-                <button className="btn-nav-inf precesso">
+                <button className={`${styles.btnNavInf} ${styles.precesso}`}>
                     <Link to="/">Precesso</Link>
                 </button>
             </div>
