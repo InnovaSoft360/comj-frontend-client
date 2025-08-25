@@ -1,0 +1,270 @@
+.informacaoPage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: .1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+}
+
+.processSection {
+  background: white;
+  border-radius: 15px;
+  padding: 3rem;
+  margin: 3rem 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.sectionTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.sectionSubtitle {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.processSteps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin: 0 auto;
+}
+
+.stepCard {
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  border-left: 5px solid #f88737;
+  position: relative;
+  overflow: hidden;
+}
+
+.stepCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(248, 135, 55, 0.1) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stepCard:hover::before {
+  opacity: 1;
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.stepNumber {
+  background: linear-gradient(135deg, #f88737, #e67e22);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 5px 15px rgba(248, 135, 55, 0.3);
+}
+
+.stepIcon {
+  font-size: 1.8rem;
+  color: #f88737;
+}
+
+.stepContent h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.stepContent p {
+  color: #34495e;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.stepContent ul {
+  list-style: none;
+  padding: 0;
+}
+
+.stepContent li {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.itemIcon {
+  margin-right: 0.5rem;
+  color: #27ae60;
+  font-size: 1rem;
+}
+
+.ctaSection {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 2.5rem;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-radius: 15px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.ctaSection::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 20%);
+  background-position: 0 0;
+  animation: rotate 15s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ctaSection h3 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.ctaSection p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+}
+
+.ctaButton {
+  background: linear-gradient(135deg, #f88737, #e67e22);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.ctaButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.ctaButton:hover::before {
+  left: 100%;
+}
+
+/* Responsividade */
+@media (max-width: 968px) {
+  .processSteps {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .informacaoPage {
+    padding: 1rem 0;
+  }
+  
+  .processSection {
+    padding: 2rem 1rem;
+    margin: 2rem 1rem;
+  }
+  
+  .sectionTitle {
+    font-size: 2rem;
+  }
+  
+  .sectionSubtitle {
+    font-size: 1rem;
+  }
+  
+  .stepCard {
+    padding: 1.5rem;
+  }
+  
+  .ctaSection {
+    padding: 2rem 1rem;
+    margin: 2rem 1rem;
+  }
+  
+  .ctaSection h3 {
+    font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .stepHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .stepNumber {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .stepContent h3 {
+    font-size: 1.3rem;
+    text-align: center;
+  }
+}

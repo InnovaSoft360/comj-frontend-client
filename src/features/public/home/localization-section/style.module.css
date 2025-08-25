@@ -1,0 +1,239 @@
+/* LocalizacaoSection.module.css */
+.localizacaoSection {
+  padding: 5rem 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mainTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #2c3e50;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.mainTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #f88737, #e67e22);
+  border-radius: 2px;
+}
+
+.mainTitle span {
+  color: #f88737;
+  background: linear-gradient(135deg, #f88737, #e67e22);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.content.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mapContainer {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 500px;
+}
+
+.mapContainer:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+}
+
+.mapWrapper {
+  width: 100%;
+  height: 100%;
+  background: #f88737;
+  border-radius: 15px;
+}
+
+.infoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.infoSection {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.infoSection:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.infoTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f1f2f6;
+}
+
+.icon {
+  color: #f88737;
+}
+
+.address p {
+  font-size: 1.05rem;
+  margin: 0.75rem 0;
+  color: #5a6c7d;
+  line-height: 1.5;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.address p::before {
+  content: "•";
+  color: #f88737;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.description {
+  font-size: 1rem;
+  color: #5a6c7d;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.proximityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.proximityItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.proximityItem:hover {
+  background: linear-gradient(135deg, #f88737, #e67e22);
+  color: white;
+  transform: scale(1.05);
+}
+
+.proximityItem:active {
+  transform: scale(0.95);
+}
+
+.proximityItem:hover .proximityIcon {
+  color: white;
+}
+
+.proximityIcon {
+  color: #f88737;
+  transition: color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.proximityText {
+  font-weight: 500;
+}
+
+/* Responsividade */
+@media (max-width: 968px) {
+  .content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .mapContainer {
+    height: 400px;
+    order: -1;
+  }
+  
+  .proximityGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .localizacaoSection {
+    padding: 3rem 1.5rem;
+  }
+  
+  .mainTitle {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .infoSection {
+    padding: 1.5rem;
+  }
+  
+  .infoTitle {
+    font-size: 1.2rem;
+  }
+  
+  .proximityGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .localizacaoSection {
+    padding: 2rem 1rem;
+  }
+  
+  .mainTitle {
+    font-size: 1.8rem;
+  }
+  
+  .mapContainer {
+    height: 300px;
+  }
+  
+  .infoSection {
+    padding: 1.25rem;
+  }
+  
+  .infoTitle {
+    font-size: 1.1rem;
+  }
+}
