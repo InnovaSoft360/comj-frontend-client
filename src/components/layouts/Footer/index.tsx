@@ -108,23 +108,6 @@ export default function Footer() {
                 <p>info@condominio-osvaldo.ao</p>
               </div>
             </motion.div>
-
-            <motion.div className={styles.footerCard} variants={cardVariants}>
-              <h3>Newsletter</h3>
-              <div className={styles.underline}></div>
-              <p>Inscreva-se para receber nossas atualizações</p>
-              <form className={styles.newsletterForm}>
-                <input 
-                  type="email" 
-                  placeholder="Seu e-mail" 
-                  className={styles.newsletterInput}
-                  required
-                />
-                <button type="submit" className={styles.newsletterButton}>
-                  Inscrever
-                </button>
-              </form>
-            </motion.div>
           </motion.div>
 
           <div className={styles.footerBottom}>
@@ -132,9 +115,7 @@ export default function Footer() {
               © {anoAtual} Condomínio Osvaldo MJ. Todos os direitos reservados.
             </p>
             <div className={styles.footerLinks}>
-              <a href="#">Política de Privacidade</a>
-              <a href="#">Termos de Uso</a>
-              <a href="#">Mapa do Site</a>
+              <Link to="/politicaPrivacidade">Política de Privacidade</Link>
             </div>
           </div>
         </div>

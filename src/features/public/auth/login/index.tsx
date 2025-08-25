@@ -2,17 +2,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import api from "../../../../core/api";
 import Logo from "../../../../assets/logo/logo.png";
-import "./style.css";
+import styles from "./style.module.css";
 
 export default function Login() {
   const navigate = useNavigate();
   
-  //#region Refs
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  //#endregion
-
-  //#region Method Post
+  
   const [isLoading, setIsLoading] = useState(false);
   
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -31,13 +28,11 @@ export default function Login() {
         password: passwordRef.current.value
       });
 
-      // O backend agora retorna as informações do usuário incluindo o role
       const userData = response.data.user;
       
-      // Redirecionar baseado no role
-      if (userData.role === 1) { // Administrador
+      if (userData.role === 1) {
         navigate("/dashboard");
-      } else if (userData.role === 2) { // Militar
+      } else if (userData.role === 2) {
         navigate("/");
       } else {
         navigate("/");
@@ -55,40 +50,59 @@ export default function Login() {
       setIsLoading(false);
     }
   }
-  //#endregion
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2><img src={Logo} alt="Logo" /></h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">E-mail</label>
-            <input type="email" id="email" placeholder="Digite seu e-mail" ref={emailRef} required />
+    <div className={styles.loginContainer}>
+      <div className={styles.loginBox}>
+        <div className={styles.logoTop}>
+          <img src={Logo} alt="Logo Condomínio Osvaldo MJ" className={styles.logo} />
+        </div>
+        
+        <div className={styles.formContainer}>
+          <h1 className={styles.title}>Acessar Conta</h1>
+          
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <input 
+                type="email" 
+                placeholder="E-mail" 
+                ref={emailRef} 
+                required 
+                className={styles.input}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <input 
+                type="password" 
+                placeholder="Senha" 
+                ref={passwordRef} 
+                required 
+                className={styles.input}
+                disabled={isLoading}
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              className={`${styles.loginBtn} ${isLoading ? styles.loading : ''}`} 
+              disabled={isLoading}
+            >
+              {isLoading ? "Entrando..." : "Entrar"}
+            </button>
+          </form>
+
+          <div className={styles.linksContainer}>
+            <Link to="/" className={styles.link}>
+              Esqueceu a senha?
+            </Link>
+            <span className={styles.separator}>•</span>
+            <Link to="/registerMilitar" className={styles.link}>
+              Criar conta
+            </Link>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Senha</label>
-            <input type="password" id="password" placeholder="Digite sua senha" ref={passwordRef} required />
-          </div>
-
-          <button type="submit" className="login-btn" disabled={isLoading}>
-            {isLoading ? "Logando..." : "Entrar"}
-          </button>
-        </form>
-
-        <p className="forgot-password-text">
-          <Link to="/forgot-password" className="forgot-password-link">
-            Esqueceu sua senha?
-          </Link>
-        </p>
-
-        <p className="register-text">
-          Não tem uma conta?{" "}
-          <Link to="/registerMilitar" className="register-link">
-            Crie agora
-          </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

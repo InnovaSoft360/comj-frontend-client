@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { ProtectedRoute, Header, Footer, Home, Dashboard, Etapas, Login, RegisterMilitar, ForgotPassword, ResetPassword, Candidaturas, Estado, DadosMilitar, EditarMilitar, SenhaMilitar, GaleriaVideo, GaleriaImagem } from "./imports";
-import { AuthProvider } from "../contexts/AuthContext";
+import { ProtectedRoute, Header, Footer, Home, Dashboard, Etapas, Login, RegisterMilitar, Candidaturas, Estado, DadosMilitar, EditarMilitar, SenhaMilitar, GaleriaVideo, GaleriaImagem, PoliticaPrivacidade } from "./imports";
 
 function App() {
   const location = useLocation();
@@ -13,7 +12,7 @@ function App() {
     location.pathname === "/forgot-password";
 
   return (
-    <AuthProvider>
+
       <div>
         {!hideLayout && <Header />}
 
@@ -21,10 +20,9 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/etapas" element={<Etapas />} />
+          <Route path="/politicaPrivacidade" element={<PoliticaPrivacidade />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registerMilitar" element={<RegisterMilitar />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
           
           {/* Galeria é pública */}
           <Route path="/galeria/video" element={<GaleriaVideo />} />
@@ -72,7 +70,6 @@ function App() {
 
         {!hideLayout && <Footer />}
       </div>
-    </AuthProvider>
   );
 }
 
