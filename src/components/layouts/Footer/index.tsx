@@ -105,7 +105,7 @@ export default function Footer() {
               </div>
               <div className={styles.contactItem}>
                 <span className={styles.contactIcon}>✉️</span>
-                <p>info@condominio-osvaldo.ao</p>
+                <p>condominio.osvaldo.mj@gmail.com</p>
               </div>
             </motion.div>
           </motion.div>

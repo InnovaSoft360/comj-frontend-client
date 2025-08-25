@@ -4,13 +4,21 @@ import type { GalleryImageItem } from './types';
 import img1 from "../../../../assets/section/img.png";
 import img2 from "../../../../assets/section/img2.png";
 import img3 from "../../../../assets/section/img3.png";
-import img5 from "../../../../assets/section/img5.jpeg";
+import img4 from "../../../../assets/section/img4.png";
 import img7 from "../../../../assets/section/img7.jpeg";
+import img8 from "../../../../assets/section/img8.jpeg";
 
 export const galleryImages: GalleryImageItem[] = [
-  { id: 1, src: img1, title: 'Casa Modelo', description: 'Espaço completo para sua família desfrutar momentos especiais'},
-  { id: 2, src: img2, title: 'Vista Superior', description: 'Vista superior do condomínio, com residências por acabar'},
-  { id: 3, src: img3, title: 'Fachada Principal', description: 'Entrada imponente e acolhedora do condomínio'},
-  { id: 5, src: img5, title: 'Vista Frontal', description: 'Vista Frontal da Casa Modelo'},
-  { id: 7, src: img7, title: 'Cozinha Gourmet', description: 'Cozinha completa com ilha central e área de serviço' },
+
+  { id: 1, src: img1, title: 'Residêcias em Desenvolvimento', description: 'Casas modernas em construção com design contemporâneo e áreas verdes integradas no condomínio planejado.'},
+
+  { id: 2, src: img2, title: 'Casa Modelo Pronta', description: 'Residência completamente finalizada com acabamentos premium, pronta para entrega imediata aos novos moradores.'},
+
+  { id: 3, src: img3, title: 'Fachada Principal', description: 'Entrada monumental com portão eletrônico, segurança 24 horas e paisagismo cuidadosamente projetado.'},
+
+  { id: 4, src: img4, title: 'Vista Frontal', description: 'Perspectiva frontal das residências mostrando arquitetura harmoniosa e integração com o ambiente urbano.'},
+
+  { id: 7, src: img7, title: 'Vista Estacionamento', description: 'Área de garagem organizada com vagas cobertas e sistema de segurança para veículos dos residentes' },
+
+  { id: 8, src: img8, title: 'Vista Lateral', description: 'Visão lateral das construções destacando os volumes arquitetônicos e materiais de alta qualidade.'},
 ];

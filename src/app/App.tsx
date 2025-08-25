@@ -59,9 +59,8 @@ function App() {
 
           {/* Rotas PROTEGIDAS Dashboard */}
           <Route path="/dashboard" element={
-            <ProtectedRoute>
+        
               <Dashboard />
-            </ProtectedRoute>
           } />
 
           {/* Redirect non-existent routes */}

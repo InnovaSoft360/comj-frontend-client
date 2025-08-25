@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { FaUser, FaEnvelope, FaIdCard, FaPhone, FaSpinner, FaCog, FaCalendar } from 'react-icons/fa';
 import api from '../../../../../core/api';
 import styles from "./style.module.css";
 
@@ -86,7 +87,10 @@ export default function EditarMilitar() {
     return (
       <section className={styles.perfilSection}>
         <div className={styles.main}>
-          <div className={styles.loading}>Carregando dados...</div>
+          <div className={styles.loadingContainer}>
+            <FaSpinner className={styles.spinner} />
+            <p>Carregando dados...</p>
+          </div>
         </div>
       </section>
     );
@@ -110,7 +114,10 @@ export default function EditarMilitar() {
         <form onSubmit={handleSubmit} className={styles.form}>
           {/* Campo Nome */}
           <div className={styles.formGroup}>
-            <label htmlFor="nome" className={styles.label}>Nome</label>
+            <label htmlFor="nome" className={styles.label}>
+              <FaUser className={styles.infoIcon} />
+              Nome
+            </label>
             <input 
               type="text" 
               id="nome" 
@@ -123,7 +130,10 @@ export default function EditarMilitar() {
 
           {/* Campo Sobrenome */}
           <div className={styles.formGroup}>
-            <label htmlFor="sobreNome" className={styles.label}>Sobrenome</label>
+            <label htmlFor="sobreNome" className={styles.label}>
+              <FaUser className={styles.infoIcon} />
+              Sobrenome
+            </label>
             <input 
               type="text" 
               id="sobreNome" 
@@ -136,7 +146,10 @@ export default function EditarMilitar() {
 
           {/* Campo Email */}
           <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>E-mail</label>
+            <label htmlFor="email" className={styles.label}>
+              <FaEnvelope className={styles.infoIcon} />
+              E-mail
+            </label>
             <input 
               type="email" 
               id="email" 
@@ -149,7 +162,10 @@ export default function EditarMilitar() {
 
           {/* Campo Telefone */}
           <div className={styles.formGroup}>
-            <label htmlFor="telefone" className={styles.label}>Telefone</label>
+            <label htmlFor="telefone" className={styles.label}>
+              <FaPhone className={styles.infoIcon} />
+              Telefone
+            </label>
             <input 
               type="tel" 
               id="telefone" 
@@ -162,7 +178,10 @@ export default function EditarMilitar() {
 
           {/* Campos somente leitura */}
           <div className={styles.formGroup}>
-            <label htmlFor="nip" className={styles.label}>NIP</label>
+            <label htmlFor="nip" className={styles.label}>
+              <FaIdCard className={styles.infoIcon} />
+              NIP
+            </label>
             <input 
               type="text" 
               id="nip" 
@@ -174,7 +193,10 @@ export default function EditarMilitar() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="role" className={styles.label}>Cargo</label>
+            <label htmlFor="role" className={styles.label}>
+              <FaCog className={styles.infoIcon} />
+              Cargo
+            </label>
             <input 
               type="text" 
               id="role" 
@@ -186,7 +208,10 @@ export default function EditarMilitar() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="dataRegistro" className={styles.label}>Data de Registro</label>
+            <label htmlFor="dataRegistro" className={styles.label}>
+              <FaCalendar className={styles.infoIcon} />
+              Data de Registro
+            </label>
             <input 
               type="text" 
               id="dataRegistro" 
