@@ -115,7 +115,7 @@ export default function Footer() {
               © {anoAtual} Condomínio Osvaldo MJ. Todos os direitos reservados.
             </p>
             <div className={styles.footerLinks}>
-              <Link to="/dashboard">Política de Privacidade</Link>
+              <Link to="/politicaPrivacidade">Política de Privacidade</Link>
             </div>
           </div>
         </div>
