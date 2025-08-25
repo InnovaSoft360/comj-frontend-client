@@ -1,0 +1,302 @@
+.registerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7fef9 0%, #f88737 100%);
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.registerBox {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 30px;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.logoTop {
+  margin-bottom: 25px;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.formContainer {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 30px 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.subtitle {
+  color: #718096;
+  margin-bottom: 25px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.form {
+  margin-bottom: 20px;
+}
+
+.formRow {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.formGroup {
+  flex: 1;
+  margin-bottom: 15px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #fff;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #f88737;
+  box-shadow: 0 0 0 3px rgba(248, 135, 55, 0.1);
+}
+
+.input:disabled {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+}
+
+.input::placeholder {
+  color: #a0aec0;
+}
+
+.fileUploadContainer {
+  text-align: center;
+}
+
+.fileLabel {
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.fileLabel:hover {
+  transform: scale(1.05);
+}
+
+.uploadPlaceholder {
+  width: 100px;
+  height: 100px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #a0aec0;
+  transition: all 0.3s ease;
+}
+
+.uploadPlaceholder:hover {
+  border-color: #f88737;
+  color: #f88737;
+}
+
+.uploadPlaceholder span {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.uploadPlaceholder p {
+  font-size: 12px;
+  margin: 0;
+}
+
+.photoPreview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #f88737;
+  box-shadow: 0 4px 12px rgba(248, 135, 55, 0.2);
+}
+
+.photoPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fileInput {
+  display: none;
+}
+
+.registerBtn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #f88737 0%, #e67e22 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.registerBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(248, 135, 55, 0.3);
+}
+
+.registerBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.registerBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loading {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+}
+
+.linksContainer {
+  margin-top: 20px;
+}
+
+.loginText {
+  margin: 0;
+  font-size: 14px;
+  color: #718096;
+}
+
+.loginLink {
+  color: #f88737;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.loginLink:hover {
+  color: #e67e22;
+  text-decoration: underline;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .registerContainer {
+    padding: 15px;
+  }
+  
+  .registerBox {
+    padding: 25px 20px;
+    max-width: 400px;
+  }
+  
+  .formContainer {
+    padding: 25px 20px;
+  }
+  
+  .formRow {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .title {
+    font-size: 18px;
+  }
+  
+  .subtitle {
+    font-size: 13px;
+  }
+  
+  .input {
+    padding: 12px 14px;
+  }
+  
+  .registerBtn {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .registerBox {
+    padding: 20px 15px;
+    max-width: 320px;
+  }
+  
+  .logo {
+    width: 70px;
+  }
+  
+  .formContainer {
+    padding: 20px 15px;
+  }
+  
+  .title {
+    font-size: 16px;
+  }
+  
+  .subtitle {
+    font-size: 12px;
+  }
+  
+  .uploadPlaceholder {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .photoPreview {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .loginText {
+    font-size: 13px;
+  }
+}
+
+/* Animações */
+.registerBox {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

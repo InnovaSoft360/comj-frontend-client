@@ -207,48 +207,6 @@
   margin: 0;
 }
 
-.newsletterForm {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.newsletterInput {
-  padding: 12px 15px;
-  border: none;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--color-white-001);
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.newsletterInput:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 2px rgba(248, 135, 55, 0.3);
-}
-
-.newsletterInput::placeholder {
-  color: var(--color-white-004);
-}
-
-.newsletterButton {
-  padding: 12px 15px;
-  border: none;
-  border-radius: 5px;
-  background: linear-gradient(135deg, var(--color-green-008), #f88737);
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.newsletterButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(248, 135, 55, 0.4);
-}
 
 .footerBottom {
   display: flex;
