@@ -1,132 +1,89 @@
-import React, { useState, useEffect } from 'react';
-import img1 from "../../../../assets/section/img.png"
-import img2 from "../../../..//assets/section/img2.png";
-import img3 from "../../../../assets/section/img3.png";
-import img5 from "../../../../assets/section/img5.jpeg";
-import img7 from "../../../../assets/section/img7.jpeg";
+import { useState } from 'react';
+import styles from './style.module.css';
+import { galleryImages } from './images';
 
-import './style.css';
-
-interface GalleryItem {
-  id: number;
-  src: string;
-  thumbnail?: string;
-  title: string;
-  description: string;
-  category: string;
-  type: 'image' | 'video';
-}
-
-const galleryItems: GalleryItem[] = [
-  { id: 1, src: img1, title: 'Casa Modelo', description: 'Espaço completo para sua família desfrutar momentos especiais', category: 'lazer', type: 'image' },
-  { id: 2, src: img2, title: 'Vista Superior', description: 'Vista superior do condomínio, com residências por acabar', category: 'lazer', type: 'image' },
-  { id: 3, src: img3, title: 'Fachada Principal', description: 'Entrada imponente e acolhedora do condomínio', category: 'Fachada', type: 'image' },
-  { id: 5, src: img5, title: 'Vista Frontal', description: 'Vista Frontal da Casa Modelo', category: 'Vista', type: 'image' },
-  { id: 7, src: img7, title: 'Cozinha Gourmet', description: 'Cozinha completa com ilha central e área de serviço', category: 'residence', type: 'image' },
-];
+const IMAGES_PER_PAGE = 6;
 
 export default function GaleriaImagem() {
-  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [filter, setFilter] = useState<'all' | 'image' | 'video' | 'residence'>('all');
-  const [filteredItems, setFilteredItems] = useState(galleryItems);
-
-  useEffect(() => {
-    const filtered = galleryItems.filter(item => {
-      if (filter === 'all') return true;
-      if (filter === 'image') return item.type === 'image';
-      if (filter === 'video') return item.type === 'video';
-      if (filter === 'residence') return item.category === 'residence';
-      return true;
-    });
-    setFilteredItems(filtered);
-  }, [filter]);
-
-  const openModal = (item: GalleryItem, index: number) => {
-    setSelectedItem(item);
-    setCurrentIndex(index);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Calcular o índice das imagens para a página atual
+  const indexOfLastImage = currentPage * IMAGES_PER_PAGE;
+  const indexOfFirstImage = indexOfLastImage - IMAGES_PER_PAGE;
+  const currentImages = galleryImages.slice(indexOfFirstImage, indexOfLastImage);
+  
+  // Calcular o total de páginas
+  const totalPages = Math.ceil(galleryImages.length / IMAGES_PER_PAGE);
+  
+  // Funções para navegação
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
   };
-
-  const closeModal = () => setSelectedItem(null);
-
-  const navigateItem = (direction: 'prev' | 'next') => {
-    let newIndex = currentIndex;
-    if (direction === 'prev') newIndex = currentIndex > 0 ? currentIndex - 1 : filteredItems.length - 1;
-    else newIndex = currentIndex < filteredItems.length - 1 ? currentIndex + 1 : 0;
-    setCurrentIndex(newIndex);
-    setSelectedItem(filteredItems[newIndex]);
+  
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!selectedItem) return;
-    if (e.key === 'Escape') closeModal();
-    else if (e.key === 'ArrowLeft') navigateItem('prev');
-    else if (e.key === 'ArrowRight') navigateItem('next');
-  };
+  
+  // Criar espaços vazios se necessário para manter o layout
+  const emptyItems = Array(IMAGES_PER_PAGE - currentImages.length).fill(null);
 
   return (
-    <div className="galeria-container">
-      <div className="galeria-header">
-        <h1>Galeria Completa</h1>
-        <p>Conheça nosso condomínio através de imagens e vídeos</p>
-      </div>
-
-      <div className="filter-container">
-        {['all', 'image', 'video', 'residence'].map(f => (
-          <button 
-            key={f}
-            className={`filter-btn ${filter === f ? 'active' : ''}`}
-            onClick={() => setFilter(f as any)}
-          >
-            {f === 'all' ? 'Todos' : f === 'image' ? 'Imagens' : f === 'video' ? 'Vídeos' : 'Residências'}
-          </button>
-        ))}
-      </div>
-
-      <div className="galeria-grid">
-        {filteredItems.map((item, index) => (
-          <div key={item.id} className="galeria-item" onClick={() => openModal(item, index)}>
-            {item.type === 'image' ? (
-              <img src={item.src} alt={item.title} loading="lazy" />
-            ) : (
-              <div className="video-item">
-                {/* Use o próprio vídeo como preview */}
-                <video src={item.src} muted preload="metadata" poster="" />
-                <div className="play-overlay">
-                  <div className="play-button">▶</div>
-                </div>
-              </div>
-            )}
-            <div className="galeria-item-info">
-              <h3 className="galeria-item-title">{item.title}</h3>
-              <p className="galeria-item-description">{item.description}</p>
-              <span className={`item-type ${item.type}`}>{item.type === 'image' ? 'Imagem' : 'Vídeo'}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {selectedItem && (
-        <div className="modal-overlay active" onClick={closeModal} onKeyDown={handleKeyDown} tabIndex={0}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeModal}>×</button>
-            
-            {selectedItem.type === 'image' ? (
-              <img src={selectedItem.src} alt={selectedItem.title} />
-            ) : (
-              <video src={selectedItem.src} controls autoPlay className="modal-video" />
-            )}
-
-            <button className="modal-nav modal-prev" onClick={() => navigateItem('prev')}>‹</button>
-            <button className="modal-nav modal-next" onClick={() => navigateItem('next')}>›</button>
-
-            <div className="modal-info">
-              <h3>{selectedItem.title}</h3>
-              <p>{selectedItem.description}</p>
-            </div>
-          </div>
+    <section className={styles.galeriaImagemSection}>
+      <div className={styles.main}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Nossa Galeria</h2>
+          <p className={styles.subtitle}>Conheça nossos imóveis e espaços</p>
         </div>
-      )}
-    </div>
+        
+        <div className={styles.galleryGrid}>
+          {currentImages.map((item) => (
+            <div key={item.id} className={styles.galleryItem}>
+              <div className={styles.imageContainer}>
+                <img 
+                  src={item.src} 
+                  alt={item.title} 
+                  className={styles.galleryImage}
+                />
+              </div>
+              <div className={styles.content}>
+                <h3 className={styles.itemTitle}>{item.title}</h3>
+                <p className={styles.itemDescription}>{item.description}</p>
+              </div>
+            </div>
+          ))}
+          
+          {/* Espaços vazios para manter o layout quando não houver 6 imagens */}
+          {emptyItems.map((_, index) => (
+            <div key={`empty-${index}`} className={styles.emptySpace}></div>
+          ))}
+        </div>
+        
+        <div className={styles.pagination}>
+          <button 
+            onClick={prevPage} 
+            disabled={currentPage === 1}
+            className={styles.paginationButton}
+          >
+            ← Anterior
+          </button>
+          
+          <span className={styles.pageInfo}>
+            Página {currentPage} de {totalPages}
+          </span>
+          
+          <button 
+            onClick={nextPage} 
+            disabled={currentPage === totalPages}
+            className={styles.paginationButton}
+          >
+            Próxima →
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }

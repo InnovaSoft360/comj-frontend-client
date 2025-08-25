@@ -1,0 +1,305 @@
+/* InformationSection.module.css */
+
+.informationSection {
+  background: #fff;
+  padding: 4rem 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.header h1 span {
+  color: #f88737;
+  position: relative;
+}
+
+.header h1 span::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #f88737, #d61c1c);
+  border-radius: 2px;
+}
+
+.header p {
+  font-size: 1.2rem;
+  color: #6b7280;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.cardsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  justify-content: center;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  height: 480px;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #f88737, #d61c1c);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.cardHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.iconWrapper {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  margin-bottom: 1.2rem;
+  position: relative;
+}
+
+.iconWrapper::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0.1;
+  z-index: 1;
+}
+
+.icon {
+  font-size: 2rem;
+  z-index: 2;
+  position: relative;
+}
+
+.card h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.featuresList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.featuresList li {
+  padding-left: 2rem;
+  position: relative;
+  margin-bottom: 1rem;
+  color: #4b5563;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: color 0.3s ease;
+}
+
+.featuresList li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* Estrutura Card */
+.estrutura {
+  border-top: 4px solid #f88737;
+}
+
+.estrutura .iconWrapper {
+  background: rgba(248, 135, 55, 0.1);
+}
+
+.estrutura .iconWrapper::after {
+  background: #f88737;
+}
+
+.estrutura .icon {
+  color: #f88737;
+}
+
+.estrutura h3 {
+  color: #f88737;
+}
+
+.estrutura .featuresList li::before {
+  background: rgba(248, 135, 55, 0.1);
+  color: #f88737;
+}
+
+/* Segurança Card */
+.seguranca {
+  border-top: 4px solid #d61c1c;
+}
+
+.seguranca .iconWrapper {
+  background: rgba(214, 28, 28, 0.1);
+}
+
+.seguranca .iconWrapper::after {
+  background: #d61c1c;
+}
+
+.seguranca .icon {
+  color: #d61c1c;
+}
+
+.seguranca h3 {
+  color: #d61c1c;
+}
+
+.seguranca .featuresList li::before {
+  background: rgba(214, 28, 28, 0.1);
+  color: #d61c1c;
+}
+
+/* Comodidades Card */
+.comodidades {
+  border-top: 4px solid #4b5563;
+}
+
+.comodidades .iconWrapper {
+  background: rgba(75, 85, 99, 0.1);
+}
+
+.comodidades .iconWrapper::after {
+  background: #4b5563;
+}
+
+.comodidades .icon {
+  color: #4b5563;
+}
+
+.comodidades h3 {
+  color: #4b5563;
+}
+
+.comodidades .featuresList li::before {
+  background: rgba(75, 85, 99, 0.1);
+  color: #4b5563;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .informationSection {
+    padding: 3rem 0;
+  }
+  
+  .header h1 {
+    font-size: 2.2rem;
+  }
+  
+  .header p {
+    font-size: 1.1rem;
+  }
+  
+  .cardsContainer {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .card {
+    height: auto;
+    padding: 2rem 1.5rem;
+  }
+  
+  .featuresList {
+    gap: 0.8rem;
+  }
+  
+  .featuresList li {
+    margin-bottom: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .header p {
+    font-size: 1rem;
+  }
+  
+  .iconWrapper {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .icon {
+    font-size: 1.5rem;
+  }
+  
+  .card h3 {
+    font-size: 1.2rem;
+  }
+  
+  .featuresList li {
+    font-size: 0.9rem;
+  }
+}

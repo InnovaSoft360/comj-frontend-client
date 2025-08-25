@@ -1,27 +1,28 @@
 import { FaHome, FaShieldAlt, FaUsers } from "react-icons/fa";
-import "./style.css";
+import styles from "./style.module.css";
 
 export default function InformationSection() {
   return (
-    <section className="information-section">
-      <div className="style-Main">
-        <div className="information-context-section">
+    <section className={styles.informationSection}>
+      <div className={styles.container}>
+        <div className={styles.header}>
           <h1>Residências T3 <span>Premium</span></h1>
           <p>
-            Todas as residências são do tipo T3, projetadas para oferecer máximo conforto, segurança e funcionalidade para sua família
+            Todas as residências são do tipo T3, projetadas para oferecer máximo conforto, 
+            segurança e funcionalidade para sua família
           </p>
         </div>
-        <div className="info-container">
-
+        
+        <div className={styles.cardsContainer}>
           {/* Estrutura T3 Completa */}
-          <div className="info-card estrutura">
-            <div className="info-card-context">
-              <div className="icon-container">
-                <FaHome size={32} />
+          <div className={`${styles.card} ${styles.estrutura}`}>
+            <div className={styles.cardHeader}>
+              <div className={styles.iconWrapper}>
+                <FaHome className={styles.icon} />
               </div>
               <h3>Estrutura T3 Completa</h3>
             </div>
-            <ul>
+            <ul className={styles.featuresList}>
               <li>3 Quartos espaçosos</li>
               <li>2 Casas de banho</li>
               <li>Sala de estar e jantar</li>
@@ -32,14 +33,14 @@ export default function InformationSection() {
           </div>
 
           {/* Segurança Total 24h */}
-          <div className="info-card seguranca">
-            <div className="info-card-context">
-              <div className="icon-container">
-                <FaShieldAlt size={32} />
+          <div className={`${styles.card} ${styles.seguranca}`}>
+            <div className={styles.cardHeader}>
+              <div className={styles.iconWrapper}>
+                <FaShieldAlt className={styles.icon} />
               </div>
               <h3>Segurança Total 24h</h3>
             </div>
-            <ul>
+            <ul className={styles.featuresList}>
               <li>Portaria com controle de acesso</li>
               <li>Vigilância 24 horas</li>
               <li>Circuito fechado de TV</li>
@@ -50,14 +51,14 @@ export default function InformationSection() {
           </div>
 
           {/* Comodidades Exclusivas */}
-          <div className="info-card comodidades">
-            <div className="info-card-context">
-              <div className="icon-container">
-                <FaUsers size={32} />
+          <div className={`${styles.card} ${styles.comodidades}`}>
+            <div className={styles.cardHeader}>
+              <div className={styles.iconWrapper}>
+                <FaUsers className={styles.icon} />
               </div>
               <h3>Comodidades Exclusivas</h3>
             </div>
-            <ul>
+            <ul className={styles.featuresList}>
               <li>Piscina comunitária</li>
               <li>Academia equipada</li>
               <li>Playground infantil</li>
