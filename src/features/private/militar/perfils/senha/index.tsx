@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { FaEye, FaEyeSlash, FaKey, FaLock, FaCheckCircle, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 import api from '../../../../../core/api';
 import styles from "./style.module.css";
 
@@ -128,99 +129,110 @@ export default function SenhaMilitar() {
       <div className={styles.main}>
         <h2 className={styles.title}>Alterar Senha</h2>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className={styles.form}>
           {/* Campo Senha Atual */}
           <div className={styles.formGroup}>
             <label htmlFor="senhaAtual" className={styles.label}>
+              <FaKey className={styles.infoIcon} />
               Senha Atual
             </label>
-            <input
-              type="password"
-              id="senhaAtual"
-              placeholder="Digite sua senha atual"
-              ref={senhaAtualRef}
-              className={styles.input}
-              required
-            />
-            <div className={styles.checkboxGroup}>
+            <div className={styles.inputContainer}>
               <input
-                type="checkbox"
-                id="showSenhaAtual"
-                checked={showSenhaAtual}
-                onChange={toggleSenhaAtual}
-                className={styles.checkbox}
+                type="password"
+                id="senhaAtual"
+                placeholder="Digite sua senha atual"
+                ref={senhaAtualRef}
+                className={styles.input}
+                required
               />
-              <label htmlFor="showSenhaAtual" className={styles.checkboxLabel}>
-                Visualizar senha atual
-              </label>
+              <button 
+                type="button" 
+                className={styles.toggleButton}
+                onClick={toggleSenhaAtual}
+              >
+                {showSenhaAtual ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
           </div>
 
           {/* Campo Nova Senha */}
           <div className={styles.formGroup}>
             <label htmlFor="novaSenha" className={styles.label}>
+              <FaLock className={styles.infoIcon} />
               Nova Senha
             </label>
-            <input
-              type="password"
-              id="novaSenha"
-              placeholder="Digite a nova senha (mínimo 6 caracteres)"
-              ref={novaSenhaRef}
-              className={styles.input}
-              required
-              minLength={6}
-            />
-            <div className={styles.checkboxGroup}>
+            <div className={styles.inputContainer}>
               <input
-                type="checkbox"
-                id="showNovaSenha"
-                checked={showNovaSenha}
-                onChange={toggleNovaSenha}
-                className={styles.checkbox}
+                type="password"
+                id="novaSenha"
+                placeholder="Digite a nova senha (mínimo 6 caracteres)"
+                ref={novaSenhaRef}
+                className={styles.input}
+                required
+                minLength={6}
               />
-              <label htmlFor="showNovaSenha" className={styles.checkboxLabel}>
-                Visualizar nova senha
-              </label>
+              <button 
+                type="button" 
+                className={styles.toggleButton}
+                onClick={toggleNovaSenha}
+              >
+                {showNovaSenha ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
           </div>
 
           {/* Campo Confirmar Senha */}
           <div className={styles.formGroup}>
             <label htmlFor="confirmarSenha" className={styles.label}>
+              <FaLock className={styles.infoIcon} />
               Confirmar Nova Senha
             </label>
-            <input
-              type="password"
-              id="confirmarSenha"
-              placeholder="Confirme a nova senha"
-              ref={confirmarSenhaRef}
-              className={styles.input}
-              required
-              minLength={6}
-            />
-            <div className={styles.checkboxGroup}>
+            <div className={styles.inputContainer}>
               <input
-                type="checkbox"
-                id="showConfirmarSenha"
-                checked={showConfirmarSenha}
-                onChange={toggleConfirmarSenha}
-                className={styles.checkbox}
+                type="password"
+                id="confirmarSenha"
+                placeholder="Confirme a nova senha"
+                ref={confirmarSenhaRef}
+                className={styles.input}
+                required
+                minLength={6}
               />
-              <label htmlFor="showConfirmarSenha" className={styles.checkboxLabel}>
-                Visualizar confirmação de senha
-              </label>
+              <button 
+                type="button" 
+                className={styles.toggleButton}
+                onClick={toggleConfirmarSenha}
+              >
+                {showConfirmarSenha ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
-          {success && <div className={styles.success}>{success}</div>}
+          {error && (
+            <div className={styles.error}>
+              <FaExclamationTriangle className={styles.errorIcon} />
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className={styles.success}>
+              <FaCheckCircle className={styles.successIcon} />
+              {success}
+            </div>
+          )}
 
           <button
             type="submit"
-            className={styles.button}
+            className={styles.submitButton}
             disabled={isLoading || !userId}
           >
-            {isLoading ? "Alterando..." : "Alterar Senha"}
+            {isLoading ? (
+              <>
+                <FaSpinner className={styles.spinner} />
+                Alterando...
+              </>
+            ) : (
+              "Alterar Senha"
+            )}
           </button>
         </form>
       </div>
