@@ -1,11 +1,10 @@
-//#region IMPORTS
+// Header.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { HiChevronDown as IconChevronDown } from "react-icons/hi";
-import api from "../../../core/api"
+import api from "../../../app/api";
 import logo from "../../../assets/logo/logo.png";
-import "./styles.css";
-//#endregion
+import styles from "./style.module.css";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
@@ -16,15 +15,24 @@ export default function Header() {
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLUListElement>(null);
 
-  //#region Efeitos e Handlers
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  const handleLinkClick = () => {
+    closeMenu();
+    scrollToTop();
+  };
+
+  // Efeitos e Handlers
   useEffect(() => {
-    // Verificar autenticação ao carregar o componente
     checkAuthentication();
     
-    // Verificar tamanho da tela
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
-      // Fechar menu ao redimensionar para desktop
       if (window.innerWidth > 768) {
         setMenuOpen(false);
         setActiveDropdown(null);
@@ -35,7 +43,6 @@ export default function Header() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fechar dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -64,7 +71,6 @@ export default function Header() {
 
   const toggleMenu = (): void => {
     setMenuOpen(!menuOpen);
-    // Fechar dropdowns ao abrir/fechar menu mobile
     if (!menuOpen) {
       setActiveDropdown(null);
     }
@@ -77,14 +83,8 @@ export default function Header() {
 
   const toggleDropdown = (dropdownName: string): void => {
     if (isMobile) {
-      // No mobile, alternar entre abrir/fechar
-      if (activeDropdown === dropdownName) {
-        setActiveDropdown(null);
-      } else {
-        setActiveDropdown(dropdownName);
-      }
+      setActiveDropdown(activeDropdown === dropdownName ? null : dropdownName);
     } else {
-      // No desktop, apenas definir como ativo (mouseover vai cuidar do resto)
       setActiveDropdown(dropdownName);
     }
   };
@@ -113,136 +113,137 @@ export default function Header() {
       alert("Erro ao fazer logout.");
     }
   };
-  //#endregion
 
-  //#region Renderização condicional
   if (isCheckingAuth) {
     return (
-      <header>
-        <div className="style-Main">
-          <nav className="navBar">
-            <div className="navBarLogo">
-              <Link to="/" className="navLink">
-                <img src={logo} alt="logo" width={90} className="logo" />
+      <header className={styles.header}>
+        <div className={styles.main}>
+          <nav className={styles.navBar}>
+            <div className={styles.logoContainer}>
+              <Link to="/" className={styles.navLink}>
+                <img src={logo} alt="logo" width={90} className={styles.logo} />
               </Link>
             </div>
-            <div>Carregando...</div>
+            <div className={styles.loading}>Carregando...</div>
           </nav>
         </div>
       </header>
     );
   }
-  //#endregion
 
-  //#region  RENDERIZAÇÃO PRINCIPAL
   return (
-    <header>
-      <div className="style-Main">
-        <nav className="navBar">
-          <div className="navBarLogo">
-            <Link to="/" className="navLink" onClick={closeMenu}>
-              <img src={logo} alt="logo" width={90} className="logo" />
+    <header className={styles.header}>
+      <div className={styles.main}>
+        <nav className={styles.navBar}>
+          <div className={styles.logoContainer}>
+            <Link to="/" className={styles.navLink} onClick={handleLinkClick}>
+              <img src={logo} alt="logo" width={90} className={styles.logo} />
             </Link>
           </div>
 
           <ul 
-            className={`navMenu ${menuOpen ? "active" : ""}`} 
+            className={`${styles.navMenu} ${menuOpen ? styles.active : ""}`} 
             ref={dropdownRef}
           >
-            <li>
-              <Link to="/" className="navLink" onClick={closeMenu}>
+            <li className={styles.navItem}>
+              <Link to="/" className={styles.navLink} onClick={handleLinkClick}>
                 Início
               </Link>
             </li>
-            <li>
-              <Link to="/etapas" className="navLink" onClick={closeMenu}>
+            
+            <li className={styles.navItem}>
+              <Link to="/etapas" className={styles.navLink} onClick={handleLinkClick}>
                 Etapas
               </Link>
             </li>
 
-            {/* Menu Galeria com Dropdown - SEMPRE visível */}
+            {/* Menu Galeria */}
             <li 
-              className={`navItemWithDropdown ${activeDropdown === 'galeria' ? 'active' : ''}`}
+              className={`${styles.navItemWithDropdown} ${activeDropdown === 'galeria' ? styles.active : ''}`}
               onMouseEnter={() => handleMouseEnter('galeria')}
               onMouseLeave={handleMouseLeave}
             >
               <div 
-                className="navLink dropdownTrigger"
+                className={styles.dropdownTrigger}
                 onClick={() => toggleDropdown('galeria')}
               >
-                <span className="divicon">Galeria <IconChevronDown className={`dropdown-arrow ${activeDropdown === 'galeria' ? 'active' : ''}`} /></span>
+                <span className={styles.dropdownTitle}>
+                  Galeria <IconChevronDown className={`${styles.dropdownArrow} ${activeDropdown === 'galeria' ? styles.active : ''}`} />
+                </span>
               </div>
-              <ul className={`dropdownMenu ${activeDropdown === 'galeria' ? 'active' : ''}`}>
+              <ul className={`${styles.dropdownMenu} ${activeDropdown === 'galeria' ? styles.active : ''}`}>
                 <li>
-                  <Link to="/galeria/imagem" onClick={closeMenu}>Imagens</Link>
+                  <Link to="/galeria/imagem" onClick={handleLinkClick}>Imagens</Link>
                 </li>
                 <li>
-                  <Link to="/galeria/video" onClick={closeMenu}>Videos</Link>
+                  <Link to="/galeria/video" onClick={handleLinkClick}>Videos</Link>
                 </li>
               </ul>
             </li>
 
-            {/* Menu Candidatura com Dropdown - APENAS quando logado */}
+            {/* Menu Candidatura */}
             {isAuthenticated && (
               <li 
-                className={`navItemWithDropdown ${activeDropdown === 'candidatura' ? 'active' : ''}`}
+                className={`${styles.navItemWithDropdown} ${activeDropdown === 'candidatura' ? styles.active : ''}`}
                 onMouseEnter={() => handleMouseEnter('candidatura')}
                 onMouseLeave={handleMouseLeave}
               >
                 <div 
-                  className="navLink dropdownTrigger"
+                  className={styles.dropdownTrigger}
                   onClick={() => toggleDropdown('candidatura')}
                 >
-                  <span className="divicon">Candidatura <IconChevronDown className={`dropdown-arrow ${activeDropdown === 'candidatura' ? 'active' : ''}`} /></span>
+                  <span className={styles.dropdownTitle}>
+                    Candidatura <IconChevronDown className={`${styles.dropdownArrow} ${activeDropdown === 'candidatura' ? styles.active : ''}`} />
+                  </span>
                 </div>
-                <ul className={`dropdownMenu ${activeDropdown === 'candidatura' ? 'active' : ''}`}>
+                <ul className={`${styles.dropdownMenu} ${activeDropdown === 'candidatura' ? styles.active : ''}`}>
                   <li>
-                    <Link to="/candidaturas/formulario" onClick={closeMenu}>Formulário</Link>
+                    <Link to="/candidaturas/formulario" onClick={handleLinkClick}>Formulário</Link>
                   </li>
                   <li>
-                    <Link to="/candidatura/estado" onClick={closeMenu}>Estado</Link>
+                    <Link to="/candidatura/estado" onClick={handleLinkClick}>Estado</Link>
                   </li>
                 </ul>
               </li>
             )}
 
-            {/* Menu Perfil com Dropdown - APENAS quando logado */}
+            {/* Menu Perfil */}
             {isAuthenticated && (
               <li 
-                className={`navItemWithDropdown ${activeDropdown === 'perfil' ? 'active' : ''}`}
+                className={`${styles.navItemWithDropdown} ${activeDropdown === 'perfil' ? styles.active : ''}`}
                 onMouseEnter={() => handleMouseEnter('perfil')}
                 onMouseLeave={handleMouseLeave}
               >
                 <div 
-                  className="navLink dropdownTrigger"
+                  className={styles.dropdownTrigger}
                   onClick={() => toggleDropdown('perfil')}
                 >
-                  <span className="divicon">Perfil <IconChevronDown className={`dropdown-arrow ${activeDropdown === 'perfil' ? 'active' : ''}`} /></span>
+                  <span className={styles.dropdownTitle}>
+                    Perfil <IconChevronDown className={`${styles.dropdownArrow} ${activeDropdown === 'perfil' ? styles.active : ''}`} />
+                  </span>
                 </div>
-                <ul className={`dropdownMenu ${activeDropdown === 'perfil' ? 'active' : ''}`}>
+                <ul className={`${styles.dropdownMenu} ${activeDropdown === 'perfil' ? styles.active : ''}`}>
                   <li>
-                    <Link to="/perfil/dados" onClick={closeMenu}>Meus Dados</Link>
+                    <Link to="/perfil/dados" onClick={handleLinkClick}>Meus Dados</Link>
                   </li>
                   <li>
-                    <Link to="/perfil/editar" onClick={closeMenu}>Editar Perfil</Link>
+                    <Link to="/perfil/editar" onClick={handleLinkClick}>Editar Perfil</Link>
                   </li>
                   <li>
-                    <Link to="/perfil/senha" onClick={closeMenu}>Alterar Senha</Link>
+                    <Link to="/perfil/senha" onClick={handleLinkClick}>Alterar Senha</Link>
                   </li>
                 </ul>
               </li>
             )}
 
             {/* Botão Entrar/Sair */}
-            <li className="navBtn">
+            <li className={styles.navButton}>
               {isAuthenticated ? (
-                // Botão Sair quando logado
-                <button onClick={handleLogout} className="logout-btn">
+                <button onClick={handleLogout} className={styles.logoutButton}>
                   Sair
                 </button>
               ) : (
-                // Botão Entrar quando deslogado
-                <button>
+                <button className={styles.loginButton}>
                   <Link to="/login" onClick={closeMenu}>
                     Entrar
                   </Link>
@@ -252,16 +253,15 @@ export default function Header() {
           </ul>
           
           <div
-            className={`menuToggle ${menuOpen ? "active" : ""}`}
+            className={`${styles.menuToggle} ${menuOpen ? styles.active : ""}`}
             onClick={toggleMenu}
           >
-            <span className="bar"></span>
-            <span className="bar"></span>
-            <span className="bar"></span>
+            <span className={styles.bar}></span>
+            <span className={styles.bar}></span>
+            <span className={styles.bar}></span>
           </div>
         </nav>
       </div>
     </header>
   );
-  //#endregion
 }

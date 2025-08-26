@@ -1,6 +1,14 @@
 import { useRef, useState, useEffect } from "react";
-import { FaEye, FaEyeSlash, FaKey, FaLock, FaCheckCircle, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
-import api from '../../../../../core/api';
+import {
+  FaEye,
+  FaEyeSlash,
+  FaKey,
+  FaLock,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaSpinner,
+} from "react-icons/fa";
+import api from "../../../../../app/api";
 import styles from "./style.module.css";
 
 export default function SenhaMilitar() {
@@ -69,7 +77,11 @@ export default function SenhaMilitar() {
     setError("");
     setSuccess("");
 
-    if (!senhaAtualRef.current?.value || !novaSenhaRef.current?.value || !confirmarSenhaRef.current?.value) {
+    if (
+      !senhaAtualRef.current?.value ||
+      !novaSenhaRef.current?.value ||
+      !confirmarSenhaRef.current?.value
+    ) {
       setError("Preencha todos os campos obrigatórios!");
       setIsLoading(false);
       return;
@@ -92,7 +104,7 @@ export default function SenhaMilitar() {
         id: userId,
         senhaAtual: senhaAtualRef.current.value,
         novaSenha: novaSenhaRef.current.value,
-        confirmarNovaSenha: confirmarSenhaRef.current.value
+        confirmarNovaSenha: confirmarSenhaRef.current.value,
       });
 
       if (response.data.code === 200) {
@@ -107,7 +119,8 @@ export default function SenhaMilitar() {
         setShowConfirmarSenha(false);
         if (senhaAtualRef.current) senhaAtualRef.current.type = "password";
         if (novaSenhaRef.current) novaSenhaRef.current.type = "password";
-        if (confirmarSenhaRef.current) confirmarSenhaRef.current.type = "password";
+        if (confirmarSenhaRef.current)
+          confirmarSenhaRef.current.type = "password";
       }
     } catch (error: any) {
       console.error(error);
@@ -128,7 +141,7 @@ export default function SenhaMilitar() {
     <section className={styles.perfilSection}>
       <div className={styles.main}>
         <h2 className={styles.title}>Alterar Senha</h2>
-        
+
         <form onSubmit={handleSubmit} className={styles.form}>
           {/* Campo Senha Atual */}
           <div className={styles.formGroup}>
@@ -145,8 +158,8 @@ export default function SenhaMilitar() {
                 className={styles.input}
                 required
               />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={styles.toggleButton}
                 onClick={toggleSenhaAtual}
               >
@@ -171,8 +184,8 @@ export default function SenhaMilitar() {
                 required
                 minLength={6}
               />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={styles.toggleButton}
                 onClick={toggleNovaSenha}
               >
@@ -197,8 +210,8 @@ export default function SenhaMilitar() {
                 required
                 minLength={6}
               />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={styles.toggleButton}
                 onClick={toggleConfirmarSenha}
               >

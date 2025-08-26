@@ -1,6 +1,14 @@
 import { useRef, useState, useEffect } from "react";
-import { FaUser, FaEnvelope, FaIdCard, FaPhone, FaSpinner, FaCog, FaCalendar } from 'react-icons/fa';
-import api from '../../../../../core/api';
+import {
+  FaUser,
+  FaEnvelope,
+  FaIdCard,
+  FaPhone,
+  FaSpinner,
+  FaCog,
+  FaCalendar,
+} from "react-icons/fa";
+import api from "../../../../../app/api";
 import styles from "./style.module.css";
 
 export default function EditarMilitar() {
@@ -21,11 +29,11 @@ export default function EditarMilitar() {
   useEffect(() => {
     async function fetchCurrentUser() {
       try {
-        const response = await api.get('/v1/Usuarios/GetCurrentUser');
+        const response = await api.get("/v1/Usuarios/GetCurrentUser");
         setUserData(response.data.data);
       } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
-        alert('Erro ao carregar dados do usuário');
+        console.error("Erro ao carregar dados do usuário:", error);
+        alert("Erro ao carregar dados do usuário");
       } finally {
         setLoadingData(false);
       }
@@ -40,8 +48,12 @@ export default function EditarMilitar() {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!nomeRef.current?.value || !sobreNomeRef.current?.value || 
-        !emailRef.current?.value || !telefoneRef.current?.value) {
+    if (
+      !nomeRef.current?.value ||
+      !sobreNomeRef.current?.value ||
+      !emailRef.current?.value ||
+      !telefoneRef.current?.value
+    ) {
       alert("Preencha todos os campos obrigatórios!");
       setIsLoading(false);
       return;
@@ -56,8 +68,8 @@ export default function EditarMilitar() {
         role: userData.role,
         militarInfo: {
           nip: userData.militarInfo.nip,
-          telefone: telefoneRef.current.value
-        }
+          telefone: telefoneRef.current.value,
+        },
       };
 
       const response = await api.put("/v1/Usuarios/UpdateMilitar", updateData);
@@ -65,7 +77,7 @@ export default function EditarMilitar() {
       if (response.data.code === 204) {
         alert("Perfil atualizado com sucesso!");
         // Recarregar os dados atualizados
-        const userResponse = await api.get('/v1/Usuarios/GetCurrentUser');
+        const userResponse = await api.get("/v1/Usuarios/GetCurrentUser");
         setUserData(userResponse.data.data);
       } else {
         alert("Erro ao atualizar perfil.");
@@ -110,7 +122,7 @@ export default function EditarMilitar() {
     <section className={styles.perfilSection}>
       <div className={styles.main}>
         <h2 className={styles.title}>Editar Perfil</h2>
-        
+
         <form onSubmit={handleSubmit} className={styles.form}>
           {/* Campo Nome */}
           <div className={styles.formGroup}>
@@ -118,13 +130,13 @@ export default function EditarMilitar() {
               <FaUser className={styles.infoIcon} />
               Nome
             </label>
-            <input 
-              type="text" 
-              id="nome" 
+            <input
+              type="text"
+              id="nome"
               ref={nomeRef}
               defaultValue={userData.nome}
               className={styles.input}
-              required 
+              required
             />
           </div>
 
@@ -134,13 +146,13 @@ export default function EditarMilitar() {
               <FaUser className={styles.infoIcon} />
               Sobrenome
             </label>
-            <input 
-              type="text" 
-              id="sobreNome" 
+            <input
+              type="text"
+              id="sobreNome"
               ref={sobreNomeRef}
               defaultValue={userData.sobreNome}
               className={styles.input}
-              required 
+              required
             />
           </div>
 
@@ -150,13 +162,13 @@ export default function EditarMilitar() {
               <FaEnvelope className={styles.infoIcon} />
               E-mail
             </label>
-            <input 
-              type="email" 
-              id="email" 
+            <input
+              type="email"
+              id="email"
               ref={emailRef}
               defaultValue={userData.email}
               className={styles.input}
-              required 
+              required
             />
           </div>
 
@@ -166,13 +178,13 @@ export default function EditarMilitar() {
               <FaPhone className={styles.infoIcon} />
               Telefone
             </label>
-            <input 
-              type="tel" 
-              id="telefone" 
+            <input
+              type="tel"
+              id="telefone"
               ref={telefoneRef}
-              defaultValue={userData.militarInfo?.telefone || ''}
+              defaultValue={userData.militarInfo?.telefone || ""}
               className={styles.input}
-              required 
+              required
             />
           </div>
 
@@ -182,10 +194,10 @@ export default function EditarMilitar() {
               <FaIdCard className={styles.infoIcon} />
               NIP
             </label>
-            <input 
-              type="text" 
-              id="nip" 
-              defaultValue={userData.militarInfo?.nip || ''}
+            <input
+              type="text"
+              id="nip"
+              defaultValue={userData.militarInfo?.nip || ""}
               className={`${styles.input} ${styles.readOnly}`}
               readOnly
               disabled
@@ -197,10 +209,10 @@ export default function EditarMilitar() {
               <FaCog className={styles.infoIcon} />
               Cargo
             </label>
-            <input 
-              type="text" 
-              id="role" 
-              defaultValue={userData.role === 1 ? 'Administrador' : 'Militar'}
+            <input
+              type="text"
+              id="role"
+              defaultValue={userData.role === 1 ? "Administrador" : "Militar"}
               className={`${styles.input} ${styles.readOnly}`}
               readOnly
               disabled
@@ -212,19 +224,21 @@ export default function EditarMilitar() {
               <FaCalendar className={styles.infoIcon} />
               Data de Registro
             </label>
-            <input 
-              type="text" 
-              id="dataRegistro" 
-              defaultValue={new Date(userData.dataRegistro).toLocaleDateString('pt-BR')}
+            <input
+              type="text"
+              id="dataRegistro"
+              defaultValue={new Date(userData.dataRegistro).toLocaleDateString(
+                "pt-BR"
+              )}
               className={`${styles.input} ${styles.readOnly}`}
               readOnly
               disabled
             />
           </div>
 
-          <button 
-            type="submit" 
-            className={styles.submitButton} 
+          <button
+            type="submit"
+            className={styles.submitButton}
             disabled={isLoading}
           >
             {isLoading ? "Atualizando..." : "Atualizar Perfil"}

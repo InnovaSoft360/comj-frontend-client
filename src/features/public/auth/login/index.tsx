@@ -1,17 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
-import api from "../../../../core/api";
+import api from "../../../../app/api";
 import Logo from "../../../../assets/logo/logo.png";
 import styles from "./style.module.css";
+import { useAlert } from "../../../../components/ui/customAlert"; 
 
 export default function Login() {
   const navigate = useNavigate();
-  
+  const { showAlert, AlertContainer } = useAlert();
+
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  
+
   const [isLoading, setIsLoading] = useState(false);
-  
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoading(true);
@@ -25,11 +27,11 @@ export default function Login() {
     try {
       const response = await api.post("/v1/Auth/Login", {
         email: emailRef.current.value,
-        password: passwordRef.current.value
+        password: passwordRef.current.value,
       });
 
       const userData = response.data.user;
-      
+
       if (userData.role === 1) {
         navigate("/dashboard");
       } else if (userData.role === 2) {
@@ -37,14 +39,14 @@ export default function Login() {
       } else {
         navigate("/");
       }
-      
-      alert("Login realizado com sucesso!");
+
+      showAlert("Login realizado com sucesso!", "success");
     } catch (error: any) {
       console.error(error);
       if (error.response?.status === 401) {
-        alert("Credenciais inválidas!");
+        showAlert("Credenciais inválidas!", "warning");
       } else {
-        alert("Erro ao fazer login.");
+      showAlert("Erro ao fazer login.", "error");
       }
     } finally {
       setIsLoading(false);
@@ -53,40 +55,47 @@ export default function Login() {
 
   return (
     <div className={styles.loginContainer}>
+      <AlertContainer />
       <div className={styles.loginBox}>
         <div className={styles.logoTop}>
-          <img src={Logo} alt="Logo Condomínio Osvaldo MJ" className={styles.logo} />
+          <img
+            src={Logo}
+            alt="Logo Condomínio Osvaldo MJ"
+            className={styles.logo}
+          />
         </div>
-        
+
         <div className={styles.formContainer}>
           <h1 className={styles.title}>Acessar Conta</h1>
-          
+
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formGroup}>
-              <input 
-                type="email" 
-                placeholder="E-mail" 
-                ref={emailRef} 
-                required 
+              <input
+                type="email"
+                placeholder="E-mail"
+                ref={emailRef}
+                required
                 className={styles.input}
                 disabled={isLoading}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <input 
-                type="password" 
-                placeholder="Senha" 
-                ref={passwordRef} 
-                required 
+              <input
+                type="password"
+                placeholder="Senha"
+                ref={passwordRef}
+                required
                 className={styles.input}
                 disabled={isLoading}
               />
             </div>
 
-            <button 
-              type="submit" 
-              className={`${styles.loginBtn} ${isLoading ? styles.loading : ''}`} 
+            <button
+              type="submit"
+              className={`${styles.loginBtn} ${
+                isLoading ? styles.loading : ""
+              }`}
               disabled={isLoading}
             >
               {isLoading ? "Entrando..." : "Entrar"}
