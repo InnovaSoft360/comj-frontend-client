@@ -1,9 +1,16 @@
 // Perfil.tsx
-import { useState, useEffect } from 'react';
-import api from '../../../../../core/api';
-import type { UserData, ApiResponse } from './user';
-import styles from './style.module.css';
-import { FaUser, FaEnvelope, FaIdCard, FaPhone, FaSpinner, FaCog } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import api from "../../../../../app/api";
+import type { UserData, ApiResponse } from "./user";
+import styles from "./style.module.css";
+import {
+  FaUser,
+  FaEnvelope,
+  FaIdCard,
+  FaPhone,
+  FaSpinner,
+  FaCog,
+} from "react-icons/fa";
 
 export default function DadosMilitar() {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -14,28 +21,30 @@ export default function DadosMilitar() {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        
-        const authCheck = await api.get('/v1/Auth/CheckAuth');
-        
+
+        const authCheck = await api.get("/v1/Auth/CheckAuth");
+
         if (!authCheck.data.authenticated) {
-          setError('Usuário não autenticado. Faça login novamente.');
+          setError("Usuário não autenticado. Faça login novamente.");
           setLoading(false);
           return;
         }
 
-        const response = await api.get<ApiResponse<UserData>>('/v1/Usuarios/GetCurrentUser');
-        
+        const response = await api.get<ApiResponse<UserData>>(
+          "/v1/Usuarios/GetCurrentUser"
+        );
+
         if (response.data.code === 200 && response.data.data) {
           setUserData(response.data.data);
         } else {
-          setError('Erro ao carregar dados do usuário');
+          setError("Erro ao carregar dados do usuário");
         }
       } catch (err: any) {
-        console.error('Erro ao buscar dados:', err);
+        console.error("Erro ao buscar dados:", err);
         if (err.response?.status === 401) {
-          setError('Sessão expirada. Faça login novamente.');
+          setError("Sessão expirada. Faça login novamente.");
         } else {
-          setError('Erro ao carregar perfil. Tente novamente.');
+          setError("Erro ao carregar perfil. Tente novamente.");
         }
       } finally {
         setLoading(false);
@@ -64,9 +73,9 @@ export default function DadosMilitar() {
         <div className={styles.perfilCard}>
           <div className={styles.errorContainer}>
             <p className={styles.errorMessage}>{error}</p>
-            <button 
+            <button
               className={styles.loginButton}
-              onClick={() => window.location.href = '/login'}
+              onClick={() => (window.location.href = "/login")}
             >
               Fazer login
             </button>
@@ -87,13 +96,13 @@ export default function DadosMilitar() {
         <div className={styles.perfilContent}>
           <div className={styles.perfilPhotoSection}>
             <div className={styles.photoContainer}>
-              <img 
-                src={userData?.foto || '/default-avatar.png'} 
+              <img
+                src={userData?.foto || "/default-avatar.png"}
                 alt="Foto do perfil"
                 className={styles.profilePhoto}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = '/default-avatar.png';
+                  target.src = "/default-avatar.png";
                 }}
               />
               <div className={styles.photoOverlay}>
@@ -101,8 +110,12 @@ export default function DadosMilitar() {
               </div>
             </div>
             <div className={styles.userStatus}>
-              <div className={`${styles.statusBadge} ${userData?.role === 1 ? styles.admin : styles.military}`}>
-                {userData?.role === 1 ? 'Administrador' : 'Militar'}
+              <div
+                className={`${styles.statusBadge} ${
+                  userData?.role === 1 ? styles.admin : styles.military
+                }`}
+              >
+                {userData?.role === 1 ? "Administrador" : "Militar"}
               </div>
             </div>
           </div>
@@ -115,7 +128,7 @@ export default function DadosMilitar() {
                   Nome
                 </label>
                 <div className={styles.infoValue}>
-                  {userData?.nome || 'Não informado'}
+                  {userData?.nome || "Não informado"}
                 </div>
               </div>
 
@@ -125,7 +138,7 @@ export default function DadosMilitar() {
                   Sobrenome
                 </label>
                 <div className={styles.infoValue}>
-                  {userData?.sobreNome || 'Não informado'}
+                  {userData?.sobreNome || "Não informado"}
                 </div>
               </div>
             </div>
@@ -137,7 +150,7 @@ export default function DadosMilitar() {
                   Email
                 </label>
                 <div className={styles.infoValue}>
-                  {userData?.email || 'Não informado'}
+                  {userData?.email || "Não informado"}
                 </div>
               </div>
             </div>
@@ -149,7 +162,7 @@ export default function DadosMilitar() {
                   NIP
                 </label>
                 <div className={styles.infoValue}>
-                  {userData?.militarInfo?.nip || 'Não informado'}
+                  {userData?.militarInfo?.nip || "Não informado"}
                 </div>
               </div>
 
@@ -159,7 +172,7 @@ export default function DadosMilitar() {
                   Telefone
                 </label>
                 <div className={styles.infoValue}>
-                  {userData?.militarInfo?.telefone || 'Não informado'}
+                  {userData?.militarInfo?.telefone || "Não informado"}
                 </div>
               </div>
             </div>
@@ -171,8 +184,11 @@ export default function DadosMilitar() {
                   Função
                 </label>
                 <div className={styles.infoValue}>
-                  {userData?.role === 1 ? 'Administrador' : 
-                   userData?.role === 2 ? 'Militar' : 'Não definido'}
+                  {userData?.role === 1
+                    ? "Administrador"
+                    : userData?.role === 2
+                    ? "Militar"
+                    : "Não definido"}
                 </div>
               </div>
 
@@ -182,7 +198,11 @@ export default function DadosMilitar() {
                   Data de Registro
                 </label>
                 <div className={styles.infoValue}>
-                  {userData?.dataRegistro ? new Date(userData.dataRegistro).toLocaleDateString('pt-BR') : 'Não informado'}
+                  {userData?.dataRegistro
+                    ? new Date(userData.dataRegistro).toLocaleDateString(
+                        "pt-BR"
+                      )
+                    : "Não informado"}
                 </div>
               </div>
             </div>

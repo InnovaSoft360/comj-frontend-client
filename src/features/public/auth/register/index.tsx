@@ -1,11 +1,10 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import api from "../../../../core/api";
+import api from "../../../../app/api";
 import Logo from "../../../../assets/logo/logo.png";
 import styles from "./style.module.css";
 
 export default function RegisterMilitar() {
-  
   const nomeRef = useRef<HTMLInputElement>(null);
   const sobreNomeRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -13,9 +12,8 @@ export default function RegisterMilitar() {
   const confirmarSenhaRef = useRef<HTMLInputElement>(null);
   const nipRef = useRef<HTMLInputElement>(null);
   const telefoneRef = useRef<HTMLInputElement>(null);
-  
-  const [isLoading, setIsLoading] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -51,7 +49,6 @@ export default function RegisterMilitar() {
       formData.append("militarInfo[nip]", nipRef.current.value);
       formData.append("militarInfo[telefone]", telefoneRef.current.value);
 
-
       await api.post("/v1/Auth/RegisterMilitar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -71,31 +68,37 @@ export default function RegisterMilitar() {
     <div className={styles.registerContainer}>
       <div className={styles.registerBox}>
         <div className={styles.logoTop}>
-          <img src={Logo} alt="Logo Condomínio Osvaldo MJ" className={styles.logo} />
+          <img
+            src={Logo}
+            alt="Logo Condomínio Osvaldo MJ"
+            className={styles.logo}
+          />
         </div>
-        
+
         <div className={styles.formContainer}>
           <h1 className={styles.title}>Cadastro Militar</h1>
-          <p className={styles.subtitle}>Preencha seus dados para criar sua conta</p>
+          <p className={styles.subtitle}>
+            Preencha seus dados para criar sua conta
+          </p>
 
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <input 
-                  type="text" 
-                  placeholder="Nome" 
-                  ref={nomeRef} 
-                  required 
+                <input
+                  type="text"
+                  placeholder="Nome"
+                  ref={nomeRef}
+                  required
                   className={styles.input}
                   disabled={isLoading}
                 />
               </div>
               <div className={styles.formGroup}>
-                <input 
-                  type="text" 
-                  placeholder="Sobrenome" 
-                  ref={sobreNomeRef} 
-                  required 
+                <input
+                  type="text"
+                  placeholder="Sobrenome"
+                  ref={sobreNomeRef}
+                  required
                   className={styles.input}
                   disabled={isLoading}
                 />
@@ -103,11 +106,11 @@ export default function RegisterMilitar() {
             </div>
 
             <div className={styles.formGroup}>
-              <input 
-                type="email" 
-                placeholder="E-mail" 
-                ref={emailRef} 
-                required 
+              <input
+                type="email"
+                placeholder="E-mail"
+                ref={emailRef}
+                required
                 className={styles.input}
                 disabled={isLoading}
               />
@@ -115,54 +118,55 @@ export default function RegisterMilitar() {
 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <input 
-                  type="text" 
-                  placeholder="NIP" 
-                  ref={nipRef} 
-                  required 
+                <input
+                  type="text"
+                  placeholder="NIP"
+                  ref={nipRef}
+                  required
                   className={styles.input}
                   disabled={isLoading}
                 />
               </div>
               <div className={styles.formGroup}>
-                <input 
-                  type="tel" 
-                  placeholder="Telefone" 
-                  ref={telefoneRef} 
-                  required 
+                <input
+                  type="tel"
+                  placeholder="Telefone"
+                  ref={telefoneRef}
+                  required
                   className={styles.input}
                   disabled={isLoading}
                 />
               </div>
             </div>
-
 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <input 
-                  type="password" 
-                  placeholder="Senha" 
-                  ref={senhaRef} 
-                  required 
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  ref={senhaRef}
+                  required
                   className={styles.input}
                   disabled={isLoading}
                 />
               </div>
               <div className={styles.formGroup}>
-                <input 
-                  type="password" 
-                  placeholder="Confirmar Senha" 
-                  ref={confirmarSenhaRef} 
-                  required 
+                <input
+                  type="password"
+                  placeholder="Confirmar Senha"
+                  ref={confirmarSenhaRef}
+                  required
                   className={styles.input}
                   disabled={isLoading}
                 />
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              className={`${styles.registerBtn} ${isLoading ? styles.loading : ''}`} 
+            <button
+              type="submit"
+              className={`${styles.registerBtn} ${
+                isLoading ? styles.loading : ""
+              }`}
               disabled={isLoading}
             >
               {isLoading ? "Cadastrando..." : "Criar Conta"}

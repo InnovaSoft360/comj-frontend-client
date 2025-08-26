@@ -1,6 +1,12 @@
 // contexts/AuthContext.tsx
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import api from '../core/api';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
+import api from "./api";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -14,7 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -54,7 +60,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, checkAuth, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, isLoading, checkAuth, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -4,6 +4,12 @@ import { motion, type Variants } from "framer-motion";
 import { FaArrowUp, FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 
 export default function Footer() {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
   const anoAtual = new Date().getFullYear();
 
   // Animação para os cards do footer - com tipo explicitamente definido
@@ -70,13 +76,13 @@ export default function Footer() {
               <div className={styles.underline}></div>
               <ul>
                 <li>
-                  <Link to="/" className={styles.navLink}>
+                  <Link to="/" className={styles.navLink} onClick={scrollToTop}>
                     <span className={styles.linkIcon}>→</span> Início
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className={styles.navLink}>
-                    <span className={styles.linkIcon}>→</span> Informações
+                  <Link to="/etapas" className={styles.navLink} onClick={scrollToTop}>
+                    <span className={styles.linkIcon}>→</span> Etapas
                   </Link>
                 </li>
                 <li>
@@ -85,8 +91,8 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className={styles.navLink}>
-                    <span className={styles.linkIcon}>→</span> Contato
+                  <Link to="/politicaPrivacidade" className={styles.navLink} onClick={scrollToTop}>
+                    <span className={styles.linkIcon}>→</span> Política de Privacidade
                   </Link>
                 </li>
               </ul>
@@ -115,7 +121,7 @@ export default function Footer() {
               © {anoAtual} Condomínio Osvaldo MJ. Todos os direitos reservados.
             </p>
             <div className={styles.footerLinks}>
-              <Link to="/politicaPrivacidade">Política de Privacidade</Link>
+              <a href="/" target="_blank" rel="noopener noreferrer">Develop by: innovaSoft360</a>
             </div>
           </div>
         </div>
