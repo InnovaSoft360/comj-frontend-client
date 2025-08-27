@@ -79,7 +79,7 @@ export default function Sidebar({
                 className={styles.submenuItem} 
                 onClick={() => navigateToContent('listar-usuarios')}
               >
-                Listar Usuários
+                Tabela de Usuários
               </li>
               <li 
                 className={styles.submenuItem}
@@ -114,25 +114,19 @@ export default function Sidebar({
                 className={styles.submenuItem}
                 onClick={() => navigateToContent('todas-candidaturas')}
               >
-                Todas Candidaturas
-              </li>
-              <li 
-                className={styles.submenuItem}
-                onClick={() => navigateToContent('pendentes')}
-              >
-                Pendentes
+                Visão Geral
               </li>
               <li 
                 className={styles.submenuItem}
                 onClick={() => navigateToContent('aprovadas')}
               >
-                Aprovadas
+                Tabela
               </li>
               <li 
                 className={styles.submenuItem}
                 onClick={() => navigateToContent('arquivadas')}
               >
-                Arquivadas
+                Avaliação
               </li>
             </ul>
           )}
