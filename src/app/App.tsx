@@ -29,40 +29,16 @@ function App() {
           <Route path="/galeria/imagem" element={<GaleriaImagem />} />
 
           {/* Rotas PROTEGIDAS - Perfil */}
-          <Route path="/perfil/dados" element={
-            <ProtectedRoute>
-              <DadosMilitar />
-            </ProtectedRoute>
-          } />
-          <Route path="/perfil/editar" element={
-            <ProtectedRoute>
-              <EditarMilitar />
-            </ProtectedRoute>
-          } />
-          <Route path="/perfil/senha" element={
-            <ProtectedRoute>
-              <SenhaMilitar />
-            </ProtectedRoute>
-          } />
+          <Route path="/perfil/dados" element={<ProtectedRoute><DadosMilitar /></ProtectedRoute>} />
+          <Route path="/perfil/editar" element={<ProtectedRoute><EditarMilitar /></ProtectedRoute>} />
+          <Route path="/perfil/senha" element={<ProtectedRoute><SenhaMilitar /></ProtectedRoute>} />
 
           {/* Rotas PROTEGIDAS - Candidatura */}
-          <Route path="/candidatura/estado" element={
-            <ProtectedRoute>
-              <Estado />
-            </ProtectedRoute>
-          } />
-          <Route path="/candidaturas/formulario" element={
-            <ProtectedRoute>
-              <Candidaturas />
-            </ProtectedRoute>
-          } />
+          <Route path="/candidatura/estado" element={<ProtectedRoute><Estado /></ProtectedRoute>} />
+          <Route path="/candidaturas/formulario" element={<ProtectedRoute><Candidaturas /></ProtectedRoute>} />
 
           {/* Rotas PROTEGIDAS Dashboard */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
           {/* Redirect non-existent routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
