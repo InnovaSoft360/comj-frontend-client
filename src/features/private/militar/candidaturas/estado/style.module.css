@@ -1,0 +1,254 @@
+.estadoSection {
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+}
+
+/* Card principal */
+.card {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.6s ease-out;
+  background: white;
+  position: relative;
+}
+
+.cardVisible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Cores baseadas no status */
+.statusPendente {
+  border-top: 4px solid #ff9800;
+}
+
+.statusPendente .statusBadge {
+  background: linear-gradient(135deg, #ff9800, #ff5722);
+}
+
+.statusEmAnalise {
+  border-top: 4px solid #2196f3;
+}
+
+.statusEmAnalise .statusBadge {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+}
+
+.statusAprovado {
+  border-top: 4px solid #4caf50;
+}
+
+.statusAprovado .statusBadge {
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+}
+
+.statusAprovado .waveEffect {
+  background: linear-gradient(90deg, 
+    rgba(76, 175, 80, 0.1), 
+    rgba(76, 175, 80, 0.2), 
+    rgba(76, 175, 80, 0.1));
+  animation: waveAnimation 2s infinite linear;
+}
+
+.statusReprovado {
+  border-top: 4px solid #d61c1cf3;
+}
+
+.statusReprovado .statusBadge {
+  background: linear-gradient(135deg, #d61c1cf3, #b71c1c);
+}
+
+/* Cabeçalho do card */
+.cardHeader {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.cardHeader h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.statusBadge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Corpo do card */
+.cardBody {
+  padding: 2rem;
+}
+
+.statusMessage {
+  margin-bottom: 1.5rem;
+}
+
+.statusMessage p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.diasRestantes {
+  text-align: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.diasRestantes h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.diasCount {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #f88737;
+  margin: 1rem 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.diasRestantes p {
+  margin: 1rem 0 0 0;
+  color: #666;
+  font-style: italic;
+}
+
+.comentarioSection {
+  margin: 2rem 0;
+}
+
+.comentarioSection h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.comentarioBox {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #6c757d;
+}
+
+.comentarioBox p {
+  margin: 0;
+  line-height: 1.6;
+  color: #495057;
+}
+
+.dataCandidatura {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.dataCandidatura p {
+  margin: 0;
+  color: #6c757d;
+}
+
+/* Rodapé com efeito de onda */
+.cardFooter {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+}
+
+.waveEffect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+}
+
+/* Animações */
+@keyframes waveAnimation {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Estados de loading e erro */
+.loading, .errorCard, .noCandidatura {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #f88737;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorCard {
+  border-top: 4px solid #d61c1cf3;
+}
+
+.noCandidatura {
+  border-top: 4px solid #2196f3;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .estadoSection {
+    padding: 1rem;
+  }
+  
+  .cardHeader {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .cardBody {
+    padding: 1.5rem;
+  }
+  
+  .diasCount {
+    font-size: 2.5rem;
+  }
+}

@@ -7,11 +7,15 @@ import {
   FaSpinner,
   FaCog,
   FaCalendar,
+  FaCheck,
+  FaTimes
 } from "react-icons/fa";
 import api from "../../../../../app/api";
 import styles from "./style.module.css";
+import { useAlert } from "../../../../../components/ui/customAlert"; 
 
 export default function EditarMilitar() {
+  const { showAlert, AlertContainer } = useAlert();
   //#region Refs
   const nomeRef = useRef<HTMLInputElement>(null);
   const sobreNomeRef = useRef<HTMLInputElement>(null);
@@ -23,6 +27,7 @@ export default function EditarMilitar() {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [loadingData, setLoadingData] = useState(true);
+  const [telefoneValido, setTelefoneValido] = useState(true);
   //#endregion
 
   //#region Fetch User Data
@@ -33,7 +38,7 @@ export default function EditarMilitar() {
         setUserData(response.data.data);
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error);
-        alert("Erro ao carregar dados do usuário");
+        showAlert("Erro ao carregar dados do usuário", "error");
       } finally {
         setLoadingData(false);
       }
@@ -41,6 +46,42 @@ export default function EditarMilitar() {
 
     fetchCurrentUser();
   }, []);
+  //#endregion
+
+  //#region Função para validar telefone (9 dígitos, começando com 9)
+  const validateTelefone = (telefone: string): boolean => {
+    const telefoneRegex = /^9\d{8}$/;
+    return telefoneRegex.test(telefone.replace(/\D/g, ''));
+  };
+
+  // Função para formatar telefone enquanto digita
+  const formatTelefone = (value: string): string => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 9) {
+      return numbers.replace(/(\d{1})(\d{4})(\d{4})/, '$1 $2 $3');
+    }
+    return numbers.slice(0, 9).replace(/(\d{1})(\d{4})(\d{4})/, '$1 $2 $3');
+  };
+
+  // Handler para input do telefone
+  const handleTelefoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    
+    // Garantir que começa com 9
+    if (value.length > 0 && value[0] !== '9') {
+      value = '9' + value;
+    }
+    
+    // Limitar a 9 dígitos
+    value = value.slice(0, 9);
+    
+    // Formatar visualmente
+    e.target.value = formatTelefone(value);
+    
+    // Validar telefone
+    const isValid = validateTelefone(value);
+    setTelefoneValido(isValid);
+  };
   //#endregion
 
   //#region Method Put - Update User
@@ -54,7 +95,23 @@ export default function EditarMilitar() {
       !emailRef.current?.value ||
       !telefoneRef.current?.value
     ) {
-      alert("Preencha todos os campos obrigatórios!");
+      showAlert("Preencha todos os campos obrigatórios!", "info");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validar telefone
+    const telefoneNumeros = telefoneRef.current.value.replace(/\D/g, '');
+    if (!validateTelefone(telefoneNumeros)) {
+      showAlert("Telefone deve ter 9 dígitos e começar com 9!", "warning");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailRef.current.value)) {
+      showAlert("Por favor, insira um email válido!", "warning");
       setIsLoading(false);
       return;
     }
@@ -68,26 +125,28 @@ export default function EditarMilitar() {
         role: userData.role,
         militarInfo: {
           nip: userData.militarInfo.nip,
-          telefone: telefoneRef.current.value,
+          telefone: telefoneNumeros,
         },
       };
 
       const response = await api.put("/v1/Usuarios/UpdateMilitar", updateData);
 
       if (response.data.code === 204) {
-        alert("Perfil atualizado com sucesso!");
+        showAlert("Perfil atualizado com sucesso!", "success");
         // Recarregar os dados atualizados
         const userResponse = await api.get("/v1/Usuarios/GetCurrentUser");
         setUserData(userResponse.data.data);
       } else {
-        alert("Erro ao atualizar perfil.");
+        showAlert("Erro ao atualizar perfil.", "error");
       }
     } catch (error: any) {
       console.error(error);
       if (error.response?.status === 400) {
-        alert("Dados inválidos!");
+        showAlert("Dados inválidos!", "error");
+      } else if (error.response?.status === 409) {
+        showAlert("Email já está em uso!", "error");
       } else {
-        alert("Erro ao atualizar perfil.");
+        showAlert("Erro ao atualizar perfil.", "error");
       }
     } finally {
       setIsLoading(false);
@@ -120,6 +179,7 @@ export default function EditarMilitar() {
 
   return (
     <section className={styles.perfilSection}>
+      <AlertContainer />
       <div className={styles.main}>
         <h2 className={styles.title}>Editar Perfil</h2>
 
@@ -178,14 +238,30 @@ export default function EditarMilitar() {
               <FaPhone className={styles.infoIcon} />
               Telefone
             </label>
-            <input
-              type="tel"
-              id="telefone"
-              ref={telefoneRef}
-              defaultValue={userData.militarInfo?.telefone || ""}
-              className={styles.input}
-              required
-            />
+            <div className={styles.inputContainer}>
+              <input
+                type="tel"
+                id="telefone"
+                ref={telefoneRef}
+                defaultValue={userData.militarInfo?.telefone ? 
+                  formatTelefone(userData.militarInfo.telefone) : ""}
+                className={`${styles.input} ${!telefoneValido ? styles.inputError : ''}`}
+                required
+                onInput={handleTelefoneInput}
+                maxLength={11} // 9 + 2 espaços
+              />
+              {telefoneRef.current?.value && (
+                <span className={styles.validationIcon}>
+                  {telefoneValido ? <FaCheck className={styles.valid} /> : <FaTimes className={styles.invalid} />}
+                </span>
+              )}
+            </div>
+            {telefoneRef.current?.value && !telefoneValido && (
+              <div className={styles.validationMessage}>
+                <FaTimes className={styles.invalid} />
+                <span>Telefone deve ter 9 dígitos e começar com 9</span>
+              </div>
+            )}
           </div>
 
           {/* Campos somente leitura */}
@@ -239,9 +315,16 @@ export default function EditarMilitar() {
           <button
             type="submit"
             className={styles.submitButton}
-            disabled={isLoading}
+            disabled={isLoading || !telefoneValido}
           >
-            {isLoading ? "Atualizando..." : "Atualizar Perfil"}
+            {isLoading ? (
+              <>
+                <FaSpinner className={styles.spinner} />
+                Atualizando...
+              </>
+            ) : (
+              "Atualizar Perfil"
+            )}
           </button>
         </form>
       </div>

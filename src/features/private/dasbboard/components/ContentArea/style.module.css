@@ -1,0 +1,18 @@
+/* ContentArea.module.css */
+
+.contentArea {
+  padding: 2rem;
+  flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+  .contentArea {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .contentArea {
+    padding: 1rem;
+  }
+}

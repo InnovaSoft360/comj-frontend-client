@@ -3,18 +3,18 @@ import {
   FaUpload,
   FaEye,
   FaTrash,
-  FaCheckCircle,
   FaSpinner,
   FaFilePdf,
-  FaFileImage,
   FaPercentage,
+  FaExclamationTriangle,
 } from "react-icons/fa";
-import api from "../../../../../app/api";
+import api from "@/app/api";
 import styles from "./style.module.css";
+import { useAlert } from "@/components/ui/customAlert"; 
 
 export default function Candidaturas() {
+  const { showAlert, AlertContainer } = useAlert();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [militarId, setMilitarId] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [fileNames, setFileNames] = useState({
@@ -23,8 +23,14 @@ export default function Candidaturas() {
     compBancaria: "",
     ultRecibo: "",
   });
+  const [fileErrors, setFileErrors] = useState({
+    bi: "",
+    declRemuneracao: "",
+    compBancaria: "",
+    ultRecibo: "",
+  });
 
-  // Refs para os arquivos - corrigido para não incluir null
+  // Refs para os arquivos
   const biRef = useRef<HTMLInputElement>(null);
   const declRemuneracaoRef = useRef<HTMLInputElement>(null);
   const compBancariaRef = useRef<HTMLInputElement>(null);
@@ -49,22 +55,83 @@ export default function Candidaturas() {
   // Atualizar progresso quando arquivos forem selecionados/removidos
   useEffect(() => {
     let filled = 0;
-    if (fileNames.bi) filled++;
-    if (fileNames.declRemuneracao) filled++;
-    if (fileNames.compBancaria) filled++;
-    if (fileNames.ultRecibo) filled++;
+    if (fileNames.bi && !fileErrors.bi) filled++;
+    if (fileNames.declRemuneracao && !fileErrors.declRemuneracao) filled++;
+    if (fileNames.compBancaria && !fileErrors.compBancaria) filled++;
+    if (fileNames.ultRecibo && !fileErrors.ultRecibo) filled++;
 
     setProgress((filled / 4) * 100);
-  }, [fileNames]);
+  }, [fileNames, fileErrors]);
+
+  // Validar se o arquivo é PDF
+  const validatePDF = (file: File): boolean => {
+    return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  };
 
   const handleFileChange = (
     field: keyof typeof fileNames,
     file: File | null
   ) => {
-    setFileNames((prev) => ({
-      ...prev,
-      [field]: file ? file.name : "",
-    }));
+    if (file) {
+      if (!validatePDF(file)) {
+        setFileErrors((prev) => ({
+          ...prev,
+          [field]: "Apenas arquivos PDF são permitidos"
+        }));
+        setFileNames((prev) => ({
+          ...prev,
+          [field]: ""
+        }));
+        
+        // Limpar o input file
+        const ref = getFileInputRef(field);
+        if (ref?.current) {
+          ref.current.value = "";
+        }
+        
+        showAlert("Apenas arquivos PDF são permitidos!", "warning");
+        return;
+      }
+
+      // Validar tamanho do arquivo (opcional: máximo 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setFileErrors((prev) => ({
+          ...prev,
+          [field]: "O arquivo não pode exceder 10MB"
+        }));
+        setFileNames((prev) => ({
+          ...prev,
+          [field]: ""
+        }));
+        
+        const ref = getFileInputRef(field);
+        if (ref?.current) {
+          ref.current.value = "";
+        }
+        
+        showAlert("O arquivo não pode exceder 10MB!", "warning");
+        return;
+      }
+
+      // Arquivo válido
+      setFileErrors((prev) => ({
+        ...prev,
+        [field]: ""
+      }));
+      setFileNames((prev) => ({
+        ...prev,
+        [field]: file.name
+      }));
+    } else {
+      setFileNames((prev) => ({
+        ...prev,
+        [field]: ""
+      }));
+      setFileErrors((prev) => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
   };
 
   const handleRemoveFile = (field: keyof typeof fileNames) => {
@@ -72,6 +139,10 @@ export default function Candidaturas() {
     if (ref?.current) {
       ref.current.value = "";
       setFileNames((prev) => ({
+        ...prev,
+        [field]: "",
+      }));
+      setFileErrors((prev) => ({
         ...prev,
         [field]: "",
       }));
@@ -102,22 +173,24 @@ export default function Candidaturas() {
     }
   };
 
-  const getFileIcon = (fileName: string) => {
-    if (fileName.toLowerCase().endsWith(".pdf")) {
-      return <FaFilePdf className={styles.fileIconPdf} />;
-    }
-    return <FaFileImage className={styles.fileIconImage} />;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     // Verificar se temos o ID do militar
     if (!militarId) {
-      alert(
-        "Erro: Não foi possível identificar o militar. Faça login novamente."
+      showAlert(
+        "Erro: Não foi possível identificar o militar. Faça login novamente.",
+        "info"
       );
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Verificar se há erros nos arquivos
+    const hasErrors = Object.values(fileErrors).some(error => error !== "");
+    if (hasErrors) {
+      showAlert("Corrija os erros nos arquivos antes de enviar.", "warning");
       setIsSubmitting(false);
       return;
     }
@@ -129,7 +202,7 @@ export default function Candidaturas() {
       !compBancariaRef.current?.files?.[0] ||
       !ultReciboRef.current?.files?.[0]
     ) {
-      alert("Por favor, selecione todos os documentos obrigatórios.");
+      showAlert("Por favor, selecione todos os documentos obrigatórios.", "info");
       setIsSubmitting(false);
       return;
     }
@@ -161,10 +234,16 @@ export default function Candidaturas() {
       });
 
       if (response.status === 200) {
-        setSuccessMessage("Candidatura submetida com sucesso!");
+        showAlert("Candidatura submetida com sucesso!", "success");
 
         // Limpar os arquivos
         setFileNames({
+          bi: "",
+          declRemuneracao: "",
+          compBancaria: "",
+          ultRecibo: "",
+        });
+        setFileErrors({
           bi: "",
           declRemuneracao: "",
           compBancaria: "",
@@ -175,9 +254,22 @@ export default function Candidaturas() {
         if (compBancariaRef.current) compBancariaRef.current.value = "";
         if (ultReciboRef.current) ultReciboRef.current.value = "";
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao enviar candidatura:", error);
-      alert("Erro ao enviar candidatura. Tente novamente.");
+      
+      // Capturar a mensagem específica da API
+      let errorMessage = "Erro ao enviar candidatura. Tente novamente.";
+      
+      if (error.response?.data?.message) {
+        // Usar a mensagem específica da API
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 500) {
+        errorMessage = "Erro interno do servidor. Tente novamente mais tarde.";
+      } else if (error.request) {
+        errorMessage = "Erro de conexão. Verifique sua internet.";
+      }
+
+      showAlert(errorMessage, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -196,11 +288,12 @@ export default function Candidaturas() {
 
   return (
     <section className={styles.candidaturaSection}>
+      <AlertContainer />
       <div className={styles.main}>
         <div className={styles.header}>
           <h1 className={styles.title}>Candidatura</h1>
           <p className={styles.subtitle}>
-            Faça upload dos documentos necessários
+            Faça upload dos documentos necessários (apenas PDF)
           </p>
         </div>
 
@@ -219,13 +312,6 @@ export default function Candidaturas() {
           <div className={styles.progressText}>{progress}% completo</div>
         </div>
 
-        {successMessage && (
-          <div className={styles.successMessage}>
-            <FaCheckCircle className={styles.successIcon} />
-            {successMessage}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className={styles.form}>
           {/* Cópia do BI */}
           <div className={styles.formGroup}>
@@ -237,7 +323,7 @@ export default function Candidaturas() {
               <input
                 type="file"
                 ref={biRef}
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept=".pdf,application/pdf"
                 required
                 onChange={(e) =>
                   handleFileChange("bi", e.target.files?.[0] || null)
@@ -246,12 +332,18 @@ export default function Candidaturas() {
                 id="bi"
               />
               <label htmlFor="bi" className={styles.fileInputLabel}>
-                Selecionar arquivo
+                Selecionar PDF
               </label>
             </div>
-            {fileNames.bi && (
+            {fileErrors.bi && (
+              <div className={styles.errorMessage}>
+                <FaExclamationTriangle />
+                {fileErrors.bi}
+              </div>
+            )}
+            {fileNames.bi && !fileErrors.bi && (
               <div className={styles.fileInfo}>
-                {getFileIcon(fileNames.bi)}
+                <FaFilePdf className={styles.fileIconPdf} />
                 <span className={styles.fileName}>{fileNames.bi}</span>
                 <div className={styles.fileActions}>
                   <button
@@ -283,7 +375,7 @@ export default function Candidaturas() {
               <input
                 type="file"
                 ref={declRemuneracaoRef}
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept=".pdf,application/pdf"
                 required
                 onChange={(e) =>
                   handleFileChange(
@@ -298,12 +390,18 @@ export default function Candidaturas() {
                 htmlFor="declRemuneracao"
                 className={styles.fileInputLabel}
               >
-                Selecionar arquivo
+                Selecionar PDF
               </label>
             </div>
-            {fileNames.declRemuneracao && (
+            {fileErrors.declRemuneracao && (
+              <div className={styles.errorMessage}>
+                <FaExclamationTriangle />
+                {fileErrors.declRemuneracao}
+              </div>
+            )}
+            {fileNames.declRemuneracao && !fileErrors.declRemuneracao && (
               <div className={styles.fileInfo}>
-                {getFileIcon(fileNames.declRemuneracao)}
+                <FaFilePdf className={styles.fileIconPdf} />
                 <span className={styles.fileName}>
                   {fileNames.declRemuneracao}
                 </span>
@@ -337,7 +435,7 @@ export default function Candidaturas() {
               <input
                 type="file"
                 ref={compBancariaRef}
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept=".pdf,application/pdf"
                 required
                 onChange={(e) =>
                   handleFileChange("compBancaria", e.target.files?.[0] || null)
@@ -346,12 +444,18 @@ export default function Candidaturas() {
                 id="compBancaria"
               />
               <label htmlFor="compBancaria" className={styles.fileInputLabel}>
-                Selecionar arquivo
+                Selecionar PDF
               </label>
             </div>
-            {fileNames.compBancaria && (
+            {fileErrors.compBancaria && (
+              <div className={styles.errorMessage}>
+                <FaExclamationTriangle />
+                {fileErrors.compBancaria}
+              </div>
+            )}
+            {fileNames.compBancaria && !fileErrors.compBancaria && (
               <div className={styles.fileInfo}>
-                {getFileIcon(fileNames.compBancaria)}
+                <FaFilePdf className={styles.fileIconPdf} />
                 <span className={styles.fileName}>
                   {fileNames.compBancaria}
                 </span>
@@ -385,7 +489,7 @@ export default function Candidaturas() {
               <input
                 type="file"
                 ref={ultReciboRef}
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept=".pdf,application/pdf"
                 required
                 onChange={(e) =>
                   handleFileChange("ultRecibo", e.target.files?.[0] || null)
@@ -394,12 +498,18 @@ export default function Candidaturas() {
                 id="ultRecibo"
               />
               <label htmlFor="ultRecibo" className={styles.fileInputLabel}>
-                Selecionar arquivo
+                Selecionar PDF
               </label>
             </div>
-            {fileNames.ultRecibo && (
+            {fileErrors.ultRecibo && (
+              <div className={styles.errorMessage}>
+                <FaExclamationTriangle />
+                {fileErrors.ultRecibo}
+              </div>
+            )}
+            {fileNames.ultRecibo && !fileErrors.ultRecibo && (
               <div className={styles.fileInfo}>
-                {getFileIcon(fileNames.ultRecibo)}
+                <FaFilePdf className={styles.fileIconPdf} />
                 <span className={styles.fileName}>{fileNames.ultRecibo}</span>
                 <div className={styles.fileActions}>
                   <button
