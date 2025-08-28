@@ -67,7 +67,7 @@
 .tabela {
   width: 100%;
   border-collapse: collapse;
-  min-width: 800px;
+  min-width: 600px;
 }
 
 .tabela th,
@@ -87,50 +87,21 @@
   background-color: #f9f9f9;
 }
 
-.infoMilitar {
-  display: flex;
-  flex-direction: column;
-}
-
-.nomeMilitar {
-  font-weight: 500;
-}
-
-.emailMilitar {
-  font-size: 12px;
-  color: #666;
-}
-
-.status {
+.role {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
 }
 
-.statusPendente {
-  background-color: #fff3cd;
-  color: #856404;
+.admin {
+  background-color: #f88737;
+  color: white;
 }
 
-.statusAprovado {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.statusReprovado {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.statusEmAnalise {
-  background-color: #d1ecf1;
-  color: #0c5460;
-}
-
-.statusDesconhecido {
-  background-color: #e2e3e5;
-  color: #383d41;
+.militar {
+  background-color: #d61c1cf3;
+  color: white;
 }
 
 .acoes {
@@ -149,6 +120,15 @@
   transition: background-color 0.2s;
 }
 
+.btnDeletar {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.btnDeletar:hover {
+  background-color: #ffcdd2;
+}
+
 .btnDetalhes {
   background-color: #e3f2fd;
   color: #1976d2;
@@ -158,31 +138,13 @@
   background-color: #bbdefb;
 }
 
-.btnAprovar {
-  background-color: #d4edda;
-  color: #155724;
+.btnEditar {
+  background-color: #fbe9e7;
+  color: #f88737;
 }
 
-.btnAprovar:hover {
-  background-color: #c3e6cb;
-}
-
-.btnReprovar {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.btnReprovar:hover {
-  background-color: #f5c6cb;
-}
-
-.btnArquivar {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.btnArquivar:hover {
-  background-color: #ffeaa7;
+.btnEditar:hover {
+  background-color: #ffccbc;
 }
 
 .paginacao {
@@ -244,13 +206,6 @@
   color: #d32f2f;
 }
 
-.semDados {
-  text-align: center;
-  color: #666;
-  font-style: italic;
-  padding: 20px;
-}
-
 /* Responsividade */
 @media (max-width: 768px) {
   .container {
@@ -287,11 +242,6 @@
   .controlesPaginacao {
     justify-content: center;
   }
-  
-  .filtros {
-    flex-direction: column;
-    gap: 10px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -302,5 +252,10 @@
   
   .tabelaContainer {
     font-size: 12px;
+  }
+  
+  .filtros {
+    flex-direction: column;
+    gap: 10px;
   }
 }

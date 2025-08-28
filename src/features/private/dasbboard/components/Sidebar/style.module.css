@@ -1,12 +1,28 @@
 /* Sidebar.module.css */
 
+:root {
+  --sidebar-width: 280px;
+  --sidebar-collapsed: 70px;
+  --color-primary: #6366f1;
+  --color-primary-light: #818cf8;
+  --color-secondary: #06b6d4;
+  --color-darker: #0f172a;
+  --color-dark: #1e293b;
+  --color-white: #f8fafc;
+  --color-gray: #94a3b8;
+  --color-success: #10b981;
+  --transition-speed: 0.3s;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
 /* Sidebar Styles */
 .sidebar {
   width: var(--sidebar-width);
-  background: linear-gradient(180deg, var(--color-darker), #000);
+  background: linear-gradient(180deg, var(--color-darker) 0%, #020617 100%);
   color: var(--color-white);
   padding: 1.5rem 0;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -14,6 +30,7 @@
   overflow-x: hidden;
   position: fixed;
   height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .sidebar.collapsed {
@@ -22,7 +39,7 @@
 
 .logo {
   padding: 0 1.5rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
@@ -36,10 +53,11 @@
   font-size: 1.5rem;
   white-space: nowrap;
   transition: opacity var(--transition-speed);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: 0.5px;
 }
 
 .sidebar.collapsed .logo h2 {
@@ -50,7 +68,7 @@
 }
 
 .toggleButton {
-  background: none;
+  background: rgba(255, 255, 255, 0.05);
   border: none;
   color: var(--color-white);
   cursor: pointer;
@@ -59,12 +77,14 @@
   align-items: center;
   justify-content: center;
   padding: 0.5rem;
-  border-radius: 6px;
-  transition: background-color var(--transition-speed);
+  border-radius: 8px;
+  transition: all var(--transition-speed);
+  backdrop-filter: blur(10px);
 }
 
 .toggleButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  transform: rotate(90deg);
 }
 
 .mobileCloseButton {
@@ -76,6 +96,7 @@
   position: absolute;
   right: 1rem;
   top: 1rem;
+  z-index: 1001;
 }
 
 .menu {
@@ -93,24 +114,37 @@
   transition: all var(--transition-speed);
   position: relative;
   white-space: nowrap;
+  margin: 0.2rem 0.8rem;
+  border-radius: 8px;
 }
 
 .menuItem:hover, .menuHeader:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0) 100%);
+  transform: translateX(5px);
 }
 
-.menuItem.active {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-left: 4px solid var(--color-primary);
+.menuItem.active, .menuHeader.activeParent {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0) 100%);
+  border-left: 3px solid var(--color-primary);
 }
 
 .menuIcon {
   margin-right: 0.8rem;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   display: flex;
   align-items: center;
   min-width: 24px;
   transition: margin var(--transition-speed);
+  color: var(--color-gray);
+}
+
+.menuItem.active .menuIcon,
+.menuHeader.activeParent .menuIcon {
+  color: var(--color-primary-light);
+}
+
+.menuItem:hover .menuIcon,
+.menuHeader:hover .menuIcon {
   color: var(--color-white);
 }
 
@@ -122,6 +156,7 @@
   flex-grow: 1;
   font-weight: 500;
   transition: opacity var(--transition-speed);
+  font-size: 0.95rem;
 }
 
 .sidebar.collapsed .menuText {
@@ -133,10 +168,13 @@
 
 .arrow {
   transition: transform var(--transition-speed);
+  color: var(--color-gray);
+  font-size: 0.9rem;
 }
 
 .menuHeader.open .arrow {
   transform: rotate(180deg);
+  color: var(--color-white);
 }
 
 .sidebar.collapsed .arrow {
@@ -149,11 +187,14 @@
 
 .submenu {
   list-style: none;
-  padding: 0;
-  margin: 0;
-  background-color: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem 0;
+  margin: 0 0.8rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 8px;
   overflow: hidden;
   transition: max-height var(--transition-speed);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .sidebar.collapsed .submenu {
@@ -161,40 +202,112 @@
 }
 
 .submenuItem {
-  padding: 0.8rem 1.5rem 0.8rem 3.5rem;
+  padding: 0.8rem 1rem 0.8rem 3.2rem;
   cursor: pointer;
-  transition: background-color var(--transition-speed);
+  transition: all var(--transition-speed);
   font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  color: var(--color-gray);
+  position: relative;
 }
 
 .submenuItem:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.submenuItem.active {
+  color: var(--color-primary-light);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0) 100%);
+}
+
+.submenuIcon {
+  margin-right: 0.7rem;
+  font-size: 1rem;
+  position: absolute;
+  left: 1.2rem;
 }
 
 /* Tooltip para itens do menu quando collapsed */
 .tooltip {
   position: absolute;
-  left: 100%;
+  left: calc(100% + 15px);
   top: 50%;
   transform: translateY(-50%);
-  background-color: var(--color-darker);
+  background-color: var(--color-dark);
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--transition-speed), visibility var(--transition-speed);
+  transition: all var(--transition-speed);
   z-index: 1000;
   pointer-events: none;
   box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar.collapsed .menuItem:hover .tooltip,
 .sidebar.collapsed .menuHeader:hover .tooltip {
   opacity: 1;
   visibility: visible;
+  left: calc(100% + 10px);
+}
+
+/* Estilo especial para o item de logout */
+.logoutItem {
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1rem;
+  margin: 1rem 0.8rem 0;
+}
+
+.logoutItem .menuIcon {
+  color: #f87171;
+}
+
+.logoutItem:hover .menuIcon {
+  color: #fca5a5;
+}
+
+/* Footer com status e versão */
+.footer {
+  padding: 1rem 1.5rem 0;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-gray);
+}
+
+.statusIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+  margin-right: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.version {
+  font-size: 0.75rem;
+  color: var(--color-gray);
+  opacity: 0.7;
 }
 
 /* Responsividade */
@@ -207,6 +320,7 @@
   .sidebar:not(.collapsed) {
     width: var(--sidebar-width);
   }
+  
   .toggleButton {
     display: none;
   }
@@ -238,12 +352,14 @@
   .menuItem, .menuHeader {
     justify-content: center;
     padding: 1.2rem 0;
+    margin: 0.2rem 0.5rem;
   }
   
   .sidebar:not(.collapsed) .menuItem,
   .sidebar:not(.collapsed) .menuHeader {
     justify-content: flex-start;
     padding: 1rem 1.5rem;
+    margin: 0.2rem 0.8rem;
   }
   
   .submenuItem {
@@ -253,7 +369,7 @@
   
   .sidebar:not(.collapsed) .submenuItem {
     text-align: left;
-    padding: 0.8rem 1.5rem 0.8rem 3.5rem;
+    padding: 0.8rem 1rem 0.8rem 3.2rem;
   }
 }
 
@@ -266,9 +382,14 @@
   
   .sidebar.mobileOpen {
     transform: translateX(0);
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
   }
   
   .mobileCloseButton {
     display: block;
+  }
+  
+  .footer {
+    display: none;
   }
 }

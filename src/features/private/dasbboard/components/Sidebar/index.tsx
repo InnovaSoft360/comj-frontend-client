@@ -1,5 +1,16 @@
 import { useState } from 'react';
-import { FiHome, FiUsers, FiFileText, FiSettings, FiLogOut, FiMenu, FiChevronDown, FiChevronUp, FiX } from 'react-icons/fi';
+import { 
+  FiHome,
+  FiLogOut, 
+  FiMenu, 
+  FiChevronDown, 
+  FiChevronUp, 
+  FiX,
+  FiBarChart2,
+  FiUserCheck,
+  FiClipboard,
+  FiTrendingUp
+} from 'react-icons/fi';
 import styles from './style.module.css';
 
 interface SidebarProps {
@@ -22,6 +33,7 @@ export default function Sidebar({
   handleLogout
 }: SidebarProps) {
   const [openSubmenus, setOpenSubmenus] = useState<{[key: string]: boolean}>({
+    dashboard: false, // Abrir por padrão
     usuarios: false,
     candidaturas: false,
     imoveis: false
@@ -47,104 +59,81 @@ export default function Sidebar({
       </div>
       
       <ul className={styles.menu}>
+        {/* Dashboard Submenu */}
+        <li className={styles.menuItemWithSubmenu}>
+          <div 
+            className={`${styles.menuHeader} ${openSubmenus.dashboard ? styles.open : ''} ${activeContent.includes('visao') ? styles.activeParent : ''}`}
+            onClick={() => toggleSubmenu('dashboard')}
+          >
+            <span className={styles.menuIcon}><FiHome /></span>
+            {!sidebarCollapsed && (
+              <>
+                <span className={styles.menuText}>Dashboard</span>
+                <span className={styles.arrow}>
+                  {openSubmenus.dashboard ? <FiChevronUp /> : <FiChevronDown />}
+                </span>
+              </>
+            )}
+            {sidebarCollapsed && <span className={styles.tooltip}>Dashboard</span>}
+          </div>
+          {(!sidebarCollapsed || mobileMenuOpen) && openSubmenus.dashboard && (
+            <ul className={styles.submenu}>
+              <li 
+                className={`${styles.submenuItem} ${activeContent === 'visao-geral' ? styles.active : ''}`}
+                onClick={() => navigateToContent('visao-geral')}>
+                <FiBarChart2 className={styles.submenuIcon} />
+                <span>Visão Geral</span>
+              </li>
+              <li 
+                className={`${styles.submenuItem} ${activeContent === 'visao-geral-candidaturas' ? styles.active : ''}`}
+                onClick={() => navigateToContent('visao-geral-candidaturas')}
+              >
+                <FiTrendingUp className={styles.submenuIcon} />
+                <span>Visão Candidaturas</span>
+              </li>
+            </ul>
+          )}
+        </li>
+
+        
+        {/* Usuários */}
         <li 
-          className={`${styles.menuItem} ${activeContent === 'visao-geral' ? styles.active : ''}`}
-          onClick={() => navigateToContent('visao-geral')}
+          className={`${styles.menuItem} ${activeContent === 'gestao-usuario' ? styles.active : ''}`} 
+          onClick={() => navigateToContent('gestao-usuario')}
         >
-          <span className={styles.menuIcon}><FiHome /></span>
-          {!sidebarCollapsed && <span className={styles.menuText}>Dashboard</span>}
-          {sidebarCollapsed && <span className={styles.tooltip}>Dashboard</span>}
+          <span className={styles.menuIcon}><FiUserCheck /></span>
+          {!sidebarCollapsed && <span className={styles.menuText}>Gestão Usuário</span>}
+          {sidebarCollapsed && <span className={styles.tooltip}>Gestão Usuário</span>}
         </li>
         
-        {/* Usuários Submenu */}
-        <li className={styles.menuItemWithSubmenu}>
-          <div 
-            className={`${styles.menuHeader} ${openSubmenus.usuarios ? styles.open : ''}`}
-            onClick={() => toggleSubmenu('usuarios')}
-          >
-            <span className={styles.menuIcon}><FiUsers /></span>
-            {!sidebarCollapsed && (
-              <>
-                <span className={styles.menuText}>Usuários</span>
-                <span className={styles.arrow}>
-                  {openSubmenus.usuarios ? <FiChevronUp /> : <FiChevronDown />}
-                </span>
-              </>
-            )}
-            {sidebarCollapsed && <span className={styles.tooltip}>Usuários</span>}
-          </div>
-          {!sidebarCollapsed && openSubmenus.usuarios && (
-            <ul className={styles.submenu}>
-              <li 
-                className={styles.submenuItem} 
-                onClick={() => navigateToContent('listar-usuarios')}
-              >
-                Tabela de Usuários
-              </li>
-              <li 
-                className={styles.submenuItem}
-                onClick={() => navigateToContent('criar-usuario')}
-              >
-                Criar Usuário
-              </li>
-            </ul>
-          )}
-        </li>
-        
-        {/* Candidaturas Submenu */}
-        <li className={styles.menuItemWithSubmenu}>
-          <div 
-            className={`${styles.menuHeader} ${openSubmenus.candidaturas ? styles.open : ''}`}
-            onClick={() => toggleSubmenu('candidaturas')}
-          >
-            <span className={styles.menuIcon}><FiFileText /></span>
-            {!sidebarCollapsed && (
-              <>
-                <span className={styles.menuText}>Candidaturas</span>
-                <span className={styles.arrow}>
-                  {openSubmenus.candidaturas ? <FiChevronUp /> : <FiChevronDown />}
-                </span>
-              </>
-            )}
-            {sidebarCollapsed && <span className={styles.tooltip}>Candidaturas</span>}
-          </div>
-          {!sidebarCollapsed && openSubmenus.candidaturas && (
-            <ul className={styles.submenu}>
-              <li 
-                className={styles.submenuItem}
-                onClick={() => navigateToContent('todas-candidaturas')}
-              >
-                Visão Geral
-              </li>
-              <li 
-                className={styles.submenuItem}
-                onClick={() => navigateToContent('aprovadas')}
-              >
-                Tabela
-              </li>
-              <li 
-                className={styles.submenuItem}
-                onClick={() => navigateToContent('arquivadas')}
-              >
-                Avaliação
-              </li>
-            </ul>
-          )}
-        </li>
-        
-        <li className={styles.menuItem}>
-          <span className={styles.menuIcon}><FiSettings /></span>
-          {!sidebarCollapsed && <span className={styles.menuText}>Configurações</span>}
-          {sidebarCollapsed && <span className={styles.tooltip}>Configurações</span>}
+        {/* Candidaturas */}
+        <li 
+          className={`${styles.menuItem} ${activeContent === 'gestao-candidatura' ? styles.active : ''}`} 
+          onClick={() => navigateToContent('gestao-candidatura')}
+        >
+          <span className={styles.menuIcon}><FiClipboard /></span>
+          {!sidebarCollapsed && <span className={styles.menuText}>Gestão Candidatura</span>}
+          {sidebarCollapsed && <span className={styles.tooltip}>Gestão Candidatura</span>}
         </li>
         
         {/* Botão Sair com funcionalidade de logout */}
-        <li className={styles.menuItem} onClick={handleLogout}>
+        <li className={`${styles.menuItem} ${styles.logoutItem}`} onClick={handleLogout}>
           <span className={styles.menuIcon}><FiLogOut /></span>
           {!sidebarCollapsed && <span className={styles.menuText}>Sair</span>}
           {sidebarCollapsed && <span className={styles.tooltip}>Sair</span>}
         </li>
       </ul>
+      
+      {/* Badge de versão ou status */}
+      {!sidebarCollapsed && (
+        <div className={styles.footer}>
+          <div className={styles.status}>
+            <div className={styles.statusIndicator}></div>
+            <span>Sistema Online</span>
+          </div>
+          <div className={styles.version}>v1.0.0</div>
+        </div>
+      )}
     </nav>
   );
 }

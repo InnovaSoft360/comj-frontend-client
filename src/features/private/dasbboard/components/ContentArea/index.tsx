@@ -1,6 +1,9 @@
 import VisaoGeral from './visaogeral';
-import ListarUsuarios from './usuario/list';
+import GestaoUsuarios from './usuario';
+import GestaoCandidatura from './candidatura/table';
+import VisaoGealCandidatura from './candidatura/overview'
 import styles from "./style.module.css"
+
 
 interface ContentAreaProps {
   activeContent: string;
@@ -13,7 +16,9 @@ export default function ContentArea({ activeContent }: ContentAreaProps) {
   // Mapeamento de componentes de conteúdo
   const contentComponents: Record<string, ContentComponent> = {
     'visao-geral': VisaoGeral,
-    'listar-usuarios': ListarUsuarios
+    'gestao-usuario': GestaoUsuarios,
+    'visao-geral-candidaturas': VisaoGealCandidatura,
+    'gestao-candidatura': GestaoCandidatura
   };
 
   // Componente de conteúdo atual
