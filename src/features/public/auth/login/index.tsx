@@ -6,7 +6,6 @@ import Logo from "@/assets/logo/logo.png";
 import { useAlert } from "@/components/ui/customAlert"; 
 import styles from "./style.module.css";
 
-
 export default function Login() {
   const navigate = useNavigate();
   const { showAlert, AlertContainer } = useAlert();
@@ -60,9 +59,11 @@ export default function Login() {
 
       const userData = response.data.user;
 
+      // ⭐⭐ REDIRECIONAMENTO ATUALIZADO ⭐⭐
       if (userData.role === 1) {
         navigate("/dashboard");
       } else if (userData.role === 2) {
+        // Verifica se o militar já completou o perfil ou precisa acessar outras páginas
         navigate("/");
       } else {
         navigate("/");
