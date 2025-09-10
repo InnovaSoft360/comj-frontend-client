@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react';
-import { FiEye, FiArchive, FiCheckCircle, FiXCircle, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiEye, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import styles from "./style.module.css";
 import api from '@/app/api';
+import ModalDetalhesCandidatura from '@/features/private/dasbboard/components/ContentArea/candidatura/modalDetalhes';
+
+interface Militar {
+  id: number;
+  nip: string;
+  nome?: string;
+  sobreNome?: string;
+  email?: string;
+}
 
 interface Candidatura {
   id: number;
   militarID: number;
+  militar: Militar;
   status: number;
   docBIUrl: string;
   docDeclRemuneracaoUrl: string;
@@ -22,24 +32,17 @@ interface ApiResponse {
   data: Candidatura[];
 }
 
-interface MilitarInfo {
-  id: number;
-  nome: string;
-  sobreNome: string;
-  email: string;
-  // Adicione outros campos necessários do militar
-}
-
 export default function GestaoCandidatura() {
   const [candidaturas, setCandidaturas] = useState<Candidatura[]>([]);
   const [candidaturasFiltradas, setCandidaturasFiltradas] = useState<Candidatura[]>([]);
-  const [militaresInfo, setMilitaresInfo] = useState<Record<number, MilitarInfo>>({});
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [itensPorPagina] = useState(5);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<number | 'todos'>('todos');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [modalAberto, setModalAberto] = useState(false);
+  const [candidaturaSelecionada, setCandidaturaSelecionada] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchCandidaturas = async () => {
@@ -54,9 +57,6 @@ export default function GestaoCandidatura() {
           const candidaturasData = response.data.data;
           setCandidaturas(candidaturasData);
           setCandidaturasFiltradas(candidaturasData);
-          
-          // Buscar informações dos militares
-          await fetchMilitaresInfo(candidaturasData);
         } else {
           setErro(response.data.message || 'Erro ao carregar candidaturas');
         }
@@ -66,34 +66,6 @@ export default function GestaoCandidatura() {
         setErro('Erro ao carregar candidaturas');
         setCarregando(false);
         console.error('Erro ao buscar candidaturas:', error);
-      }
-    };
-
-    const fetchMilitaresInfo = async (candidaturasData: Candidatura[]) => {
-      try {
-        const militarIds = [...new Set(candidaturasData.map(c => c.militarID))];
-        const militaresMap: Record<number, MilitarInfo> = {};
-        
-        // Buscar informações de cada militar
-        for (const militarId of militarIds) {
-          try {
-            const response = await api.get<MilitarInfo>(`/v1/Militares/${militarId}`);
-            militaresMap[militarId] = response.data;
-          } catch (error) {
-            console.error(`Erro ao buscar militar ${militarId}:`, error);
-            // Usar dados padrão em caso de erro
-            militaresMap[militarId] = {
-              id: militarId,
-              nome: 'Nome',
-              sobreNome: 'Não encontrado',
-              email: 'email@nao.encontrado'
-            };
-          }
-        }
-        
-        setMilitaresInfo(militaresMap);
-      } catch (error) {
-        console.error('Erro ao buscar informações dos militares:', error);
       }
     };
 
@@ -132,41 +104,15 @@ export default function GestaoCandidatura() {
     }
   };
 
-  // Função para verificar se pode avaliar (status Pendente ou EmAnálise)
-  const podeAvaliar = (status: number) => {
-    return status === 0 || status === 3; // Pendente (0) ou EmAnálise (3)
-  };
-
-  // Funções de ação
-  const handleAvaliar = async (id: number, status: number) => {
-    try {
-      console.log('Avaliar candidatura:', id, 'Status:', status);
-      // Implementar lógica de avaliação
-      // await api.patch(`/v1/Candidaturas/${id}/status`, { status });
-      // Atualizar a lista após avaliação
-      setCandidaturas(candidaturas.map(c => 
-        c.id === id ? { ...c, status } : c
-      ));
-    } catch (error) {
-      console.error('Erro ao avaliar candidatura:', error);
-    }
-  };
-
-  const handleArquivar = async (id: number) => {
-    try {
-      console.log('Arquivar candidatura:', id);
-      // Implementar lógica de arquivamento
-      // await api.patch(`/v1/Candidaturas/${id}/arquivar`);
-      // Atualizar a lista após arquivamento
-      setCandidaturas(candidaturas.filter(c => c.id !== id));
-    } catch (error) {
-      console.error('Erro ao arquivar candidatura:', error);
-    }
-  };
 
   const handleDetalhes = (id: number) => {
-    console.log('Detalhes da candidatura:', id);
-    // Implementar visualização de detalhes
+    setCandidaturaSelecionada(id);
+    setModalAberto(true);
+  };
+
+  const fecharModal = () => {
+    setModalAberto(false);
+    setCandidaturaSelecionada(null);
   };
 
   // Função para formatar data
@@ -279,7 +225,7 @@ export default function GestaoCandidatura() {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Militar</th>
+              <th>Militar (NIP)</th>
               <th>Data Candidatura</th>
               <th>Status</th>
               <th>Dias Restantes</th>
@@ -288,75 +234,46 @@ export default function GestaoCandidatura() {
           </thead>
           <tbody>
             {candidaturasPaginaAtual.length > 0 ? (
-              candidaturasPaginaAtual.map(candidatura => {
-                const militar = militaresInfo[candidatura.militarID] || {
-                  nome: 'Carregando...',
-                  sobreNome: '',
-                  email: ''
-                };
-                
-                return (
-                  <tr key={candidatura.id}>
-                    <td>{candidatura.id}</td>
-                    <td>
-                      <div className={styles.infoMilitar}>
+              candidaturasPaginaAtual.map(candidatura => (
+                <tr key={candidatura.id}>
+                  <td>{candidatura.id}</td>
+                  <td>
+                    <div className={styles.infoMilitar}>
+                      <div className={styles.nipMilitar}>
+                        NIP: {candidatura.militar.nip}
+                      </div>
+                      {candidatura.militar.nome && candidatura.militar.sobreNome && (
                         <div className={styles.nomeMilitar}>
-                          {militar.nome} {militar.sobreNome}
+                          {candidatura.militar.nome} {candidatura.militar.sobreNome}
                         </div>
+                      )}
+                      {candidatura.militar.email && (
                         <div className={styles.emailMilitar}>
-                          {militar.email}
+                          {candidatura.militar.email}
                         </div>
-                      </div>
-                    </td>
-                    <td>{formatarData(candidatura.dataCandidatura)}</td>
-                    <td>
-                      <span className={`${styles.status} ${getStatusClass(candidatura.status)}`}>
-                        {getStatusText(candidatura.status)}
-                      </span>
-                    </td>
-                    <td>{candidatura.diasRestantes}</td>
-                    <td>
-                      <div className={styles.acoes}>
-                        <button 
-                          className={styles.btnDetalhes}
-                          onClick={() => handleDetalhes(candidatura.id)}
-                          title="Detalhes"
-                        >
-                          <FiEye />
-                        </button>
-                        
-                        {/* Mostrar ações de avaliação apenas para status Pendente ou EmAnálise */}
-                        {podeAvaliar(candidatura.status) && (
-                          <>
-                            <button 
-                              className={styles.btnAprovar}
-                              onClick={() => handleAvaliar(candidatura.id, 1)}
-                              title="Aprovar"
-                            >
-                              <FiCheckCircle />
-                            </button>
-                            <button 
-                              className={styles.btnReprovar}
-                              onClick={() => handleAvaliar(candidatura.id, 2)}
-                              title="Reprovar"
-                            >
-                              <FiXCircle />
-                            </button>
-                          </>
-                        )}
-                        
-                        <button 
-                          className={styles.btnArquivar}
-                          onClick={() => handleArquivar(candidatura.id)}
-                          title="Arquivar"
-                        >
-                          <FiArchive />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
+                      )}
+                    </div>
+                  </td>
+                  <td>{formatarData(candidatura.dataCandidatura)}</td>
+                  <td>
+                    <span className={`${styles.status} ${getStatusClass(candidatura.status)}`}>
+                      {getStatusText(candidatura.status)}
+                    </span>
+                  </td>
+                  <td>{candidatura.diasRestantes}</td>
+                  <td>
+                    <div className={styles.acoes}>
+                      <button 
+                        className={styles.btnDetalhes}
+                        onClick={() => handleDetalhes(candidatura.id)}
+                        title="Detalhes"
+                      >
+                        <FiEye />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td colSpan={6} className={styles.semDados}>
@@ -399,6 +316,13 @@ export default function GestaoCandidatura() {
           </button>
         </div>
       </div>
+
+      {/* Modal de detalhes */}
+      <ModalDetalhesCandidatura
+        candidaturaId={candidaturaSelecionada}
+        isOpen={modalAberto}
+        onClose={fecharModal}
+      />
     </div>
   );
 }
