@@ -1,7 +1,9 @@
+// Seu componente GestaoUsuarios atualizado
 import { useState, useEffect } from 'react';
 import { FiTrash2, FiEdit, FiEye, FiChevronLeft, FiChevronRight, FiFilter } from 'react-icons/fi';
 import styles from "./style.module.css";
 import api from '@/app/api';
+import ModalDetalhesUsuario from './modalDetalhes'; // Importe o modal
 
 interface Usuario {
   id: number;
@@ -30,6 +32,8 @@ export default function GestaoUsuarios() {
   const [erro, setErro] = useState<string | null>(null);
   const [filtroRole, setFiltroRole] = useState<number | 'todos'>('todos');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [modalAberto, setModalAberto] = useState(false);
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUsuarios = async () => {
@@ -95,7 +99,7 @@ export default function GestaoUsuarios() {
     }
   };
 
-  // Funções de ação (a serem implementadas)
+  // Funções de ação
   const handleDeletar = async (id: number) => {
     try {
       console.log('Deletar usuário:', id);
@@ -109,13 +113,18 @@ export default function GestaoUsuarios() {
   };
 
   const handleDetalhes = (id: number) => {
-    console.log('Detalhes do usuário:', id);
-    // Implementar visualização de detalhes
+    setUsuarioSelecionado(id);
+    setModalAberto(true);
   };
 
   const handleEditar = (id: number) => {
     console.log('Editar usuário:', id);
     // Implementar edição
+  };
+
+  const fecharModal = () => {
+    setModalAberto(false);
+    setUsuarioSelecionado(null);
   };
 
   if (carregando) {
@@ -269,6 +278,15 @@ export default function GestaoUsuarios() {
           </button>
         </div>
       </div>
+
+      {/* Modal de detalhes */}
+      <ModalDetalhesUsuario
+        usuarioId={usuarioSelecionado}
+        isOpen={modalAberto}
+        onClose={fecharModal}
+        onEdit={handleEditar}
+        onDelete={handleDeletar}
+      />
     </div>
   );
 }
