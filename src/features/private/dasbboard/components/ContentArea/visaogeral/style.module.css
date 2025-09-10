@@ -1,0 +1,417 @@
+.visaoGeralSection {
+  padding: 2rem;
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f88737 0%, #d61c1c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.tituloIcon {
+  color: #f88737;
+  font-size: 1.5rem;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #f88737 0%, #d61c1c 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.cardsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.card:hover .cardWave {
+  transform: translateX(0);
+}
+
+.cardBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  opacity: 0.03;
+  z-index: 0;
+}
+
+.cardUsuarios .cardBackground {
+  background: linear-gradient(135deg, #f88737 0%, #d61c1c 100%);
+}
+
+.cardCandidaturas .cardBackground {
+  background: linear-gradient(135deg, #d61c1c 0%, #f88737 100%);
+}
+
+.cardImoveis .cardBackground {
+  background: linear-gradient(135deg, #f88737 0%, #d61c1c 100%);
+}
+
+.cardContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cardIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+
+.cardUsuarios .cardIcon {
+  background: linear-gradient(135deg, rgba(248, 135, 55, 0.15) 0%, rgba(214, 28, 28, 0.15) 100%);
+  color: #f88737;
+}
+
+.cardCandidaturas .cardIcon {
+  background: linear-gradient(135deg, rgba(214, 28, 28, 0.15) 0%, rgba(248, 135, 55, 0.15) 100%);
+  color: #d61c1c;
+}
+
+.cardImoveis .cardIcon {
+  background: linear-gradient(135deg, rgba(248, 135, 55, 0.15) 0%, rgba(214, 28, 28, 0.15) 100%);
+  color: #f88737;
+}
+
+.cardInfo h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.valor {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f88737 0%, #d61c1c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cardStats {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.cardUsuarios .cardStats {
+  background: rgba(248, 135, 55, 0.1);
+  color: #f88737;
+}
+
+.cardCandidaturas .cardStats {
+  background: rgba(214, 28, 28, 0.1);
+  color: #d61c1c;
+}
+
+.cardImoveis .cardStats {
+  background: rgba(248, 135, 55, 0.1);
+  color: #f88737;
+}
+
+.cardWave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f88737, #d61c1c);
+  transform: translateX(-100%);
+  transition: transform 1s ease;
+}
+
+.cardUsuarios .cardWave {
+  background: linear-gradient(90deg, #f88737, #d61c1c);
+}
+
+.cardCandidaturas .cardWave {
+  background: linear-gradient(90deg, #d61c1c, #f88737);
+}
+
+.cardImoveis .cardWave {
+  background: linear-gradient(90deg, #f88737, #d61c1c);
+}
+
+.skeleton {
+  width: 80px;
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.graficoSection {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.graficoTitulo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.graficoSubtitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.graficoContainer {
+  display: flex;
+  height: 300px;
+  margin-top: 2rem;
+  position: relative;
+}
+
+.graficoBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2rem;
+  flex: 1;
+  padding-bottom: 2rem;
+  z-index: 2;
+}
+
+.barContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  gap: 0.75rem;
+}
+
+.barLabel {
+  font-size: 1.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f88737 0%, #d61c1c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 12px 12px 0 0;
+  position: relative;
+  overflow: hidden;
+  transition: height 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.barFill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  border-radius: 12px 12px 0 0;
+}
+
+.barUsuarios .barFill {
+  background: linear-gradient(to top, #f88737, #ff9f5a);
+}
+
+.barCandidaturas .barFill {
+  background: linear-gradient(to top, #d61c1c, #e74c4c);
+}
+
+.barImoveis .barFill {
+  background: linear-gradient(to top, #f88737, #d61c1c);
+}
+
+.barGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), transparent);
+  border-radius: 12px 12px 0 0;
+}
+
+.barName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.graficoGrid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1;
+}
+
+.gridLine {
+  border-top: 1px dashed #e2e8f0;
+  position: relative;
+  padding-top: 0.5rem;
+}
+
+.gridLine span {
+  position: absolute;
+  right: 0;
+  top: -10px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* Animações especiais */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(248, 135, 55, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(248, 135, 55, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(248, 135, 55, 0.5); }
+}
+
+.card:hover .cardIcon {
+  animation: glow 2s infinite;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .visaoGeralSection {
+    padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .cardsContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .graficoBars {
+    gap: 1rem;
+  }
+  
+  .barContainer {
+    gap: 0.5rem;
+  }
+  
+  .barLabel {
+    font-size: 1rem;
+  }
+  
+  .barName {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .titulo {
+    font-size: 1.5rem;
+  }
+  
+  .cardContent {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .cardStats {
+    margin: 0;
+  }
+  
+  .valor {
+    font-size: 1.8rem;
+  }
+  
+  .graficoSection {
+    padding: 1rem;
+  }
+  
+  .graficoTitulo {
+    font-size: 1.3rem;
+  }
+}

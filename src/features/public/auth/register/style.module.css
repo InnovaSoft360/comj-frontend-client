@@ -300,3 +300,52 @@
     transform: translateY(0);
   }
 }
+/* Container para inputs de senha com ícone */
+.passwordContainer {
+  position: relative;
+  width: 100%;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #a0aec0;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passwordToggle:hover {
+  color: #f88737;
+}
+
+/* Ajuste para o input de senha com ícone */
+.passwordContainer .input {
+  padding-right: 40px;
+}
+
+/* Checkbox para mostrar senha */
+.togglePassword {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.togglePassword input[type="checkbox"] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  accent-color: #f88737;
+}
+
+.togglePassword label {
+  color: #718096;
+  cursor: pointer;
+}

@@ -12,64 +12,81 @@ function App() {
     location.pathname === "/forgot-password";
 
   return (
+    <div>
+      {!hideLayout && <Header />}
 
-      <div>
-        {!hideLayout && <Header />}
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/etapas" element={<Etapas />} />
+        <Route path="/politicaPrivacidade" element={<PoliticaPrivacidade />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registerMilitar" element={<RegisterMilitar />} />
+        
+        {/* Galeria é pública */}
+        <Route path="/galeria/video" element={<GaleriaVideo />} />
+        <Route path="/galeria/imagem" element={<GaleriaImagem />} />
 
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/etapas" element={<Etapas />} />
-          <Route path="/politicaPrivacidade" element={<PoliticaPrivacidade />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/registerMilitar" element={<RegisterMilitar />} />
-          
-          {/* Galeria é pública */}
-          <Route path="/galeria/video" element={<GaleriaVideo />} />
-          <Route path="/galeria/imagem" element={<GaleriaImagem />} />
-
-          {/* Rotas PROTEGIDAS - Perfil */}
-          <Route path="/perfil/dados" element={
-            <ProtectedRoute>
+        {/* Rotas PROTEGIDAS CLIENTE - Apenas para Militares (role 2) */}
+        <Route 
+          path="/perfil/dados" 
+          element={
+            <ProtectedRoute requiredRole={2}>
               <DadosMilitar />
             </ProtectedRoute>
-          } />
-          <Route path="/perfil/editar" element={
-            <ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/perfil/editar" 
+          element={
+            <ProtectedRoute requiredRole={2}>
               <EditarMilitar />
             </ProtectedRoute>
-          } />
-          <Route path="/perfil/senha" element={
-            <ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/perfil/senha" 
+          element={
+            <ProtectedRoute requiredRole={2}>
               <SenhaMilitar />
             </ProtectedRoute>
-          } />
+          } 
+        />
 
-          {/* Rotas PROTEGIDAS - Candidatura */}
-          <Route path="/candidatura/estado" element={
-            <ProtectedRoute>
+        {/* Rotas PROTEGIDAS CLIENTE - Candidatura (apenas para Militares) */}
+        <Route 
+          path="/candidatura/estado" 
+          element={
+            <ProtectedRoute requiredRole={2}>
               <Estado />
             </ProtectedRoute>
-          } />
-          <Route path="/candidaturas/formulario" element={
-            <ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/candidaturas/formulario" 
+          element={
+            <ProtectedRoute requiredRole={2}>
               <Candidaturas />
             </ProtectedRoute>
-          } />
+          } 
+        />
 
-          {/* Rotas PROTEGIDAS Dashboard */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
+        {/* Rotas PROTEGIDAS ADM Dashboard (apenas para Admin - role 1) */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute requiredRole={1}>
               <Dashboard />
             </ProtectedRoute>
-          } />
+          } 
+        />
 
-          {/* Redirect non-existent routes */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        {/* Redirect non-existent routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
 
-        {!hideLayout && <Footer />}
-      </div>
+      {!hideLayout && <Footer />}
+    </div>
   );
 }
 

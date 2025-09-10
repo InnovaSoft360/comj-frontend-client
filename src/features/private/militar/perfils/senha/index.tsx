@@ -7,11 +7,15 @@ import {
   FaCheckCircle,
   FaExclamationTriangle,
   FaSpinner,
+  FaCheck,
+  FaTimes
 } from "react-icons/fa";
 import api from "../../../../../app/api";
 import styles from "./style.module.css";
+import { useAlert } from "../../../../../components/ui/customAlert"; 
 
 export default function SenhaMilitar() {
+  const { showAlert, AlertContainer } = useAlert();
   //#region Refs
   const senhaAtualRef = useRef<HTMLInputElement>(null);
   const novaSenhaRef = useRef<HTMLInputElement>(null);
@@ -26,6 +30,13 @@ export default function SenhaMilitar() {
   const [showSenhaAtual, setShowSenhaAtual] = useState(false);
   const [showNovaSenha, setShowNovaSenha] = useState(false);
   const [showConfirmarSenha, setShowConfirmarSenha] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    hasMinLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false
+  });
   //#endregion
 
   //#region Buscar dados do usuário logado
@@ -36,7 +47,7 @@ export default function SenhaMilitar() {
         setUserId(response.data.data.id);
       } catch (error) {
         console.error("Erro ao buscar dados do usuário:", error);
-        setError("Erro ao carregar dados do usuário");
+        showAlert("Erro ao carregar dados do usuário", "error");
       }
     }
 
@@ -44,29 +55,33 @@ export default function SenhaMilitar() {
   }, []);
   //#endregion
 
-  //#region Toggle functions CORRIGIDAS - usando o novo valor
+  //#region Validar força da senha
+  const validatePasswordStrength = (password: string) => {
+    setPasswordStrength({
+      hasMinLength: password.length >= 8,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    });
+  };
+
+  const isPasswordStrong = () => {
+    return Object.values(passwordStrength).every(condition => condition);
+  };
+  //#endregion
+
+  //#region Toggle functions
   const toggleSenhaAtual = () => {
-    const novoValor = !showSenhaAtual;
-    setShowSenhaAtual(novoValor);
-    if (senhaAtualRef.current) {
-      senhaAtualRef.current.type = novoValor ? "text" : "password";
-    }
+    setShowSenhaAtual(!showSenhaAtual);
   };
 
   const toggleNovaSenha = () => {
-    const novoValor = !showNovaSenha;
-    setShowNovaSenha(novoValor);
-    if (novaSenhaRef.current) {
-      novaSenhaRef.current.type = novoValor ? "text" : "password";
-    }
+    setShowNovaSenha(!showNovaSenha);
   };
 
   const toggleConfirmarSenha = () => {
-    const novoValor = !showConfirmarSenha;
-    setShowConfirmarSenha(novoValor);
-    if (confirmarSenhaRef.current) {
-      confirmarSenhaRef.current.type = novoValor ? "text" : "password";
-    }
+    setShowConfirmarSenha(!showConfirmarSenha);
   };
   //#endregion
 
@@ -82,19 +97,27 @@ export default function SenhaMilitar() {
       !novaSenhaRef.current?.value ||
       !confirmarSenhaRef.current?.value
     ) {
-      setError("Preencha todos os campos obrigatórios!");
+      showAlert("Preencha todos os campos obrigatórios!", "info");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validar se a nova senha é igual à atual
+    if (senhaAtualRef.current.value === novaSenhaRef.current.value) {
+      showAlert("A nova senha não pode ser igual à senha atual!", "warning");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validar força da senha
+    if (!isPasswordStrong()) {
+      showAlert("A senha não atende aos requisitos de segurança!", "warning");
       setIsLoading(false);
       return;
     }
 
     if (novaSenhaRef.current.value !== confirmarSenhaRef.current.value) {
-      setError("As senhas não coincidem!");
-      setIsLoading(false);
-      return;
-    }
-
-    if (novaSenhaRef.current.value.length < 6) {
-      setError("A nova senha deve ter pelo menos 6 caracteres!");
+      showAlert("As senhas não coincidem!", "warning");
       setIsLoading(false);
       return;
     }
@@ -108,28 +131,31 @@ export default function SenhaMilitar() {
       });
 
       if (response.data.code === 200) {
-        setSuccess("Senha alterada com sucesso!");
+        showAlert("Senha alterada com sucesso!", "success");
         // Limpar os campos
         if (senhaAtualRef.current) senhaAtualRef.current.value = "";
         if (novaSenhaRef.current) novaSenhaRef.current.value = "";
         if (confirmarSenhaRef.current) confirmarSenhaRef.current.value = "";
-        // Resetar os checkboxes e tipos dos inputs
+        // Resetar estados
         setShowSenhaAtual(false);
         setShowNovaSenha(false);
         setShowConfirmarSenha(false);
-        if (senhaAtualRef.current) senhaAtualRef.current.type = "password";
-        if (novaSenhaRef.current) novaSenhaRef.current.type = "password";
-        if (confirmarSenhaRef.current)
-          confirmarSenhaRef.current.type = "password";
+        setPasswordStrength({
+          hasMinLength: false,
+          hasUpperCase: false,
+          hasLowerCase: false,
+          hasNumber: false,
+          hasSpecialChar: false
+        });
       }
     } catch (error: any) {
       console.error(error);
       if (error.response?.status === 400) {
         setError(error.response.data.message || "Erro ao alterar senha");
       } else if (error.response?.status === 401) {
-        setError("Senha atual incorreta");
+        showAlert("Senha atual incorreta", "error");
       } else {
-        setError("Erro ao alterar senha. Tente novamente.");
+        showAlert("Erro ao alterar senha. Tente novamente.", "error");
       }
     } finally {
       setIsLoading(false);
@@ -139,6 +165,7 @@ export default function SenhaMilitar() {
 
   return (
     <section className={styles.perfilSection}>
+      <AlertContainer />
       <div className={styles.main}>
         <h2 className={styles.title}>Alterar Senha</h2>
 
@@ -151,7 +178,7 @@ export default function SenhaMilitar() {
             </label>
             <div className={styles.inputContainer}>
               <input
-                type="password"
+                type={showSenhaAtual ? "text" : "password"}
                 id="senhaAtual"
                 placeholder="Digite sua senha atual"
                 ref={senhaAtualRef}
@@ -176,13 +203,14 @@ export default function SenhaMilitar() {
             </label>
             <div className={styles.inputContainer}>
               <input
-                type="password"
+                type={showNovaSenha ? "text" : "password"}
                 id="novaSenha"
-                placeholder="Digite a nova senha (mínimo 6 caracteres)"
+                placeholder="Digite a nova senha"
                 ref={novaSenhaRef}
                 className={styles.input}
                 required
-                minLength={6}
+                minLength={8}
+                onChange={(e) => validatePasswordStrength(e.target.value)}
               />
               <button
                 type="button"
@@ -192,6 +220,33 @@ export default function SenhaMilitar() {
                 {showNovaSenha ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+            
+            {/* Indicador de força da senha */}
+            {novaSenhaRef.current?.value && (
+              <div className={styles.passwordStrength}>
+                <h4>Requisitos da senha:</h4>
+                <div className={styles.requirement}>
+                  {passwordStrength.hasMinLength ? <FaCheck className={styles.valid} /> : <FaTimes className={styles.invalid} />}
+                  <span>Mínimo 8 caracteres</span>
+                </div>
+                <div className={styles.requirement}>
+                  {passwordStrength.hasUpperCase ? <FaCheck className={styles.valid} /> : <FaTimes className={styles.invalid} />}
+                  <span>Letra maiúscula (A-Z)</span>
+                </div>
+                <div className={styles.requirement}>
+                  {passwordStrength.hasLowerCase ? <FaCheck className={styles.valid} /> : <FaTimes className={styles.invalid} />}
+                  <span>Letra minúscula (a-z)</span>
+                </div>
+                <div className={styles.requirement}>
+                  {passwordStrength.hasNumber ? <FaCheck className={styles.valid} /> : <FaTimes className={styles.invalid} />}
+                  <span>Número (0-9)</span>
+                </div>
+                <div className={styles.requirement}>
+                  {passwordStrength.hasSpecialChar ? <FaCheck className={styles.valid} /> : <FaTimes className={styles.invalid} />}
+                  <span>Caractere especial (!@#$%^&*)</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Campo Confirmar Senha */}
@@ -202,13 +257,13 @@ export default function SenhaMilitar() {
             </label>
             <div className={styles.inputContainer}>
               <input
-                type="password"
+                type={showConfirmarSenha ? "text" : "password"}
                 id="confirmarSenha"
                 placeholder="Confirme a nova senha"
                 ref={confirmarSenhaRef}
                 className={styles.input}
                 required
-                minLength={6}
+                minLength={8}
               />
               <button
                 type="button"
@@ -218,6 +273,21 @@ export default function SenhaMilitar() {
                 {showConfirmarSenha ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+            
+            {/* Verificação de correspondência de senhas */}
+            {novaSenhaRef.current?.value && confirmarSenhaRef.current?.value && (
+              <div className={styles.passwordMatch}>
+                {novaSenhaRef.current.value === confirmarSenhaRef.current.value ? (
+                  <div className={styles.matchValid}>
+                    <FaCheck /> As senhas coincidem
+                  </div>
+                ) : (
+                  <div className={styles.matchInvalid}>
+                    <FaTimes /> As senhas não coincidem
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {error && (
@@ -236,7 +306,7 @@ export default function SenhaMilitar() {
           <button
             type="submit"
             className={styles.submitButton}
-            disabled={isLoading || !userId}
+            disabled={isLoading || !userId || !isPasswordStrong()}
           >
             {isLoading ? (
               <>

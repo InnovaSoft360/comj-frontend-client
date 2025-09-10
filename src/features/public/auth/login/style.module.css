@@ -82,6 +82,42 @@
   color: #a0aec0;
 }
 
+/* Container para input de senha com ícone */
+.passwordContainer {
+  position: relative;
+  width: 100%;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #a0aec0;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.passwordToggle:hover:not(:disabled) {
+  color: #f88737;
+}
+
+.passwordToggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Ajuste para o input de senha com ícone */
+.passwordContainer .input {
+  padding-right: 40px;
+}
+
 .loginBtn {
   width: 100%;
   padding: 14px;
@@ -109,6 +145,10 @@
   cursor: not-allowed;
 }
 
+.loading {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+}
+
 .linksContainer {
   display: flex;
   justify-content: center;
@@ -133,6 +173,26 @@
 .separator {
   color: #cbd5e0;
   font-weight: 300;
+}
+
+/* Checkbox para mostrar senha (opcional) */
+.togglePassword {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.togglePassword input[type="checkbox"] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  accent-color: #f88737;
+}
+
+.togglePassword label {
+  color: #718096;
+  cursor: pointer;
 }
 
 /* Responsividade */
@@ -164,6 +224,15 @@
     font-size: 13px;
   }
   
+  .passwordToggle {
+    right: 10px;
+    padding: 3px;
+  }
+  
+  .passwordContainer .input {
+    padding-right: 35px;
+  }
+  
   .loginBtn {
     padding: 12px;
     font-size: 13px;
@@ -192,4 +261,15 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Efeito de shake para erros */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.3s ease-in-out;
 }

@@ -1,4 +1,3 @@
-/* style.module.css */
 .perfilSection {
   min-height: 100vh;
   padding: 2rem;
@@ -96,6 +95,62 @@
   color: #f88737;
 }
 
+/* Password Strength Indicator */
+.passwordStrength {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.passwordStrength h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #495057;
+  font-weight: 600;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.valid {
+  color: #28a745;
+  font-size: 0.8rem;
+}
+
+.invalid {
+  color: #dc3545;
+  font-size: 0.8rem;
+}
+
+/* Password Match Indicator */
+.passwordMatch {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.matchValid {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #28a745;
+  font-weight: 500;
+}
+
+.matchInvalid {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #dc3545;
+  font-weight: 500;
+}
+
 .submitButton {
   background: linear-gradient(135deg, #f88737 0%, #d61c1cf3 100%);
   color: white;
@@ -191,5 +246,13 @@
   
   .toggleButton {
     right: 0.5rem;
+  }
+  
+  .passwordStrength {
+    padding: 0.75rem;
+  }
+  
+  .requirement {
+    font-size: 0.8rem;
   }
 }

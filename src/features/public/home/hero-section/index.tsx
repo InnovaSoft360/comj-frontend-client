@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import heroBg from "../../../../assets/section/img2.png";
+import heroBg from "@/assets/section/img2.png";
 import styles from "./style.module.css";
 
 export default function HeroSection() {

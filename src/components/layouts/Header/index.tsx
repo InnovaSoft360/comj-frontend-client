@@ -5,8 +5,10 @@ import { HiChevronDown as IconChevronDown } from "react-icons/hi";
 import api from "../../../app/api";
 import logo from "../../../assets/logo/logo.png";
 import styles from "./style.module.css";
+import { useAlert } from "../../../components/ui/customAlert"; 
 
 export default function Header() {
+  const { showAlert, AlertContainer } = useAlert();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
@@ -107,10 +109,10 @@ export default function Header() {
       setIsAuthenticated(false);
       closeMenu();
       navigate("/");
-      alert("Logout realizado com sucesso!");
+      showAlert("Logout realizado com sucesso!", "success");
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      alert("Erro ao fazer logout.");
+      showAlert("Erro ao fazer logout.", "error");
     }
   };
 
@@ -118,6 +120,7 @@ export default function Header() {
     return (
       <header className={styles.header}>
         <div className={styles.main}>
+          <AlertContainer />
           <nav className={styles.navBar}>
             <div className={styles.logoContainer}>
               <Link to="/" className={styles.navLink}>
