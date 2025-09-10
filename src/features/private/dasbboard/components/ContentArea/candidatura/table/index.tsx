@@ -104,6 +104,30 @@ export default function GestaoCandidatura() {
     }
   };
 
+  // Função para mudar status da candidatura
+  const handleStatusChange = async (candidaturaId: number, novoStatus: number) => {
+    try {
+      // Implementar lógica para atualizar o status da candidatura
+      console.log('Mudando status da candidatura:', candidaturaId, 'para:', novoStatus);
+      
+      // Exemplo de chamada à API:
+      // const response = await api.put(`/v1/Candidaturas/${candidaturaId}/status`, { status: novoStatus });
+      
+      // Atualizar a lista localmente (simulação)
+      setCandidaturas(prevCandidaturas => 
+        prevCandidaturas.map(candidatura => 
+          candidatura.id === candidaturaId 
+            ? { ...candidatura, status: novoStatus } 
+            : candidatura
+        )
+      );
+      
+      alert(`Status da candidatura ${candidaturaId} atualizado para: ${getStatusText(novoStatus)}`);
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      alert('Erro ao atualizar status da candidatura');
+    }
+  };
 
   const handleDetalhes = (id: number) => {
     setCandidaturaSelecionada(id);
@@ -322,6 +346,7 @@ export default function GestaoCandidatura() {
         candidaturaId={candidaturaSelecionada}
         isOpen={modalAberto}
         onClose={fecharModal}
+        onStatusChange={handleStatusChange as unknown as () => void}
       />
     </div>
   );
