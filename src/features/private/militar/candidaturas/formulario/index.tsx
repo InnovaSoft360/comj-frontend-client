@@ -42,15 +42,29 @@ export default function Candidaturas() {
       try {
         const response = await api.get("/v1/Usuarios/GetCurrentUser");
         if (response.data.code === 200 && response.data.data) {
-          setMilitarId(response.data.data.id);
+          // Acessar o ID do militarInfo, não do usuário
+          const militarInfo = response.data.data.militarInfo;
+          if (militarInfo && militarInfo.id) {
+            setMilitarId(militarInfo.id);
+          } else {
+            console.error("MilitarInfo não encontrado ou sem ID");
+            showAlert("Erro: Perfil militar não encontrado.", "error");
+          }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao buscar ID do militar:", error);
+        
+        // Verificar se é erro de autenticação
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          showAlert("Sessão expirada. Faça login novamente.", "warning");
+        } else {
+          showAlert("Erro ao carregar dados do militar.", "error");
+        }
       }
     };
 
     fetchMilitarId();
-  }, []);
+  }, [showAlert]);
 
   // Atualizar progresso quando arquivos forem selecionados/removidos
   useEffect(() => {
@@ -210,7 +224,7 @@ export default function Candidaturas() {
     try {
       const formData = new FormData();
 
-      // Adicionar campos obrigatórios
+      // Adicionar campos obrigatórios - usar o ID do militarInfo
       formData.append("MilitarID", militarId.toString());
       formData.append("Status", "0"); // Status 0 = Pendente
 
@@ -280,7 +294,7 @@ export default function Candidaturas() {
       <section className={styles.candidaturaSection}>
         <div className={styles.loadingContainer}>
           <FaSpinner className={styles.spinner} />
-          <p>Carregando...</p>
+          <p>Carregando informações do militar...</p>
         </div>
       </section>
     );
