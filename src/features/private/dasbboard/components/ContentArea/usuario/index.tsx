@@ -1,4 +1,3 @@
-// Seu componente GestaoUsuarios atualizado
 import { useState, useEffect } from 'react';
 import { FiTrash2, FiEdit, FiEye, FiChevronLeft, FiChevronRight, FiFilter } from 'react-icons/fi';
 import styles from "./style.module.css";
