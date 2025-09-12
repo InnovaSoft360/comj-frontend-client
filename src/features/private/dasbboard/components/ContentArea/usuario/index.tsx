@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { FiTrash2, FiEdit, FiEye, FiChevronLeft, FiChevronRight, FiFilter } from 'react-icons/fi';
+import { FiTrash2, FiEdit, FiEye, FiChevronLeft, FiChevronRight, FiFilter, FiPlus, FiKey } from 'react-icons/fi';
 import styles from "./style.module.css";
 import api from '@/app/api';
-import ModalDetalhesUsuario from './modalDetalhes'; // Importe o modal
+import ModalDetalhesUsuario from './modalDetalhes';
 
 interface Usuario {
   id: number;
@@ -40,7 +40,6 @@ export default function GestaoUsuarios() {
         setCarregando(true);
         setErro(null);
         
-        // Chamada real à API
         const response = await api.get<ApiResponse>('/v1/Usuarios/GetAll');
         
         if (response.data.code === 200) {
@@ -55,18 +54,12 @@ export default function GestaoUsuarios() {
         setErro('Erro ao carregar usuários');
         setCarregando(false);
         console.error('Erro ao buscar usuários:', error);
-        
-        // Log mais detalhado do erro
-        if (error.response) {
-          console.error('Detalhes do erro:', error.response.data);
-        }
       }
     };
 
     fetchUsuarios();
   }, []);
 
-  // Aplicar filtro quando o filtroRole mudar
   useEffect(() => {
     if (filtroRole === 'todos') {
       setUsuariosFiltrados(usuarios);
@@ -74,18 +67,15 @@ export default function GestaoUsuarios() {
       const filtrados = usuarios.filter(usuario => usuario.role === filtroRole);
       setUsuariosFiltrados(filtrados);
     }
-    setPaginaAtual(1); // Resetar para a primeira página ao aplicar filtro
+    setPaginaAtual(1);
   }, [filtroRole, usuarios]);
 
-  // Calcular totais de páginas
   const totalPaginas = Math.ceil(usuariosFiltrados.length / itensPorPagina);
   
-  // Obter usuários da página atual
   const indiceUltimoItem = paginaAtual * itensPorPagina;
   const indicePrimeiroItem = indiceUltimoItem - itensPorPagina;
   const usuariosPaginaAtual = usuariosFiltrados.slice(indicePrimeiroItem, indiceUltimoItem);
 
-  // Mudar página
   const avancarPagina = () => {
     if (paginaAtual < totalPaginas) {
       setPaginaAtual(paginaAtual + 1);
@@ -98,13 +88,9 @@ export default function GestaoUsuarios() {
     }
   };
 
-  // Funções de ação
   const handleDeletar = async (id: number) => {
     try {
       console.log('Deletar usuário:', id);
-      // Implementar lógica de deleção
-      // await api.delete(`/v1/Usuarios/${id}`);
-      // Atualizar a lista após deletar
       setUsuarios(usuarios.filter(user => user.id !== id));
     } catch (error) {
       console.error('Erro ao deletar usuário:', error);
@@ -118,7 +104,14 @@ export default function GestaoUsuarios() {
 
   const handleEditar = (id: number) => {
     console.log('Editar usuário:', id);
-    // Implementar edição
+  };
+
+  const handleNovaSenha = (id: number) => {
+    console.log('Atualizar senha do usuário:', id);
+  };
+
+  const handleNovoUsuario = () => {
+    console.log('Abrir modal para novo usuário');
   };
 
   const fecharModal = () => {
@@ -139,13 +132,23 @@ export default function GestaoUsuarios() {
       <div className={styles.header}>
         <h1 className={styles.titulo}>Lista de Usuários</h1>
         
-        <button 
-          className={styles.btnFiltro}
-          onClick={() => setMostrarFiltros(!mostrarFiltros)}
-          title="Filtrar por role"
-        >
-          <FiFilter /> Filtrar
-        </button>
+        <div className={styles.headerActions}>
+          <button 
+            className={styles.btnNovo}
+            onClick={handleNovoUsuario}
+            title="Novo Usuário"
+          >
+            <FiPlus /> Novo Usuário
+          </button>
+          
+          <button 
+            className={styles.btnFiltro}
+            onClick={() => setMostrarFiltros(!mostrarFiltros)}
+            title="Filtrar por role"
+          >
+            <FiFilter /> Filtrar
+          </button>
+        </div>
       </div>
 
       {mostrarFiltros && (
@@ -223,13 +226,22 @@ export default function GestaoUsuarios() {
                         <FiEye />
                       </button>
                       {usuario.role === 1 && (
-                        <button 
-                          className={styles.btnEditar}
-                          onClick={() => handleEditar(usuario.id)}
-                          title="Editar"
-                        >
-                          <FiEdit />
-                        </button>
+                        <>
+                          <button 
+                            className={styles.btnEditar}
+                            onClick={() => handleEditar(usuario.id)}
+                            title="Editar"
+                          >
+                            <FiEdit />
+                          </button>
+                          <button 
+                            className={styles.btnSenha}
+                            onClick={() => handleNovaSenha(usuario.id)}
+                            title="Atualizar Senha"
+                          >
+                            <FiKey />
+                          </button>
+                        </>
                       )}
                     </div>
                   </td>
@@ -246,7 +258,6 @@ export default function GestaoUsuarios() {
         </table>
       </div>
 
-      {/* Paginação */}
       <div className={styles.paginacao}>
         <div className={styles.infoPaginacao}>
           Mostrando {usuariosPaginaAtual.length} de {usuariosFiltrados.length} usuários
@@ -278,7 +289,6 @@ export default function GestaoUsuarios() {
         </div>
       </div>
 
-      {/* Modal de detalhes */}
       <ModalDetalhesUsuario
         usuarioId={usuarioSelecionado}
         isOpen={modalAberto}

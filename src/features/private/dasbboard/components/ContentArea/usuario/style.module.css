@@ -15,26 +15,49 @@
   gap: 15px;
 }
 
+.headerActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .titulo {
   color: #333;
   margin: 0;
   font-size: 24px;
+  font-weight: 600;
 }
 
-.btnFiltro {
+.btnFiltro, .btnNovo {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background-color: #f5f5f5;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btnFiltro {
+  background-color: #f5f5f5;
+  color: #333;
 }
 
 .btnFiltro:hover {
   background-color: #e0e0e0;
+}
+
+.btnNovo {
+  background-color: #f88737;
+  color: white;
+  border-color: #f88737;
+}
+
+.btnNovo:hover {
+  background-color: #e6762a;
+  border-color: #e6762a;
 }
 
 .filtros {
@@ -53,6 +76,7 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .filtros input[type="radio"] {
@@ -62,12 +86,14 @@
 .tabelaContainer {
   overflow-x: auto;
   margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
 }
 
 .tabela {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  min-width: 800px;
 }
 
 .tabela th,
@@ -81,6 +107,8 @@
   background-color: #f5f5f5;
   font-weight: 600;
   color: #333;
+  position: sticky;
+  top: 0;
 }
 
 .tabela tr:hover {
@@ -88,10 +116,13 @@
 }
 
 .role {
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
 }
 
 .admin {
@@ -100,24 +131,26 @@
 }
 
 .militar {
-  background-color: #d61c1cf3;
+  background-color: #d61c1c;
   color: white;
 }
 
 .acoes {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .acoes button {
   border: none;
-  border-radius: 4px;
-  padding: 6px;
+  border-radius: 6px;
+  padding: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  font-size: 16px;
 }
 
 .btnDeletar {
@@ -147,6 +180,15 @@
   background-color: #ffccbc;
 }
 
+.btnSenha {
+  background-color: #e8f5e8;
+  color: #388e3c;
+}
+
+.btnSenha:hover {
+  background-color: #c8e6c9;
+}
+
 .paginacao {
   display: flex;
   justify-content: space-between;
@@ -161,6 +203,7 @@
 .infoPaginacao {
   color: #666;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .controlesPaginacao {
@@ -173,16 +216,18 @@
   border: 1px solid #e0e0e0;
   background-color: white;
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #333;
 }
 
 .btnPagina:hover:not(:disabled) {
   background-color: #f5f5f5;
+  border-color: #ccc;
 }
 
 .btnPagina:disabled {
@@ -200,10 +245,26 @@
   text-align: center;
   padding: 40px;
   font-size: 18px;
+  border-radius: 8px;
+  margin: 20px;
+}
+
+.carregando {
+  background-color: #f5f5f5;
+  color: #666;
 }
 
 .erro {
+  background-color: #ffebee;
   color: #d32f2f;
+  border: 1px solid #ffcdd2;
+}
+
+.semDados {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+  font-style: italic;
 }
 
 /* Responsividade */
@@ -218,6 +279,11 @@
     align-items: flex-start;
   }
   
+  .headerActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
   .titulo {
     font-size: 20px;
   }
@@ -229,8 +295,13 @@
   }
   
   .acoes {
-    flex-direction: column;
+    flex-direction: row;
     gap: 4px;
+  }
+  
+  .acoes button {
+    padding: 6px;
+    font-size: 14px;
   }
   
   .paginacao {
@@ -258,4 +329,71 @@
     flex-direction: column;
     gap: 10px;
   }
+  
+  .btnFiltro, .btnNovo {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Adicione estas classes ao seu style.module.css existente */
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.btnNovo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #f88737;
+  color: white;
+  border: 1px solid #f88737;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btnNovo:hover {
+  background-color: #e6762a;
+  border-color: #e6762a;
+}
+
+.btnSenha {
+  background-color: #e8f5e8;
+  color: #388e3c;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btnSenha:hover {
+  background-color: #c8e6c9;
+}
+
+/* Ajuste para os botões de ação */
+.acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.acoes button {
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 16px;
 }
