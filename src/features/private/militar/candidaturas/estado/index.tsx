@@ -34,6 +34,7 @@ interface UserData {
   role: number;
   dataRegistro: string;
   militarInfo: {
+    id: number;
     nip: string;
     telefone: string;
   } | null;
@@ -50,6 +51,7 @@ export default function Estado() {
   const [candidatura, setCandidatura] = useState<Candidatura | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,17 +61,43 @@ export default function Estado() {
         
         // Primeiro obtém o usuário logado
         const userResponse = await api.get<ApiResponse<UserData>>('/v1/Usuarios/GetCurrentUser');
-        const userId = userResponse.data.data.id;
+        const userData = userResponse.data.data;
+        setUserData(userData);
+        
+        // Verificar se o usuário tem militarInfo e pegar o ID correto
+        if (!userData.militarInfo || !userData.militarInfo.id) {
+          setError('Perfil militar não encontrado. Verifique se você é um militar cadastrado.');
+          setLoading(false);
+          return;
+        }
+        
+        const militarId = userData.militarInfo.id;
         
         // Depois busca a candidatura com base no ID do militar
         const candidaturaResponse = await api.get<ApiResponse<Candidatura>>(
-          `/v1/Candidaturas/GetByMilitarId?Id=${userId}`
+          `/v1/Candidaturas/GetByMilitarId?Id=${militarId}`
         );
         
-        setCandidatura(candidaturaResponse.data.data);
-      } catch (err) {
-        setError('Erro ao carregar dados da candidatura');
+        if (candidaturaResponse.data.code === 200) {
+          setCandidatura(candidaturaResponse.data.data);
+        } else {
+          // Se não encontrar candidatura, não é erro - pode ser que o usuário ainda não tenha enviado
+          setCandidatura(null);
+        }
+      } catch (err: any) {
         console.error('Erro:', err);
+        
+        // Verificar se é erro 404 (candidatura não encontrada)
+        if (err.response?.status === 404) {
+          setCandidatura(null);
+        } 
+        // Verificar se é erro de autenticação
+        else if (err.response?.status === 401 || err.response?.status === 403) {
+          setError('Sessão expirada. Faça login novamente.');
+        }
+        else {
+          setError('Erro ao carregar dados da candidatura');
+        }
       } finally {
         setLoading(false);
       }
@@ -102,6 +130,14 @@ export default function Estado() {
         <div className={styles.errorCard}>
           <h3>Erro</h3>
           <p>{error}</p>
+          {error.includes('Sessão expirada') && (
+            <button 
+              className={styles.loginButton}
+              onClick={() => window.location.href = '/login'}
+            >
+              Fazer Login
+            </button>
+          )}
         </div>
       </section>
     );
@@ -113,6 +149,18 @@ export default function Estado() {
         <div className={styles.noCandidatura}>
           <h3>Nenhuma candidatura encontrada</h3>
           <p>Você ainda não submeteu nenhuma candidatura.</p>
+          {userData?.militarInfo && (
+            <div className={styles.militarInfo}>
+              <p><strong>NIP:</strong> {userData.militarInfo.nip}</p>
+              <p><strong>Telefone:</strong> {userData.militarInfo.telefone}</p>
+            </div>
+          )}
+          <button 
+            className={styles.submitButton}
+            onClick={() => window.location.href = '/candidatura'}
+          >
+            Submeter Candidatura
+          </button>
         </div>
       </section>
     );
@@ -210,6 +258,17 @@ export default function Estado() {
               {new Date(candidatura.dataCandidatura).toLocaleDateString('pt-BR')}
             </p>
           </div>
+
+          {/* Informações do militar */}
+          {userData?.militarInfo && (
+            <div className={styles.militarInfoCard}>
+              <h3>Informações do Militar</h3>
+              <p><strong>NIP:</strong> {userData.militarInfo.nip}</p>
+              <p><strong>Telefone:</strong> {userData.militarInfo.telefone}</p>
+              <p><strong>Nome:</strong> {userData.nome} {userData.sobreNome}</p>
+              <p><strong>Email:</strong> {userData.email}</p>
+            </div>
+          )}
         </div>
         
         <div className={styles.cardFooter}>

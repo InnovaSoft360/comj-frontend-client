@@ -25,11 +25,102 @@ interface CandidaturaDetalhes {
   diasRestantes: number;
 }
 
+interface UserData {
+  id: number;
+  nome: string;
+  sobreNome: string;
+  email: string;
+  foto: string;
+  role: number;
+  dataRegistro: string;
+  militarInfo: null;
+  administradorInfo: {
+    id: number;
+    cargo: number;
+  };
+}
+
+interface ApiResponse<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
 interface ModalDetalhesCandidaturaProps {
   candidaturaId: number | null;
   isOpen: boolean;
   onClose: () => void;
-  onStatusChange: () => void; // Nova prop para atualizar a lista após mudanças
+  onStatusChange: () => void;
+}
+
+// Componente Modal para Comentário de Rejeição
+function ModalComentarioRejeicao({ 
+  isOpen, 
+  onClose, 
+  onConfirm 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onConfirm: (comentario: string) => void; 
+}) {
+  const [comentario, setComentario] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (comentario.trim()) {
+      onConfirm(comentario);
+      setComentario('');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className={styles.overlayComentario} onClick={onClose}>
+      <div className={styles.modalComentario} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.headerComentario}>
+          <h3>Comentário de Rejeição</h3>
+          <button className={styles.btnFecharComentario} onClick={onClose}>
+            <FiX />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className={styles.formComentario}>
+          <div className={styles.formGroupComentario}>
+            <label htmlFor="comentario" className={styles.labelComentario}>
+              Digite o motivo da rejeição:
+            </label>
+            <textarea
+              id="comentario"
+              value={comentario}
+              onChange={(e) => setComentario(e.target.value)}
+              className={styles.textareaComentario}
+              placeholder="Explique o motivo da rejeição da candidatura..."
+              rows={4}
+              required
+            />
+          </div>
+          
+          <div className={styles.botoesComentario}>
+            <button 
+              type="button" 
+              className={styles.btnCancelarComentario}
+              onClick={onClose}
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              className={styles.btnConfirmarComentario}
+              disabled={!comentario.trim()}
+            >
+              Confirmar Rejeição
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 export default function ModalDetalhesCandidatura({ 
@@ -39,18 +130,20 @@ export default function ModalDetalhesCandidatura({
   onStatusChange 
 }: ModalDetalhesCandidaturaProps) {
   const [candidatura, setCandidatura] = useState<CandidaturaDetalhes | null>(null);
+  const [adminId, setAdminId] = useState<number | null>(null);
   const [carregando, setCarregando] = useState(false);
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [pdfAtivoIndex, setPdfAtivoIndex] = useState<number>(0);
   const [pdfUrls, setPdfUrls] = useState<string[]>([]);
   const [nomesDocumentos, setNomesDocumentos] = useState<string[]>([]);
+  const [modalComentarioAberto, setModalComentarioAberto] = useState(false);
 
   useEffect(() => {
     if (isOpen && candidaturaId) {
+      fetchAdminId();
       fetchDetalhesCandidatura();
     } else {
-      // Resetar estado quando o modal fechar
       setCandidatura(null);
       setPdfAtivoIndex(0);
       setPdfUrls([]);
@@ -59,7 +152,18 @@ export default function ModalDetalhesCandidatura({
     }
   }, [isOpen, candidaturaId]);
 
-  // Função para corrigir URLs HTTPS para HTTP
+  // Buscar o ID do administrador logado
+  const fetchAdminId = async () => {
+    try {
+      const response = await api.get<ApiResponse<UserData>>('/v1/Usuarios/GetCurrentUser');
+      if (response.data.code === 200 && response.data.data.administradorInfo) {
+        setAdminId(response.data.data.administradorInfo.id);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar ID do administrador:', error);
+    }
+  };
+
   const corrigirUrl = (url: string): string => {
     if (!url) return '';
     return url.replace('https://localhost:5027', 'http://localhost:5027');
@@ -75,7 +179,6 @@ export default function ModalDetalhesCandidatura({
       if (response.data.code === 200) {
         setCandidatura(response.data.data);
         
-        // Preparar array de URLs e nomes de documentos (corrigindo HTTPS para HTTP)
         const urls: string[] = [];
         const nomes: string[] = [];
         
@@ -102,7 +205,6 @@ export default function ModalDetalhesCandidatura({
         setPdfUrls(urls);
         setNomesDocumentos(nomes);
         
-        // Definir o primeiro PDF como ativo por padrão
         if (urls.length > 0) {
           setPdfAtivoIndex(0);
         }
@@ -171,20 +273,29 @@ export default function ModalDetalhesCandidatura({
     }
   };
 
-  // Funções para manipular o status da candidatura
+  // Função para gerar mensagem automática de aprovação
+  const gerarMensagemAprovacao = (): string => {
+    return "Parabéns! Sua candidatura foi aprovada com sucesso. Sua documentação está completa e atende a todos os requisitos necessários para o processo.";
+  };
+
+  // Função para aprovar a candidatura
   const handleAprovar = async () => {
-    if (!candidatura) return;
+    if (!candidatura || !adminId) return;
     
     try {
       setProcessando(true);
-      const response = await api.put(`/v1/Candidaturas/UpdateStatus`, {
-        id: candidatura.id,
-        status: 1 // Aprovado
+      const mensagem = gerarMensagemAprovacao();
+      
+      const response = await api.patch(`/v1/Candidaturas/Approve`, {
+        candidaturaId: candidatura.id,
+        adminId: adminId,
+        comentario: mensagem
       });
       
       if (response.data.code === 200) {
         setCandidatura({ ...candidatura, status: 1 });
-        onStatusChange(); // Atualiza a lista principal
+        onStatusChange();
+        alert("Candidatura aprovada com sucesso!");
       } else {
         setErro(response.data.message || 'Erro ao aprovar candidatura');
       }
@@ -196,27 +307,32 @@ export default function ModalDetalhesCandidatura({
     }
   };
 
-  const handleNegar = async () => {
-    if (!candidatura) return;
+  // Função para rejeitar a candidatura com comentário
+  const handleRejeitarComComentario = async (comentario: string) => {
+    if (!candidatura || !adminId) return;
     
     try {
       setProcessando(true);
-      const response = await api.put(`/v1/Candidaturas/UpdateStatus`, {
-        id: candidatura.id,
-        status: 2 // Reprovado
+      
+      const response = await api.patch(`/v1/Candidaturas/Reject`, {
+        candidaturaId: candidatura.id,
+        adminId: adminId,
+        comentario: comentario
       });
       
       if (response.data.code === 200) {
         setCandidatura({ ...candidatura, status: 2 });
-        onStatusChange(); // Atualiza a lista principal
+        onStatusChange();
+        alert("Candidatura rejeitada com sucesso!");
       } else {
-        setErro(response.data.message || 'Erro ao negar candidatura');
+        setErro(response.data.message || 'Erro ao rejeitar candidatura');
       }
     } catch (error: any) {
-      setErro('Erro ao negar candidatura');
+      setErro('Erro ao rejeitar candidatura');
       console.error('Erro:', error);
     } finally {
       setProcessando(false);
+      setModalComentarioAberto(false);
     }
   };
 
@@ -230,8 +346,8 @@ export default function ModalDetalhesCandidatura({
       });
       
       if (response.data.code === 200) {
-        onClose(); // Fecha o modal após arquivar
-        onStatusChange(); // Atualiza a lista principal
+        onClose();
+        onStatusChange();
       } else {
         setErro(response.data.message || 'Erro ao arquivar candidatura');
       }
@@ -243,174 +359,229 @@ export default function ModalDetalhesCandidatura({
     }
   };
 
+  // Abrir modal de comentário para rejeição
+  const handleAbrirModalRejeicao = () => {
+    setModalComentarioAberto(true);
+  };
+
+  // Fechar modal de comentário
+  const handleFecharModalRejeicao = () => {
+    setModalComentarioAberto(false);
+  };
+
+  // Função para determinar quais botões mostrar baseado no status
+  const getBotoesVisiveis = () => {
+    if (!candidatura) return { mostrarAprovar: false, mostrarNegar: false, mostrarArquivar: false };
+
+    const status = candidatura.status;
+    
+    // Status 0 (Pendente) ou 3 (Em Análise): mostrar Aprovar e Negar
+    if (status === 0 || status === 3) {
+      return { mostrarAprovar: true, mostrarNegar: true, mostrarArquivar: false };
+    }
+    
+    // Status 2 (Reprovado): mostrar apenas Arquivar
+    if (status === 2) {
+      return { mostrarAprovar: false, mostrarNegar: false, mostrarArquivar: true };
+    }
+    
+    // Status 1 (Aprovado): não mostrar nenhum botão
+    if (status === 1) {
+      return { mostrarAprovar: false, mostrarNegar: false, mostrarArquivar: false };
+    }
+    
+    // Default: não mostrar nenhum botão
+    return { mostrarAprovar: false, mostrarNegar: false, mostrarArquivar: false };
+  };
+
   if (!isOpen) return null;
 
+  const { mostrarAprovar, mostrarNegar, mostrarArquivar } = getBotoesVisiveis();
+
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h2>Detalhes da Candidatura #{candidaturaId}</h2>
-          <button className={styles.btnFechar} onClick={onClose}>
-            <FiX />
-          </button>
-        </div>
+    <>
+      <div className={styles.overlay} onClick={onClose}>
+        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <div className={styles.header}>
+            <h2>Detalhes da Candidatura #{candidaturaId}</h2>
+            <button className={styles.btnFechar} onClick={onClose}>
+              <FiX />
+            </button>
+          </div>
 
-        <div className={styles.conteudo}>
-          {carregando && <div className={styles.carregando}>Carregando...</div>}
-          
-          {erro && <div className={styles.erro}>{erro}</div>}
-          
-          {candidatura && !carregando && (
-            <>
-              <div className={styles.acoesRapidas}>
-                <button 
-                  className={`${styles.btnAcao} ${styles.btnAprovar}`}
-                  onClick={handleAprovar}
-                  disabled={processando || candidatura.status === 1}
-                  title="Aprovar candidatura"
-                >
-                  <FiCheck /> Aprovar
-                </button>
-                
-                <button 
-                  className={`${styles.btnAcao} ${styles.btnNegar}`}
-                  onClick={handleNegar}
-                  disabled={processando || candidatura.status === 2}
-                  title="Negar candidatura"
-                >
-                  <FiXCircle /> Negar
-                </button>
-                
-                <button 
-                  className={`${styles.btnAcao} ${styles.btnArquivar}`}
-                  onClick={handleArquivar}
-                  disabled={processando}
-                  title="Arquivar candidatura"
-                >
-                  <FiArchive /> Arquivar
-                </button>
-              </div>
-
-              <div className={styles.detalhes}>
-                <div className={styles.infoGeral}>
-                  <h3>Informações Gerais</h3>
-                  <div className={styles.gridInfo}>
-                    <div className={styles.infoItem}>
-                      <span className={styles.label}>ID:</span>
-                      <span className={styles.valor}>{candidatura.id}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.label}>Militar ID:</span>
-                      <span className={styles.valor}>{candidatura.militarID}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.label}>Militar:</span>
-                      <span className={styles.valor}>
-                        NIP: {candidatura.militar.nip}
-                        {candidatura.militar.nome && ` - ${candidatura.militar.nome} ${candidatura.militar.sobreNome || ''}`}
-                      </span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.label}>Status:</span>
-                      <span className={`${styles.valor} ${styles[`status${candidatura.status}`]}`}>
-                        {getStatusText(candidatura.status)}
-                      </span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.label}>Data da Candidatura:</span>
-                      <span className={styles.valor}>{formatarData(candidatura.dataCandidatura)}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <span className={styles.label}>Dias Restantes:</span>
-                      <span className={styles.valor}>
-                        {candidatura.diasRestantes > 0 ? (
-                          <span className={styles.diasPositivos}>{candidatura.diasRestantes} dias</span>
-                        ) : (
-                          <span className={styles.diasNegativos}>Expirado</span>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.documentos}>
-                  <h3>Documentos ({pdfUrls.length})</h3>
-                  
-                  <div className={styles.listaDocumentos}>
-                    {pdfUrls.map((url, index) => (
+          <div className={styles.conteudo}>
+            {carregando && <div className={styles.carregando}>Carregando...</div>}
+            
+            {erro && <div className={styles.erro}>{erro}</div>}
+            
+            {candidatura && !carregando && (
+              <>
+                {/* Botões de ação - condicionais baseados no status */}
+                {(mostrarAprovar || mostrarNegar || mostrarArquivar) && (
+                  <div className={styles.acoesRapidas}>
+                    {mostrarAprovar && (
                       <button 
-                        key={index}
-                        className={`${styles.docItem} ${pdfAtivoIndex === index ? styles.ativo : ''}`}
-                        onClick={() => setPdfAtivoIndex(index)}
+                        className={`${styles.btnAcao} ${styles.btnAprovar}`}
+                        onClick={handleAprovar}
+                        disabled={processando || !adminId}
+                        title={!adminId ? "Aguardando carregamento do ID do administrador" : "Aprovar candidatura"}
                       >
-                        <span>{nomesDocumentos[index]}</span>
-                        <FiDownload 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownload(url, `${nomesDocumentos[index].toLowerCase().replace(/\s+/g, '_')}.pdf`);
-                          }}
-                          title="Download"
-                        />
+                        <FiCheck /> Aprovar
                       </button>
-                    ))}
-                  </div>
-
-                  <div className={styles.visualizadorPdf}>
-                    {pdfUrls.length > 0 ? (
-                      <>
-                        <div className={styles.pdfHeader}>
-                          <div className={styles.pdfNavigation}>
-                            <button 
-                              onClick={voltarDocumento} 
-                              disabled={pdfAtivoIndex === 0}
-                              className={styles.navButton}
-                              title="Documento anterior"
-                            >
-                              <FiChevronLeft />
-                            </button>
-                            
-                            <span className={styles.pdfTitle}>
-                              {pdfAtivoIndex + 1} de {pdfUrls.length}: {nomesDocumentos[pdfAtivoIndex]}
-                            </span>
-                            
-                            <button 
-                              onClick={avancarDocumento} 
-                              disabled={pdfAtivoIndex === pdfUrls.length - 1}
-                              className={styles.navButton}
-                              title="Próximo documento"
-                            >
-                              <FiChevronRight />
-                            </button>
-                          </div>
-                          
-                          <a 
-                            href={pdfUrls[pdfAtivoIndex]} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className={styles.btnAbrirExterno}
-                          >
-                            <FiExternalLink /> Abrir em nova janela
-                          </a>
-                        </div>
-                        <iframe 
-                          src={pdfUrls[pdfAtivoIndex]}
-                          className={styles.pdfFrame}
-                          title={`Visualizador de PDF - ${nomesDocumentos[pdfAtivoIndex]}`}
-                        />
-                      </>
-                    ) : (
-                      <div className={styles.semDocumentos}>
-                        <FiX size={32} />
-                        <span>Nenhum documento disponível</span>
-                      </div>
+                    )}
+                    
+                    {mostrarNegar && (
+                      <button 
+                        className={`${styles.btnAcao} ${styles.btnNegar}`}
+                        onClick={handleAbrirModalRejeicao}
+                        disabled={processando}
+                        title="Rejeitar candidatura"
+                      >
+                        <FiXCircle /> Rejeitar
+                      </button>
+                    )}
+                    
+                    {mostrarArquivar && (
+                      <button 
+                        className={`${styles.btnAcao} ${styles.btnArquivar}`}
+                        onClick={handleArquivar}
+                        disabled={processando}
+                        title="Arquivar candidatura"
+                      >
+                        <FiArchive /> Arquivar
+                      </button>
                     )}
                   </div>
+                )}
+
+                <div className={styles.detalhes}>
+                  <div className={styles.infoGeral}>
+                    <h3>Informações Gerais</h3>
+                    <div className={styles.gridInfo}>
+                      <div className={styles.infoItem}>
+                        <span className={styles.label}>ID:</span>
+                        <span className={styles.valor}>{candidatura.id}</span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.label}>Militar ID:</span>
+                        <span className={styles.valor}>{candidatura.militarID}</span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.label}>Militar:</span>
+                        <span className={styles.valor}>
+                          NIP: {candidatura.militar.nip}
+                          {candidatura.militar.nome && ` - ${candidatura.militar.nome} ${candidatura.militar.sobreNome || ''}`}
+                        </span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.label}>Status:</span>
+                        <span className={`${styles.valor} ${styles[`status${candidatura.status}`]}`}>
+                          {getStatusText(candidatura.status)}
+                        </span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.label}>Data da Candidatura:</span>
+                        <span className={styles.valor}>{formatarData(candidatura.dataCandidatura)}</span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.label}>Dias Restantes:</span>
+                        <span className={styles.valor}>
+                          {candidatura.diasRestantes > 0 ? (
+                            <span className={styles.diasPositivos}>{candidatura.diasRestantes} dias</span>
+                          ) : (
+                            <span className={styles.diasNegativos}>Expirado</span>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.documentos}>
+                    <h3>Documentos ({pdfUrls.length})</h3>
+                    
+                    <div className={styles.listaDocumentos}>
+                      {pdfUrls.map((url, index) => (
+                        <button 
+                          key={index}
+                          className={`${styles.docItem} ${pdfAtivoIndex === index ? styles.ativo : ''}`}
+                          onClick={() => setPdfAtivoIndex(index)}
+                        >
+                          <span>{nomesDocumentos[index]}</span>
+                          <FiDownload 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownload(url, `${nomesDocumentos[index].toLowerCase().replace(/\s+/g, '_')}.pdf`);
+                            }}
+                            title="Download"
+                          />
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className={styles.visualizadorPdf}>
+                      {pdfUrls.length > 0 ? (
+                        <>
+                          <div className={styles.pdfHeader}>
+                            <div className={styles.pdfNavigation}>
+                              <button 
+                                onClick={voltarDocumento} 
+                                disabled={pdfAtivoIndex === 0}
+                                className={styles.navButton}
+                                title="Documento anterior"
+                              >
+                                <FiChevronLeft />
+                              </button>
+                              
+                              <span className={styles.pdfTitle}>
+                                {pdfAtivoIndex + 1} de {pdfUrls.length}: {nomesDocumentos[pdfAtivoIndex]}
+                              </span>
+                              
+                              <button 
+                                onClick={avancarDocumento} 
+                                disabled={pdfAtivoIndex === pdfUrls.length - 1}
+                                className={styles.navButton}
+                                title="Próximo documento"
+                              >
+                                <FiChevronRight />
+                              </button>
+                            </div>
+                            
+                            <a 
+                              href={pdfUrls[pdfAtivoIndex]} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className={styles.btnAbrirExterno}
+                            >
+                              <FiExternalLink /> Abrir em nova janela
+                            </a>
+                          </div>
+                          <iframe 
+                            src={pdfUrls[pdfAtivoIndex]}
+                            className={styles.pdfFrame}
+                            title={`Visualizador de PDF - ${nomesDocumentos[pdfAtivoIndex]}`}
+                          />
+                        </>
+                      ) : (
+                        <div className={styles.semDocumentos}>
+                          <FiX size={32} />
+                          <span>Nenhum documento disponível</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Modal de Comentário para Rejeição */}
+      <ModalComentarioRejeicao
+        isOpen={modalComentarioAberto}
+        onClose={handleFecharModalRejeicao}
+        onConfirm={handleRejeitarComComentario}
+      />
+    </>
   );
 }
