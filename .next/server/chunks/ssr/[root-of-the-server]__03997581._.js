@@ -75,12 +75,12 @@ function Footer() {
             label: 'Início'
         },
         {
-            href: '/processo',
-            label: 'Processo'
-        },
-        {
             href: '/galeria',
             label: 'Galeria'
+        },
+        {
+            href: "/localizacao",
+            label: "Localização"
         },
         {
             href: '/contato',
@@ -649,12 +649,12 @@ function Header() {
             label: "Início"
         },
         {
-            href: "/processo",
-            label: "Processo"
-        },
-        {
             href: "/galeria",
             label: "Galeria"
+        },
+        {
+            href: "/localizacao",
+            label: "Localização"
         },
         {
             href: "/contato",

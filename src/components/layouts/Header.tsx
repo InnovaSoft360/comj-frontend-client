@@ -28,8 +28,8 @@ export default function Header() {
 
   const menuItems = [
     { href: "/", label: "Início" },
-    { href: "/processo", label: "Processo" },
     { href: "/galeria", label: "Galeria" },
+    { href: "/localizacao", label: "Localização" },
     { href: "/contato", label: "Contato" }
   ];
 
