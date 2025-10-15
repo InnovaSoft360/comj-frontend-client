@@ -17,11 +17,8 @@ import {
   FaTools,
   FaBed,
   FaBath,
-  FaCarSide,
-  FaRulerCombined,
   FaCheck,
-  FaHome,
-  FaHeart
+  FaCarSide,
 } from "react-icons/fa";
 
 // Dados do slider
