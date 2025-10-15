@@ -1,19 +1,43 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaWhatsapp, FaSun, FaMoon } from "react-icons/fa";
+import { FaUser, FaFileAlt, FaSignOutAlt, FaChevronDown, FaWhatsapp } from "react-icons/fa";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Mock user data - substituir com dados reais do teu contexto
+  const user = {
+    name: "Carlos Silva",
+    email: "carlos@email.com",
+    avatar: null // ou URL da imagem
+  };
 
   // Dark Mode Effect
   useEffect(() => {
     const isDark = localStorage.getItem('darkMode') === 'true';
     setDarkMode(isDark);
     document.documentElement.classList.toggle('dark', isDark);
+  }, []);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const toggleDarkMode = () => {
@@ -26,11 +50,33 @@ export default function Header() {
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const closeMenu = () => setMenuOpen(false);
 
+  const toggleUserMenu = () => setUserMenuOpen(!userMenuOpen);
+
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const handleLogout = () => {
+    // Implementar lógica de logout
+    console.log("Logout clicked");
+    setUserMenuOpen(false);
+  };
+
   const menuItems = [
     { href: "/", label: "Início" },
     { href: "/galeria", label: "Galeria" },
     { href: "/localizacao", label: "Localização" },
     { href: "/contato", label: "Contato" }
+  ];
+
+  const userMenuItems = [
+    { href: "/perfil", label: "Perfil", icon: FaUser },
+    { href: "/candidatura", label: "Minha Candidatura", icon: FaFileAlt },
   ];
 
   const whatsappNumber = "935751955";
@@ -55,20 +101,37 @@ export default function Header() {
               <span className="hidden sm:inline opacity-90">- Fale connosco</span>
             </a>
 
-            {/* Dark Mode Toggle */}
+            {/* Dark Mode Toggle - Com animação ULTRA FODA */}
             <button
               onClick={toggleDarkMode}
-              className="flex items-center space-x-2 p-1 rounded-full hover:bg-white/20 transition-colors duration-200 group"
-              aria-label="Alternar modo escuro"
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+              className="relative overflow-hidden group px-4 py-1 rounded-full border-2 border-white/30 hover:border-white/60 transition-all duration-500"
             >
-              {darkMode ? (
-                <FaSun className="w-4 h-4 text-yellow-300 group-hover:rotate-45 transition-transform duration-500" />
-              ) : (
-                <FaMoon className="w-4 h-4 text-blue-200 group-hover:rotate-12 transition-transform duration-500" />
-              )}
-              <span className="hidden sm:inline font-medium">
-                {darkMode ? 'Modo Claro' : 'Modo Escuro'}
+              {/* Background animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Efeito de brilho */}
+              <div className="absolute inset-0 bg-white/20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              
+              {/* Texto principal */}
+              <span className="relative z-10 font-bold text-sm tracking-wider">
+                {darkMode ? 'BEM-VINDO' : 'CONDOMÍNIO OSVALDO MJ'}
               </span>
+              
+              {/* Efeito de partículas no hover */}
+              {isHovering && (
+                <>
+                  <div className="absolute top-1 left-2 w-1 h-1 bg-white rounded-full animate-ping" />
+                  <div className="absolute bottom-1 right-2 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.2s' }} />
+                  <div className="absolute top-1 right-4 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.4s' }} />
+                </>
+              )}
+              
+              {/* Efeito de borda pulsante */}
+              <div className={`absolute inset-0 rounded-full border-2 ${
+                darkMode ? 'border-yellow-300' : 'border-blue-300'
+              } opacity-0 group-hover:opacity-100 animate-pulse`} />
             </button>
           </div>
         </div>
@@ -124,9 +187,79 @@ export default function Header() {
               </Link>
             ))}
             
+            {/* User Profile Menu */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={toggleUserMenu}
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 group"
+              >
+                <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-full text-white font-semibold text-sm group-hover:scale-105 transition-transform duration-200">
+                  {user.avatar ? (
+                    <Image 
+                      src={user.avatar} 
+                      alt={user.name}
+                      width={40}
+                      height={40}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    getUserInitials(user.name)
+                  )}
+                </div>
+                <span className="text-gray-700 dark:text-gray-300 font-medium max-w-32 truncate">
+                  {user.name.split(' ')[0]}
+                </span>
+                <FaChevronDown className={`w-3 h-3 text-gray-500 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* User Dropdown Menu */}
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in-0 zoom-in-95">
+                  {/* User Info */}
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {user.name}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  {/* Menu Items */}
+                  <div className="py-1">
+                    {userMenuItems.map((item) => {
+                      const IconComponent = item.icon;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 group"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <IconComponent className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition-colors" />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  {/* Logout */}
+                  <div className="border-t border-gray-100 dark:border-gray-700 pt-1">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 group"
+                    >
+                      <FaSignOutAlt className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      <span>Sair</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* CTA Button */}
             <Link
-              href="/candidatar"
+              href="/login"
               className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:translate-y-[-2px] transform relative overflow-hidden group"
             >
               <span className="relative z-10">Candidatar-se</span>
@@ -135,54 +268,187 @@ export default function Header() {
           </div>
 
           {/* Mobile Menu Toggle */}
-          <button
-            className="lg:hidden flex flex-col space-y-1.5 p-2 group"
-            onClick={toggleMenu}
-            aria-label="Abrir menu"
-          >
-            <span className={`w-6 h-0.5 bg-gray-700 dark:bg-gray-300 transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2 bg-orange-500' : 'group-hover:bg-orange-500'}`}></span>
-            <span className={`w-6 h-0.5 bg-gray-700 dark:bg-gray-300 transition-all duration-300 ${menuOpen ? 'opacity-0' : 'group-hover:bg-orange-500'}`}></span>
-            <span className={`w-6 h-0.5 bg-gray-700 dark:bg-gray-300 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2 bg-orange-500' : 'group-hover:bg-orange-500'}`}></span>
-          </button>
+          <div className="lg:hidden flex items-center space-x-4">
+            {/* User Avatar Mobile */}
+            <button
+              onClick={toggleUserMenu}
+              className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-full text-white font-semibold text-sm hover:scale-105 transition-transform duration-200"
+            >
+              {user.avatar ? (
+                <Image 
+                  src={user.avatar} 
+                  alt={user.name}
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+              ) : (
+                getUserInitials(user.name)
+              )}
+            </button>
+
+            <button
+              className="flex flex-col space-y-1.5 p-2 group"
+              onClick={toggleMenu}
+              aria-label="Abrir menu"
+            >
+              <span className={`w-6 h-0.5 bg-gray-700 dark:bg-gray-300 transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2 bg-orange-500' : 'group-hover:bg-orange-500'}`}></span>
+              <span className={`w-6 h-0.5 bg-gray-700 dark:bg-gray-300 transition-all duration-300 ${menuOpen ? 'opacity-0' : 'group-hover:bg-orange-500'}`}></span>
+              <span className={`w-6 h-0.5 bg-gray-700 dark:bg-gray-300 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2 bg-orange-500' : 'group-hover:bg-orange-500'}`}></span>
+            </button>
+          </div>
         </nav>
       </div>
 
-      {/* Mobile Menu */}
-      <div className={`lg:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 transition-all duration-500 ease-in-out overflow-hidden ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="px-4 py-6 space-y-4">
-          {menuItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="block py-3 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 font-medium border-b border-gray-100 dark:border-gray-700 transition-all duration-300 transform hover:translate-x-2"
+      {/* Mobile Menu - Full Screen */}
+      <div className={`lg:hidden fixed inset-0 bg-white dark:bg-gray-900 z-40 transition-all duration-500 ease-in-out transform ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="flex flex-col h-full pt-20 pb-8 px-6">
+          {/* Close Button */}
+          <button
+            onClick={closeMenu}
+            className="absolute top-6 right-6 p-2 text-gray-500 hover:text-orange-500 transition-colors"
+            aria-label="Fechar menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Navigation Items */}
+          <div className="flex-1 space-y-6">
+            {menuItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="block py-4 text-2xl font-semibold text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 border-b border-gray-200 dark:border-gray-800 transition-all duration-300 transform hover:translate-x-4"
+                onClick={closeMenu}
+              >
+                {item.label}
+              </Link>
+            ))}
+            
+            {/* WhatsApp Mobile */}
+            <a 
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-4 py-4 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 border-b border-gray-200 dark:border-gray-800 transition-all duration-300 transform hover:translate-x-4"
               onClick={closeMenu}
             >
-              {item.label}
+              <FaWhatsapp className="w-6 h-6" />
+              <span className="text-2xl font-semibold">Falar no WhatsApp</span>
+            </a>
+          </div>
+
+          {/* User Section Mobile */}
+          <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-r from-orange-500 to-red-600 rounded-full text-white font-semibold text-lg">
+                {user.avatar ? (
+                  <Image 
+                    src={user.avatar} 
+                    alt={user.name}
+                    width={56}
+                    height={56}
+                    className="rounded-full"
+                  />
+                ) : (
+                  getUserInitials(user.name)
+                )}
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-gray-800 dark:text-white">
+                  {user.name}
+                </p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {user.email}
+                </p>
+              </div>
+            </div>
+
+            {/* User Actions Mobile */}
+            <div className="space-y-3">
+              {userMenuItems.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center space-x-4 py-3 text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
+                    onClick={closeMenu}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
+                );
+              })}
+              
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-4 py-3 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 w-full"
+              >
+                <FaSignOutAlt className="w-5 h-5" />
+                <span className="font-medium">Sair</span>
+              </button>
+            </div>
+
+            {/* CTA Button Mobile */}
+            <Link
+              href="/login"
+              className="block w-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-center py-4 rounded-xl font-semibold text-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg mt-6 transform hover:scale-105"
+              onClick={closeMenu}
+            >
+              Candidatar-se
             </Link>
-          ))}
-          
-          {/* WhatsApp Mobile */}
-          <a 
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-3 py-3 text-green-600 dark:text-green-400 font-medium border-b border-gray-100 dark:border-gray-700 transition-all duration-300 transform hover:translate-x-2"
-            onClick={closeMenu}
-          >
-            <FaWhatsapp className="w-5 h-5" />
-            <span>Falar no WhatsApp</span>
-          </a>
-          
-          {/* CTA Button Mobile */}
-          <Link
-            href="/candidatar"
-            className="block w-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-center py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg mt-4 transform hover:scale-105"
-            onClick={closeMenu}
-          >
-            Candidatar-se
-          </Link>
+          </div>
         </div>
       </div>
+
+      {/* Mobile User Menu Overlay */}
+      {userMenuOpen && (
+        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setUserMenuOpen(false)}>
+          <div className="absolute top-20 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-64 py-2 animate-in fade-in-0 zoom-in-95">
+            {/* User Info */}
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                {user.name}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {user.email}
+              </p>
+            </div>
+
+            {/* Menu Items */}
+            <div className="py-1">
+              {userMenuItems.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <IconComponent className="w-4 h-4 text-gray-400" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Logout */}
+            <div className="border-t border-gray-100 dark:border-gray-700 pt-1">
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
+              >
+                <FaSignOutAlt className="w-4 h-4" />
+                <span>Sair</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

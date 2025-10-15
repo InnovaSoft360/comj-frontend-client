@@ -245,7 +245,7 @@ function Home() {
                 "Home.useEffect.timer": ()=>{
                     setIsLoading(false);
                 }
-            }["Home.useEffect.timer"], 5000);
+            }["Home.useEffect.timer"], 3000);
             return ({
                 "Home.useEffect": ()=>clearTimeout(timer)
             })["Home.useEffect"];

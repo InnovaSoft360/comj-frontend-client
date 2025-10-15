@@ -73,19 +73,7 @@ var __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$g
 ;
 const metadata = {
     title: "Condomínio Osvaldo MJ - Residências T3 no Zango-4",
-    description: "Residências T3 modernas e seguras para famílias no Zango-4, Icolo e Bengo. Candidatura online simplificada.",
-    keywords: "residências T3, Zango-4, Icolo e Bengo, casas, condomínio, Angola, moradias, candidatura",
-    authors: [
-        {
-            name: "Condomínio Osvaldo MJ"
-        }
-    ],
-    openGraph: {
-        title: "Condomínio Osvaldo MJ - Residências T3",
-        description: "Residências T3 modernas para famílias no Zango-4",
-        type: "website",
-        locale: "pt_AO"
-    }
+    description: "Residências T3 modernas e seguras para famílias no Zango-4, Icolo e Bengo. Candidatura online simplificada."
 };
 function RootLayout({ children }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("html", {
@@ -98,7 +86,7 @@ function RootLayout({ children }) {
                         content: "index, follow"
                     }, void 0, false, {
                         fileName: "[project]/src/app/layout.tsx",
-                        lineNumber: 36,
+                        lineNumber: 28,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("meta", {
@@ -106,7 +94,7 @@ function RootLayout({ children }) {
                         content: "index, follow"
                     }, void 0, false, {
                         fileName: "[project]/src/app/layout.tsx",
-                        lineNumber: 37,
+                        lineNumber: 29,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("link", {
@@ -114,34 +102,27 @@ function RootLayout({ children }) {
                         href: "https://condominio-osvaldomj.com"
                     }, void 0, false, {
                         fileName: "[project]/src/app/layout.tsx",
-                        lineNumber: 38,
+                        lineNumber: 30,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/layout.tsx",
-                lineNumber: 35,
+                lineNumber: 27,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("body", {
-                className: `${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$geist_a71539c9$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} ${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$geist_mono_8d43a2aa$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} antialiased bg-gray-50`,
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
-                    className: "min-h-screen",
-                    children: children
-                }, void 0, false, {
-                    fileName: "[project]/src/app/layout.tsx",
-                    lineNumber: 43,
-                    columnNumber: 9
-                }, this)
+                className: `${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$geist_a71539c9$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} ${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$geist_mono_8d43a2aa$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} antialiased`,
+                children: children
             }, void 0, false, {
                 fileName: "[project]/src/app/layout.tsx",
-                lineNumber: 40,
+                lineNumber: 32,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/layout.tsx",
-        lineNumber: 34,
+        lineNumber: 26,
         columnNumber: 5
     }, this);
 }
