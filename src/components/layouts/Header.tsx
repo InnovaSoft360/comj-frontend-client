@@ -7,24 +7,15 @@ import { FaUser, FaFileAlt, FaSignOutAlt, FaChevronDown, FaWhatsapp } from "reac
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Mock user data - substituir com dados reais do teu contexto
+  // Mock user data
   const user = {
     name: "Carlos Silva",
     email: "carlos@email.com",
-    avatar: null // ou URL da imagem
+    avatar: null
   };
-
-  // Dark Mode Effect
-  useEffect(() => {
-    const isDark = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(isDark);
-    document.documentElement.classList.toggle('dark', isDark);
-  }, []);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -40,16 +31,8 @@ export default function Header() {
     };
   }, []);
 
-  const toggleDarkMode = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    localStorage.setItem('darkMode', newDarkMode.toString());
-    document.documentElement.classList.toggle('dark', newDarkMode);
-  };
-
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const closeMenu = () => setMenuOpen(false);
-
   const toggleUserMenu = () => setUserMenuOpen(!userMenuOpen);
 
   const getUserInitials = (name: string) => {
@@ -62,7 +45,6 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    // Implementar lógica de logout
     console.log("Logout clicked");
     setUserMenuOpen(false);
   };
@@ -85,11 +67,11 @@ export default function Header() {
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-lg sticky top-0 z-50 transition-colors duration-300">
-      {/* Top Bar - WhatsApp & Dark Mode */}
+      {/* Top Bar - Apenas WhatsApp */}
       <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-2 text-sm">
-            {/* WhatsApp Contact */}
+          <div className="flex justify-end items-center py-2 text-sm">
+            {/* WhatsApp Contact - No canto direito */}
             <a 
               href={whatsappUrl}
               target="_blank"
@@ -100,39 +82,6 @@ export default function Header() {
               <span className="font-medium">+244 935 751 955</span>
               <span className="hidden sm:inline opacity-90">- Fale connosco</span>
             </a>
-
-            {/* Dark Mode Toggle - Com animação ULTRA FODA */}
-            <button
-              onClick={toggleDarkMode}
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
-              className="relative overflow-hidden group px-4 py-1 rounded-full border-2 border-white/30 hover:border-white/60 transition-all duration-500"
-            >
-              {/* Background animado */}
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Efeito de brilho */}
-              <div className="absolute inset-0 bg-white/20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              
-              {/* Texto principal */}
-              <span className="relative z-10 font-bold text-sm tracking-wider">
-                {darkMode ? 'BEM-VINDO' : 'CONDOMÍNIO OSVALDO MJ'}
-              </span>
-              
-              {/* Efeito de partículas no hover */}
-              {isHovering && (
-                <>
-                  <div className="absolute top-1 left-2 w-1 h-1 bg-white rounded-full animate-ping" />
-                  <div className="absolute bottom-1 right-2 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.2s' }} />
-                  <div className="absolute top-1 right-4 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.4s' }} />
-                </>
-              )}
-              
-              {/* Efeito de borda pulsante */}
-              <div className={`absolute inset-0 rounded-full border-2 ${
-                darkMode ? 'border-yellow-300' : 'border-blue-300'
-              } opacity-0 group-hover:opacity-100 animate-pulse`} />
-            </button>
           </div>
         </div>
       </div>
@@ -144,26 +93,16 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group" onClick={closeMenu}>
             <div className="relative">
-              {/* Logo Desktop */}
               <Image 
                 src="/images/logo.png" 
                 alt="Condomínio Osvaldo MJ" 
-                width={65} 
-                height={65}
-                className="hidden lg:block transition-transform duration-300 group-hover:scale-105"
-              />
-              
-              {/* Logo Mobile */}
-              <Image 
-                src="/images/logo.png"
-                alt="Condomínio Osvaldo MJ" 
                 width={50} 
                 height={50}
-                className="lg:hidden transition-transform duration-300 group-hover:scale-105"
+                className="lg:w-16 lg:h-16 transition-transform duration-300 group-hover:scale-105"
               />
             </div>
             
-            {/* Brand Text */}
+            {/* Brand Text - Desktop */}
             <div className="hidden lg:block">
               <h1 className="text-xl font-bold text-gray-800 dark:text-white transition-colors duration-300">
                 Condomínio Osvaldo MJ
@@ -269,7 +208,15 @@ export default function Header() {
 
           {/* Mobile Menu Toggle */}
           <div className="lg:hidden flex items-center space-x-4">
-            {/* User Avatar Mobile */}
+            {/* CTA Button Mobile */}
+            <Link
+              href="/login"
+              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg"
+            >
+              Candidatar-se
+            </Link>
+
+            {/* User Avatar Mobile - Only shows avatar, menu opens on click */}
             <button
               onClick={toggleUserMenu}
               className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-full text-white font-semibold text-sm hover:scale-105 transition-transform duration-200"
@@ -300,7 +247,7 @@ export default function Header() {
         </nav>
       </div>
 
-      {/* Mobile Menu - Full Screen */}
+      {/* Mobile Menu - Full Screen (APENAS NAVEGAÇÃO PRINCIPAL) */}
       <div className={`lg:hidden fixed inset-0 bg-white dark:bg-gray-900 z-40 transition-all duration-500 ease-in-out transform ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full pt-20 pb-8 px-6">
           {/* Close Button */}
@@ -314,7 +261,7 @@ export default function Header() {
             </svg>
           </button>
 
-          {/* Navigation Items */}
+          {/* Navigation Items - APENAS MENU PRINCIPAL */}
           <div className="flex-1 space-y-6">
             {menuItems.map((item) => (
               <Link
@@ -326,85 +273,14 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
-            
-            {/* WhatsApp Mobile */}
-            <a 
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-4 py-4 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 border-b border-gray-200 dark:border-gray-800 transition-all duration-300 transform hover:translate-x-4"
-              onClick={closeMenu}
-            >
-              <FaWhatsapp className="w-6 h-6" />
-              <span className="text-2xl font-semibold">Falar no WhatsApp</span>
-            </a>
           </div>
 
-          {/* User Section Mobile */}
-          <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
-            <div className="flex items-center space-x-4 mb-6">
-              <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-r from-orange-500 to-red-600 rounded-full text-white font-semibold text-lg">
-                {user.avatar ? (
-                  <Image 
-                    src={user.avatar} 
-                    alt={user.name}
-                    width={56}
-                    height={56}
-                    className="rounded-full"
-                  />
-                ) : (
-                  getUserInitials(user.name)
-                )}
-              </div>
-              <div>
-                <p className="text-lg font-semibold text-gray-800 dark:text-white">
-                  {user.name}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-
-            {/* User Actions Mobile */}
-            <div className="space-y-3">
-              {userMenuItems.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-center space-x-4 py-3 text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
-                    onClick={closeMenu}
-                  >
-                    <IconComponent className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                );
-              })}
-              
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-4 py-3 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 w-full"
-              >
-                <FaSignOutAlt className="w-5 h-5" />
-                <span className="font-medium">Sair</span>
-              </button>
-            </div>
-
-            {/* CTA Button Mobile */}
-            <Link
-              href="/login"
-              className="block w-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-center py-4 rounded-xl font-semibold text-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg mt-6 transform hover:scale-105"
-              onClick={closeMenu}
-            >
-              Candidatar-se
-            </Link>
-          </div>
+          {/* REMOVIDA A SEÇÃO DO USUÁRIO DO MENU MOBILE */}
+          {/* O usuário agora só aparece no dropdown separado */}
         </div>
       </div>
 
-      {/* Mobile User Menu Overlay */}
+      {/* Mobile User Menu Overlay - MENU SEPARADO PARA USUÁRIO */}
       {userMenuOpen && (
         <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setUserMenuOpen(false)}>
           <div className="absolute top-20 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-64 py-2 animate-in fade-in-0 zoom-in-95">

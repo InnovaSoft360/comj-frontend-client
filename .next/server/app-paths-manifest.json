@@ -5,6 +5,5 @@
   "/(containers)/contato/page": "app/(containers)/contato/page.js",
   "/(containers)/galeria/page": "app/(containers)/galeria/page.js",
   "/(containers)/localizacao/page": "app/(containers)/localizacao/page.js",
-  "/(containers)/page": "app/(containers)/page.js",
-  "/_not-found/page": "app/_not-found/page.js"
+  "/(containers)/page": "app/(containers)/page.js"
 }
