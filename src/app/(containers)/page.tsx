@@ -174,7 +174,6 @@ const plantasData = [
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   // Detecta se é mobile
   useEffect(() => {
@@ -188,15 +187,6 @@ export default function Home() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Simula loading do conteúdo
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   // Auto-play do slider
   useEffect(() => {
     const interval = setInterval(() => {
@@ -204,175 +194,6 @@ export default function Home() {
     }, 6000);
     return () => clearInterval(interval);
   }, []);
-
-  // Skeleton Components
-  const SkeletonHero = () => (
-    <section className="relative min-h-screen overflow-hidden bg-gray-300 dark:bg-gray-700">
-      <div className="relative h-screen w-full">
-        <div className="absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse"></div>
-        
-        <div className="relative z-10 flex items-center justify-center h-full px-4 sm:px-6 lg:px-8">
-          <div className="text-center w-full max-w-6xl mx-auto">
-            <div className="w-full">
-              <div className="h-16 sm:h-20 md:h-24 lg:h-28 xl:h-32 bg-gray-400 dark:bg-gray-600 rounded-2xl mx-auto mb-4 animate-pulse max-w-4xl"></div>
-              
-              <div className="h-6 sm:h-8 bg-gray-400 dark:bg-gray-600 rounded-xl mx-auto mb-8 animate-pulse max-w-2xl"></div>
-              
-              <div className="h-14 bg-gray-400 dark:bg-gray-600 rounded-xl mx-auto animate-pulse max-w-xs"></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
-          <div className="flex space-x-3">
-            {[1, 2, 3, 4].map((_, index) => (
-              <div
-                key={index}
-                className="w-3 h-3 bg-gray-400 dark:bg-gray-600 rounded-full animate-pulse"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-
-  const SkeletonProcesso = () => (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="h-12 bg-gray-300 dark:bg-gray-600 rounded-2xl mx-auto mb-6 animate-pulse max-w-md"></div>
-          <div className="h-1 bg-gray-300 dark:bg-gray-600 mx-auto mb-6 w-24 animate-pulse"></div>
-          <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded-xl mx-auto animate-pulse max-w-2xl"></div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
-          {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-2xl animate-pulse"></div>
-                <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse"></div>
-              </div>
-              
-              <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded-xl mb-4 animate-pulse"></div>
-              <div className="h-16 bg-gray-300 dark:bg-gray-600 rounded-xl mb-6 animate-pulse"></div>
-              
-              <div className="space-y-3">
-                {[1, 2, 3].map((subItem) => (
-                  <div key={subItem} className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
-                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded flex-1 animate-pulse"></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-
-  const SkeletonCaracteristicas = () => (
-    <section className="py-20 bg-white dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="h-12 bg-gray-300 dark:bg-gray-600 rounded-2xl mx-auto mb-6 animate-pulse max-w-lg"></div>
-          <div className="h-1 bg-gray-300 dark:bg-gray-600 mx-auto mb-6 w-24 animate-pulse"></div>
-          <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded-xl mx-auto animate-pulse max-w-2xl"></div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[1, 2, 3, 4, 5, 6].map((item) => (
-            <div key={item} className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-3xl p-8 shadow-2xl border border-gray-100 dark:border-gray-600">
-              <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-2xl mb-6 animate-pulse"></div>
-              <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded-xl mb-4 animate-pulse"></div>
-              <div className="h-20 bg-gray-300 dark:bg-gray-600 rounded-xl animate-pulse"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-
-  const SkeletonModelos = () => (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="h-12 bg-gray-300 dark:bg-gray-600 rounded-2xl mx-auto mb-6 animate-pulse max-w-xs"></div>
-          <div className="h-1 bg-gray-300 dark:bg-gray-600 mx-auto mb-6 w-24 animate-pulse"></div>
-          <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded-xl mx-auto animate-pulse max-w-2xl"></div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700">
-              <div className="h-64 bg-gray-300 dark:bg-gray-600 animate-pulse"></div>
-              
-              <div className="p-8">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex-1">
-                    <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded-xl mb-2 animate-pulse"></div>
-                    <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse w-3/4"></div>
-                  </div>
-                  <div className="text-right">
-                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-16 mb-1"></div>
-                    <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-12"></div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  {[1, 2, 3].map((icon) => (
-                    <div key={icon} className="text-center">
-                      <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-lg mx-auto mb-2 animate-pulse"></div>
-                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="space-y-2">
-                  {[1, 2, 3, 4].map((destaque) => (
-                    <div key={destaque} className="flex items-center space-x-3">
-                      <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
-                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded flex-1 animate-pulse"></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-
-  const SkeletonCTA = () => (
-    <section className="py-20 bg-gradient-to-r from-orange-500 to-red-600 relative overflow-hidden">
-      <div className="absolute inset-0 bg-black/20"></div>
-      
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="h-12 bg-orange-400 rounded-2xl mx-auto mb-6 animate-pulse max-w-lg"></div>
-        <div className="h-16 bg-orange-400 rounded-xl mx-auto mb-8 animate-pulse max-w-2xl"></div>
-        
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <div className="h-14 bg-white rounded-xl animate-pulse w-48"></div>
-          <div className="h-14 bg-transparent border-2 border-white rounded-xl animate-pulse w-48"></div>
-        </div>
-      </div>
-    </section>
-  );
-
-  // Render Skeleton se estiver carregando
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
-        <SkeletonHero />
-        <SkeletonProcesso />
-        <SkeletonCaracteristicas />
-        <SkeletonModelos />
-        <SkeletonCTA />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -706,6 +527,7 @@ export default function Home() {
               Realize o sonho da casa própria em um condomínio moderno, seguro e com todas 
               as comodidades que sua família merece.
             </p>
+          
           </motion.div>
         </div>
       </section>
