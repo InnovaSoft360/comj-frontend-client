@@ -2,7 +2,7 @@ module.exports = [
 "[project]/src/app/(containers)/perfil/page.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
-// app/(container)/user/perfil/page.tsx
+// app/(container)/perfil/page.tsx
 __turbopack_context__.s([
     "default",
     ()=>PerfilPage

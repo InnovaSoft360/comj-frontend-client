@@ -1,6 +1,7 @@
+// components/ui/customAlert.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // Interface para o alerta
 interface AlertProps {
@@ -14,6 +15,11 @@ interface AlertProps {
 const CustomAlert = ({ message, type = 'info', duration = 3000, onClose }: AlertProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+    setTimeout(() => onClose(), 300);
+  }, [onClose]);
+
   useEffect(() => {
     setIsVisible(true);
     
@@ -24,12 +30,7 @@ const CustomAlert = ({ message, type = 'info', duration = 3000, onClose }: Alert
       
       return () => clearTimeout(timer);
     }
-  }, [duration]);
-
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(() => onClose(), 300);
-  };
+  }, [duration, handleClose]);
 
   return (
     <div 

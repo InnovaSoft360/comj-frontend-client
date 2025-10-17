@@ -139,6 +139,7 @@ const __TURBOPACK__default__export__ = api;
 "[project]/src/components/ui/customAlert.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
+// components/ui/customAlert.tsx
 __turbopack_context__.s([
     "default",
     ()=>__TURBOPACK__default__export__,
@@ -153,6 +154,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 // Componente do Alert
 const CustomAlert = ({ message, type = 'info', duration = 3000, onClose })=>{
     const [isVisible, setIsVisible] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const handleClose = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(()=>{
+        setIsVisible(false);
+        setTimeout(()=>onClose(), 300);
+    }, [
+        onClose
+    ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         setIsVisible(true);
         if (duration > 0) {
@@ -162,12 +169,9 @@ const CustomAlert = ({ message, type = 'info', duration = 3000, onClose })=>{
             return ()=>clearTimeout(timer);
         }
     }, [
-        duration
+        duration,
+        handleClose
     ]);
-    const handleClose = ()=>{
-        setIsVisible(false);
-        setTimeout(()=>onClose(), 300);
-    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: `fixed top-4 right-4 min-w-[300px] p-4 rounded-lg shadow-xl transform transition-all duration-300 ease-in-out z-50 flex items-center ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} ${type === 'success' ? 'bg-gradient-to-r from-green-500 to-green-600 border-l-4 border-green-700 text-white' : type === 'error' ? 'bg-gradient-to-r from-red-500 to-red-600 border-l-4 border-red-700 text-white' : type === 'warning' ? 'bg-gradient-to-r from-orange-500 to-orange-600 border-l-4 border-orange-700 text-white' : 'bg-gradient-to-r from-blue-500 to-blue-600 border-l-4 border-blue-700 text-white'}`,
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -178,7 +182,7 @@ const CustomAlert = ({ message, type = 'info', duration = 3000, onClose })=>{
                     children: message
                 }, void 0, false, {
                     fileName: "[project]/src/components/ui/customAlert.tsx",
-                    lineNumber: 46,
+                    lineNumber: 47,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -187,18 +191,18 @@ const CustomAlert = ({ message, type = 'info', duration = 3000, onClose })=>{
                     children: "×"
                 }, void 0, false, {
                     fileName: "[project]/src/components/ui/customAlert.tsx",
-                    lineNumber: 49,
+                    lineNumber: 50,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0))
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/ui/customAlert.tsx",
-            lineNumber: 45,
+            lineNumber: 46,
             columnNumber: 7
         }, ("TURBOPACK compile-time value", void 0))
     }, void 0, false, {
         fileName: "[project]/src/components/ui/customAlert.tsx",
-        lineNumber: 35,
+        lineNumber: 36,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -225,7 +229,7 @@ const useAlert = ()=>{
                     onClose: ()=>removeAlert(alert.id)
                 }, alert.id, false, {
                     fileName: "[project]/src/components/ui/customAlert.tsx",
-                    lineNumber: 76,
+                    lineNumber: 77,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0)))
         }, void 0, false);

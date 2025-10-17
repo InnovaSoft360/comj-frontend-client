@@ -1,4 +1,4 @@
-// app/(container)/user/perfil/page.tsx
+// app/(container)/perfil/page.tsx
 'use client';
 
 import { useAuth } from "@/hooks/useAuth";
