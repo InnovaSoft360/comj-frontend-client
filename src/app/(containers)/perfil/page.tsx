@@ -3,16 +3,20 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { FaUser, FaEnvelope, FaAddressCard, FaEdit, FaKey, FaTrash } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaAddressCard, FaEdit, FaKey, FaTrash, FaCamera } from "react-icons/fa";
 import { getApiUrl } from "@/lib/config";
 import { useEffect, useState } from "react";
 import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
+import EditProfileModal from "@/components/modals/EditProfileModal";
+import UpdatePhotoModal from "@/components/modals/UpdatePhotoModal";
 
 export default function PerfilPage() {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, isLoading, isAuthenticated, refreshAuth } = useAuth();
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isUpdatePhotoModalOpen, setIsUpdatePhotoModalOpen] = useState(false);
 
   // Redirecionar se não estiver autenticado
   useEffect(() => {
@@ -20,6 +24,15 @@ export default function PerfilPage() {
       router.push('/login');
     }
   }, [isAuthenticated, isLoading, router]);
+
+  const handleProfileUpdated = () => {
+    refreshAuth(); // Atualiza os dados do usuário
+  };
+
+  const handlePhotoUpdated = () => {
+    refreshAuth(); // Atualiza os dados do usuário
+    setImageError(false); // Reset error state para mostrar nova imagem
+  };
 
   if (isLoading) {
     return (
@@ -42,8 +55,9 @@ export default function PerfilPage() {
     { icon: FaAddressCard, label: 'BI/Identificação', value: user.bi || 'Não informado' }
   ];
 
-  const handleEditProfile = () => console.log('Abrir modal de edição');
+  const handleEditProfile = () => setIsEditProfileModalOpen(true);
   const handleChangePassword = () => setIsChangePasswordModalOpen(true);
+  const handleUpdatePhoto = () => setIsUpdatePhotoModalOpen(true);
   const handleDeleteAccount = () => console.log('Abrir modal de deleção');
 
   return (
@@ -61,8 +75,12 @@ export default function PerfilPage() {
             {/* Banner com Foto */}
             <div className="h-32 bg-gradient-to-r from-orange-500 to-red-600 relative">
               <div className="absolute -bottom-12 left-6">
-                <div className="relative">
-                  <div className="w-24 h-24 bg-gradient-to-r from-orange-500 to-red-600 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center text-white font-bold text-xl shadow-lg overflow-hidden">
+                {/* ✅ CORRIGIDO: Movido onClick para o container principal */}
+                <div 
+                  className="relative group cursor-pointer"
+                  onClick={handleUpdatePhoto}
+                >
+                  <div className="w-24 h-24 bg-gradient-to-r from-orange-500 to-red-600 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center text-white font-bold text-xl shadow-lg overflow-hidden hover:scale-105 transition-transform duration-200">
                     {showImage ? (
                       <img 
                         src={userPhoto}
@@ -74,6 +92,12 @@ export default function PerfilPage() {
                       <span className="text-lg">{userInitials}</span>
                     )}
                   </div>
+                  
+                  {/* ✅ CORRIGIDO: Overlay não interfere no clique */}
+                  <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                    <FaCamera className="w-6 h-6 text-white" />
+                  </div>
+                  
                   <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
                 </div>
               </div>
@@ -137,11 +161,25 @@ export default function PerfilPage() {
         </div>
       </div>
 
-      {/* Modal de Alteração de Senha */}
+      {/* Modais */}
       <ChangePasswordModal
         isOpen={isChangePasswordModalOpen}
         onClose={() => setIsChangePasswordModalOpen(false)}
         userId={user.id}
+      />
+
+      <EditProfileModal
+        isOpen={isEditProfileModalOpen}
+        onClose={() => setIsEditProfileModalOpen(false)}
+        user={user}
+        onProfileUpdated={handleProfileUpdated}
+      />
+
+      <UpdatePhotoModal
+        isOpen={isUpdatePhotoModalOpen}
+        onClose={() => setIsUpdatePhotoModalOpen(false)}
+        user={user}
+        onPhotoUpdated={handlePhotoUpdated}
       />
     </>
   );

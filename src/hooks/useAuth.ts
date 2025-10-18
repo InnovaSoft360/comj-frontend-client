@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 
-interface User {
+export interface User {
   id: string;
   firstName: string;
   lastName: string;
