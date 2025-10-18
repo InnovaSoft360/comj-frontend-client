@@ -1,4 +1,4 @@
-// components/Header.tsx
+// components/layouts/Header.tsx
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -8,13 +8,22 @@ import { FaUser, FaFileAlt, FaSignOutAlt, FaChevronDown, FaWhatsapp } from "reac
 import { useAuth } from "@/hooks/useAuth";
 import { getApiUrl } from "@/lib/config";
 
+// Interface para o usuário
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  photoUrl?: string;
+}
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
 
-  const { user, isLoading, logout, getUserInitials } = useAuth();
+  const { user, logout, getUserInitials } = useAuth();
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -44,7 +53,7 @@ export default function Header() {
   };
 
   // Helper para renderizar avatar do usuário
-  const renderUserAvatar = (user: any, size: number = 40, className: string = "") => {
+  const renderUserAvatar = (user: User, size: number = 40, className: string = "") => {
     const userPhoto = user.photoUrl ? getApiUrl(user.photoUrl) : null;
     const userInitials = getUserInitials(user);
     const showImage = userPhoto && !imageErrors[user.id];
@@ -75,7 +84,7 @@ export default function Header() {
   ];
 
   const userMenuItems = [
-    { href: "/perfil", label: "Perfil", icon: FaUser }, // Corrigido para /user/perfil
+    { href: "/perfil", label: "Perfil", icon: FaUser },
     { href: "/candidatura", label: "Minha Candidatura", icon: FaFileAlt },
   ];
 

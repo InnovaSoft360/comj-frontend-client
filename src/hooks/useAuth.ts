@@ -2,17 +2,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 interface User {
   id: string;
   firstName: string;
   lastName: string;
-  photoUrl: string;
-  bi: string;
   email: string;
-  role: number;
+  photoUrl?: string;
+  role?: number;
 }
 
 export const useAuth = () => {
@@ -20,47 +18,54 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Verificar se o usuário está autenticado
   useEffect(() => {
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+
+        if (token && userData) {
+          setUser(JSON.parse(userData));
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        logout();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     checkAuth();
   }, []);
 
-  const checkAuth = async () => {
-    try {
-      const response = await api.get('/v1/Users/Me');
-      if (response.data.code === 200) {
-        setUser(response.data.data);
-      }
-    } catch (error) {
-      console.log('Usuário não autenticado');
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
+  const login = (userData: User, token: string) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
   };
 
-  const logout = async () => {
-    try {
-      await api.post('/v1/Auth/Logout');
-    } catch (error) {
-      console.error('Erro no logout:', error);
-    } finally {
-      setUser(null);
-      // Limpar qualquer token/local storage se estiver usando
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      router.push('/');
-    }
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    router.push('/'); // ← MUDOU AQUI: de '/login' para '/'
   };
 
-  const getUserInitials = (user: User) => {
-    return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+  const updateUser = (updatedUser: User) => {
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
+
+  const getUserInitials = (user: User): string => {
+    return `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase();
   };
 
   return {
     user,
     isLoading,
+    login,
     logout,
-    getUserInitials
+    updateUser,
+    getUserInitials,
   };
 };

@@ -590,6 +590,83 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
 }),
+"[project]/src/hooks/useAuth.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+// hooks/useAuth.ts
+__turbopack_context__.s([
+    "useAuth",
+    ()=>useAuth
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-client] (ecmascript)");
+var _s = __turbopack_context__.k.signature();
+'use client';
+;
+;
+const useAuth = ()=>{
+    _s();
+    const [user, setUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
+    const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "useAuth.useEffect": ()=>{
+            const checkAuth = {
+                "useAuth.useEffect.checkAuth": ()=>{
+                    try {
+                        const token = localStorage.getItem('token');
+                        const userData = localStorage.getItem('user');
+                        if (token && userData) {
+                            setUser(JSON.parse(userData));
+                        }
+                    } catch (error) {
+                        console.error('Error checking auth:', error);
+                        logout();
+                    } finally{
+                        setIsLoading(false);
+                    }
+                }
+            }["useAuth.useEffect.checkAuth"];
+            checkAuth();
+        }
+    }["useAuth.useEffect"], []);
+    const login = (userData, token)=>{
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+    };
+    const logout = ()=>{
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        router.push('/'); // ← MUDOU AQUI: de '/login' para '/'
+    };
+    const updateUser = (updatedUser)=>{
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+    };
+    const getUserInitials = (user)=>{
+        var _user_firstName, _user_lastName;
+        return "".concat(((_user_firstName = user.firstName) === null || _user_firstName === void 0 ? void 0 : _user_firstName.charAt(0)) || '').concat(((_user_lastName = user.lastName) === null || _user_lastName === void 0 ? void 0 : _user_lastName.charAt(0)) || '').toUpperCase();
+    };
+    return {
+        user,
+        isLoading,
+        login,
+        logout,
+        updateUser,
+        getUserInitials
+    };
+};
+_s(useAuth, "8WEfEbosx3NfLBPRVajZSQS3udc=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
+    ];
+});
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
+}
+}),
 "[project]/src/lib/config.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
@@ -607,99 +684,6 @@ const API_CONFIG = {
 const getApiUrl = (path)=>{
     return "".concat(API_CONFIG.baseURL).concat(path);
 };
-if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
-    __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
-}
-}),
-"[project]/src/lib/api.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
-"use strict";
-
-// lib/api.ts
-__turbopack_context__.s([
-    "default",
-    ()=>__TURBOPACK__default__export__
-]);
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/axios/lib/axios.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/config.ts [app-client] (ecmascript)");
-;
-;
-const api = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].create({
-    baseURL: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_CONFIG"].baseURL,
-    withCredentials: true
-});
-const __TURBOPACK__default__export__ = api;
-if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
-    __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
-}
-}),
-"[project]/src/hooks/useAuth.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
-"use strict";
-
-// hooks/useAuth.ts
-__turbopack_context__.s([
-    "useAuth",
-    ()=>useAuth
-]);
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api.ts [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-client] (ecmascript)");
-var _s = __turbopack_context__.k.signature();
-'use client';
-;
-;
-;
-const useAuth = ()=>{
-    _s();
-    const [user, setUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
-    const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
-    const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
-    // Verificar se o usuário está autenticado
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "useAuth.useEffect": ()=>{
-            checkAuth();
-        }
-    }["useAuth.useEffect"], []);
-    const checkAuth = async ()=>{
-        try {
-            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get('/v1/Users/Me');
-            if (response.data.code === 200) {
-                setUser(response.data.data);
-            }
-        } catch (error) {
-            console.log('Usuário não autenticado');
-            setUser(null);
-        } finally{
-            setIsLoading(false);
-        }
-    };
-    const logout = async ()=>{
-        try {
-            await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/v1/Auth/Logout');
-        } catch (error) {
-            console.error('Erro no logout:', error);
-        } finally{
-            setUser(null);
-            // Limpar qualquer token/local storage se estiver usando
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            router.push('/');
-        }
-    };
-    const getUserInitials = (user)=>{
-        return "".concat(user.firstName[0]).concat(user.lastName[0]).toUpperCase();
-    };
-    return {
-        user,
-        isLoading,
-        logout,
-        getUserInitials
-    };
-};
-_s(useAuth, "8WEfEbosx3NfLBPRVajZSQS3udc=", false, function() {
-    return [
-        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
-    ];
-});
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
@@ -816,7 +800,7 @@ function Header() {
     ];
     const userMenuItems = [
         {
-            href: "/user/perfil",
+            href: "/perfil",
             label: "Perfil",
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaUser"]
         },
@@ -1514,4 +1498,4 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 }),
 ]);
 
-//# sourceMappingURL=src_c08ed193._.js.map
+//# sourceMappingURL=src_e96d6f5b._.js.map

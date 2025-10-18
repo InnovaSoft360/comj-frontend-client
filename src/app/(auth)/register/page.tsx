@@ -1,7 +1,7 @@
 // app/(auth)/register/page.tsx
 'use client';
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaIdCard } from "react-icons/fa";
