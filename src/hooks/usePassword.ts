@@ -1,7 +1,7 @@
 // hooks/usePassword.ts
 'use client';
 
-import { useState, useCallback } from 'react'; // ✅ Adicionar useCallback
+import { useState, useCallback } from 'react';
 import api from '@/lib/api';
 
 interface ChangePasswordData {
@@ -16,16 +16,25 @@ interface ChangePasswordResponse {
   message: string;
 }
 
+// Interface para erros da API
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  type?: string;
+}
+
 export const usePassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // ✅ Usar useCallback para evitar recriação da função
   const resetState = useCallback(() => {
     setError(null);
     setSuccess(false);
-  }, []); // ✅ Dependências vazias - função não recria
+  }, []);
 
   const changePassword = async (data: ChangePasswordData): Promise<boolean> => {
     setIsLoading(true);
@@ -55,11 +64,13 @@ export const usePassword = () => {
         setError(response.data.message || 'Erro ao alterar senha');
         return false;
       }
-    } catch (error: any) {
-      // Tratamento silencioso de erros
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else if (error.type === 'NETWORK_ERROR') {
+    } catch (error: unknown) {
+      // ✅ CORRIGIDO: Removido 'any' e usando type guard
+      const apiError = error as ApiError;
+      
+      if (apiError.response?.data?.message) {
+        setError(apiError.response.data.message);
+      } else if (apiError.type === 'NETWORK_ERROR') {
         setError('Erro de conexão. Tente novamente.');
       } else {
         setError('Erro ao alterar senha. Tente novamente.');
@@ -75,6 +86,6 @@ export const usePassword = () => {
     isLoading,
     error,
     success,
-    resetState, // ✅ Agora está memoizado
+    resetState,
   };
 };
