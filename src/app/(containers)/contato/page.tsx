@@ -13,8 +13,25 @@ const subjectMapping = {
   'outro': 'Outro'
 };
 
+// Interface para erros
+interface ApiError {
+  code?: string;
+  message?: string;
+  name?: string;
+  response?: {
+    status?: number;
+    data?: {
+      errors?: string[] | Record<string, string[]>;
+      message?: string;
+      success?: boolean;
+    };
+  };
+}
+
+type ErrorType = 'NETWORK_ERROR' | 'VALIDATION_ERROR' | 'SERVER_ERROR' | 'TIMEOUT_ERROR' | 'UNKNOWN_ERROR';
+
 // Função auxiliar para detectar tipo de erro - SILENCIOSA
-const getErrorType = (error: any): 'NETWORK_ERROR' | 'VALIDATION_ERROR' | 'SERVER_ERROR' | 'TIMEOUT_ERROR' | 'UNKNOWN_ERROR' => {
+const getErrorType = (error: ApiError): ErrorType => {
   if (!error) return 'UNKNOWN_ERROR';
   
   // Erro de timeout
@@ -33,7 +50,7 @@ const getErrorType = (error: any): 'NETWORK_ERROR' | 'VALIDATION_ERROR' | 'SERVE
   }
   
   // Erro do servidor (status 500+)
-  if (error.response?.status >= 500) {
+  if (error.response?.status && error.response.status >= 500) {
     return 'SERVER_ERROR';
   }
   
@@ -41,16 +58,49 @@ const getErrorType = (error: any): 'NETWORK_ERROR' | 'VALIDATION_ERROR' | 'SERVE
 };
 
 // Função para retry automático - SILENCIOSA
-const retryApiCall = async (fn: () => Promise<any>, retries = 2): Promise<any> => {
+const retryApiCall = async (fn: () => Promise<unknown>, retries = 2): Promise<unknown> => {
   try {
     return await fn();
   } catch (error) {
-    if (retries > 0 && getErrorType(error) === 'NETWORK_ERROR') {
+    if (retries > 0 && getErrorType(error as ApiError) === 'NETWORK_ERROR') {
       await new Promise(resolve => setTimeout(resolve, 1000));
       return retryApiCall(fn, retries - 1);
     }
     throw error;
   }
+};
+
+// Função para processar erros de validação
+const processValidationErrors = (errors: string[] | Record<string, string[]> | undefined): Record<string, string> => {
+  const validationErrors: Record<string, string> = {};
+
+  if (!errors) return validationErrors;
+
+  // Se for array de strings
+  if (Array.isArray(errors)) {
+    errors.forEach((err: string) => {
+      if (err.includes('Full name') || err.includes('Nome')) validationErrors.nome = err;
+      else if (err.includes('Email') || err.includes('E-mail')) validationErrors.email = err;
+      else if (err.includes('Phone') || err.includes('Telefone')) validationErrors.telefone = err;
+      else if (err.includes('Subject') || err.includes('Assunto')) validationErrors.assunto = err;
+      else if (err.includes('Message') || err.includes('Mensagem')) validationErrors.mensagem = err;
+    });
+  } 
+  // Se for objeto com campos
+  else if (typeof errors === 'object') {
+    Object.entries(errors).forEach(([field, errorMessages]) => {
+      if (Array.isArray(errorMessages) && errorMessages.length > 0) {
+        const errorMessage = errorMessages[0];
+        if (field.includes('FullName') || field.includes('fullName') || field.includes('nome')) validationErrors.nome = errorMessage;
+        else if (field.includes('Email') || field.includes('email')) validationErrors.email = errorMessage;
+        else if (field.includes('Phone') || field.includes('phone') || field.includes('telefone')) validationErrors.telefone = errorMessage;
+        else if (field.includes('Subject') || field.includes('subject') || field.includes('assunto')) validationErrors.assunto = errorMessage;
+        else if (field.includes('Message') || field.includes('message') || field.includes('mensagem')) validationErrors.mensagem = errorMessage;
+      }
+    });
+  }
+
+  return validationErrors;
 };
 
 export default function Contacto() {
@@ -134,7 +184,7 @@ export default function Contacto() {
       };
 
       // Função de requisição com timeout
-      const makeRequest = async () => {
+      const makeRequest = async (): Promise<unknown> => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -144,9 +194,9 @@ export default function Contacto() {
           });
           clearTimeout(timeoutId);
           return response;
-        } catch (error: any) {
+        } catch (error: unknown) {
           clearTimeout(timeoutId);
-          if (error.name === 'AbortError') {
+          if ((error as ApiError).name === 'AbortError') {
             throw new Error('TIMEOUT_ERROR');
           }
           throw error;
@@ -154,7 +204,7 @@ export default function Contacto() {
       };
 
       // Executar requisição com retry automático
-      const response = await retryApiCall(makeRequest);
+      const response = await retryApiCall(makeRequest) as { data?: { success?: boolean } };
 
       if (response.data?.success) {
         showAlert("Mensagem enviada com sucesso! Entraremos em contacto em breve.", "success");
@@ -163,11 +213,11 @@ export default function Contacto() {
         showAlert("Erro ao enviar mensagem. Tente novamente.", "error");
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       // ⭐⭐ REMOVIDO COMPLETAMENTE O console.error ⭐⭐
       // Nenhum log no console - tratamento totalmente silencioso
 
-      const errorType = getErrorType(error);
+      const errorType = getErrorType(error as ApiError);
 
       switch (errorType) {
         case 'NETWORK_ERROR':
@@ -179,15 +229,9 @@ export default function Contacto() {
           break;
 
         case 'VALIDATION_ERROR':
-          if (error.response?.data?.errors) {
-            const validationErrors: Record<string, string> = {};
-            error.response.data.errors.forEach((err: string) => {
-              if (err.includes('Full name') || err.includes('Nome')) validationErrors.nome = err;
-              else if (err.includes('Email') || err.includes('E-mail')) validationErrors.email = err;
-              else if (err.includes('Phone') || err.includes('Telefone')) validationErrors.telefone = err;
-              else if (err.includes('Subject') || err.includes('Assunto')) validationErrors.assunto = err;
-              else if (err.includes('Message') || err.includes('Mensagem')) validationErrors.mensagem = err;
-            });
+          const apiError = error as ApiError;
+          if (apiError.response?.data?.errors) {
+            const validationErrors = processValidationErrors(apiError.response.data.errors);
             setErrors(validationErrors);
             showAlert("Por favor, corrija os erros no formulário.", "warning");
           } else {
@@ -200,8 +244,8 @@ export default function Contacto() {
           break;
 
         default:
-          if (error.response?.data?.message) {
-            showAlert(error.response.data.message, "error");
+          if ((error as ApiError).response?.data?.message) {
+            showAlert((error as ApiError).response!.data!.message!, "error");
           } else {
             showAlert("Erro inesperado ao enviar mensagem. Tente novamente mais tarde.", "error");
           }
