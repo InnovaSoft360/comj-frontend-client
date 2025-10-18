@@ -57,7 +57,7 @@ export default function ForgotPassword() {
           };
           status?: number;
         };
-        request?: any;
+        request?: unknown; // CORREÇÃO: trocado de 'any' para 'unknown'
       };
       
       // Mostrar mensagem de erro da API se disponível
