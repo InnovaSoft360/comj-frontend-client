@@ -1,18 +1,26 @@
+// lib/api.ts
 import axios from 'axios';
-
-const getBaseURL = () => {
-  if (typeof window === 'undefined') return 'http://localhost:5211'; // SSR
-  
-  const isHttps = window.location.protocol === 'https:';
-  const port = isHttps ? 7209 : 5211;
-  const host = window.location.hostname; // Pega localhost ou IP automaticamente
-  
-  return `${isHttps ? 'https' : 'http'}://${host}:${port}`;
-};
+import { API_CONFIG } from './config';
 
 const api = axios.create({
-  baseURL: process.env.API_BASE_URL || getBaseURL(),
+  baseURL: API_CONFIG.baseURL,
   withCredentials: true,
+  timeout: 10000, // 10 segundos timeout
 });
+
+// Interceptor para tratar erros de conexão
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+      // API indisponível - não quebra o frontend
+      return Promise.reject({
+        type: 'NETWORK_ERROR',
+        message: 'Servidor indisponível. Tente novamente em alguns instantes.'
+      });
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

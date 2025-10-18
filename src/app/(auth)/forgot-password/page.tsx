@@ -4,26 +4,83 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaArrowLeft, FaEnvelope } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import api from "@/lib/api";
+import { useAlert } from "@/components/ui/customAlert";
 
 export default function ForgotPassword() {
+  const router = useRouter();
+  const { showAlert, AlertContainer } = useAlert();
+
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
+
+  // Função para validar email
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // TODO: Implementar lógica de recuperação de senha
-    console.log("Email para recuperação:", email);
-    
-    setTimeout(() => {
+
+    // Validação do email
+    if (!validateEmail(email)) {
+      showAlert("Por favor, insira um email válido!", "warning");
       setIsLoading(false);
-      // TODO: Mostrar mensagem de sucesso
-    }, 2000);
+      return;
+    }
+
+    try {
+      // Fazer requisição para a API
+      const response = await api.post("/v1/Password/Forgot", {
+        email: email
+      });
+
+      if (response.data.code === 200) {
+        showAlert("Senha temporária enviada para seu email!", "success");
+        
+        // Redirecionar para login após 3 segundos
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
+      }
+
+    } catch (error: unknown) {
+      console.error("Erro na recuperação de senha:", error);
+      
+      const err = error as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+          status?: number;
+        };
+        request?: unknown; // CORREÇÃO: trocado de 'any' para 'unknown'
+      };
+      
+      // Mostrar mensagem de erro da API se disponível
+      if (err.response?.data?.message) {
+        showAlert(err.response.data.message, "error");
+      } else if (err.response?.status === 404) {
+        showAlert("Email não encontrado em nosso sistema.", "error");
+      } else if (err.response?.status === 400) {
+        showAlert("Email inválido. Verifique o formato e tente novamente.", "error");
+      } else if (err.request) {
+        showAlert("Erro de conexão. Verifique sua internet.", "error");
+      } else {
+        showAlert("Erro ao enviar instruções. Tente novamente.", "error");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-orange-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+      <AlertContainer />
+      
       <div className="w-full max-w-md">
         {/* Back Button */}
         <Link 
@@ -107,6 +164,21 @@ export default function ForgotPassword() {
               </Link>
             </p>
           </div>
+        </div>
+
+        {/* Additional Help */}
+        <div className="text-center mt-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Não recebeu o email?{" "}
+            <a 
+              href="https://wa.me/244935751955" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors duration-200"
+            >
+              Contacte-nos no WhatsApp
+            </a>
+          </p>
         </div>
       </div>
     </div>
