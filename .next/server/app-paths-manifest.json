@@ -1,4 +1,7 @@
 {
+  "/(auth)/login/page": "app/(auth)/login/page.js",
   "/(containers)/contato/page": "app/(containers)/contato/page.js",
-  "/(containers)/page": "app/(containers)/page.js"
+  "/(containers)/page": "app/(containers)/page.js",
+  "/(containers)/perfil/page": "app/(containers)/perfil/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js"
 }
