@@ -32,7 +32,7 @@ export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
-  // Verificar autenticação
+  // Verificar autenticação - SILENCIOSO
   const checkAuth = useCallback(async () => {
     try {
       const response = await api.get<CheckAuthResponse>('/v1/Auth/CheckAuth');
@@ -48,7 +48,7 @@ export const useAuth = () => {
         setUser(null);
       }
     } catch (error) {
-      console.error('Erro ao verificar autenticação:', error);
+      // SILENCIOSO - não loga erro no console
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -56,7 +56,7 @@ export const useAuth = () => {
     }
   }, []);
 
-  // Login
+  // Login - SILENCIOSO
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await api.post<AuthResponse>('/v1/Auth/Login', {
@@ -75,17 +75,17 @@ export const useAuth = () => {
         return false;
       }
     } catch (error) {
-      console.error('Erro no login:', error);
+      // SILENCIOSO - não loga erro no console
       return false;
     }
   };
 
-  // Logout
+  // Logout - SILENCIOSO
   const logout = useCallback(async () => {
     try {
       await api.post('/v1/Auth/Logout');
     } catch (error) {
-      console.error('Erro no logout:', error);
+      // SILENCIOSO - não importa se falhar o logout
     } finally {
       setUser(null);
       setIsAuthenticated(false);
@@ -93,7 +93,7 @@ export const useAuth = () => {
     }
   }, [router]);
 
-  // Atualizar usuário
+  // Atualizar usuário - SILENCIOSO
   const updateUser = async (updatedUser: User): Promise<boolean> => {
     try {
       const response = await api.put<AuthResponse>('/v1/Users/Me', updatedUser);
@@ -103,7 +103,7 @@ export const useAuth = () => {
       }
       return false;
     } catch (error) {
-      console.error('Erro ao atualizar usuário:', error);
+      // SILENCIOSO - não loga erro no console
       return false;
     }
   };

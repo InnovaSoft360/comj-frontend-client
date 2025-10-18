@@ -1,3 +1,4 @@
+// app/(auth)/forgot-password/page.tsx
 'use client';
 
 import { useState } from "react";
@@ -48,7 +49,7 @@ export default function ForgotPassword() {
       }
 
     } catch (error: unknown) {
-      console.error("Erro na recuperação de senha:", error);
+      // SILENCIOSO - não loga erro no console
       
       const err = error as {
         response?: {
@@ -57,7 +58,7 @@ export default function ForgotPassword() {
           };
           status?: number;
         };
-        request?: unknown; // CORREÇÃO: trocado de 'any' para 'unknown'
+        request?: unknown;
       };
       
       // Mostrar mensagem de erro da API se disponível

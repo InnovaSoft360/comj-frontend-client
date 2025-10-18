@@ -1,32 +1,226 @@
 'use client';
 
 import { useState } from "react";
-import { FaWhatsapp, FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane } from "react-icons/fa";
+import { FaWhatsapp, FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaExclamationTriangle } from "react-icons/fa";
+import api from "@/lib/api";
+import { useAlert } from "@/components/ui/customAlert";
+
+// Mapeamento dos assuntos para valores em inglês
+const subjectMapping = {
+  'informacao': 'Informações Gerais',
+  'visita': 'Agendar Visita', 
+  'suporte': 'Suporte Técnico',
+  'outro': 'Outro'
+};
+
+// Função auxiliar para detectar tipo de erro - SILENCIOSA
+const getErrorType = (error: any): 'NETWORK_ERROR' | 'VALIDATION_ERROR' | 'SERVER_ERROR' | 'TIMEOUT_ERROR' | 'UNKNOWN_ERROR' => {
+  if (!error) return 'UNKNOWN_ERROR';
+  
+  // Erro de timeout
+  if (error.message === 'TIMEOUT_ERROR') {
+    return 'TIMEOUT_ERROR';
+  }
+  
+  // Erro de rede
+  if (error.code === 'NETWORK_ERROR' || error.code === 'ECONNABORTED' || error.message?.includes('Network Error')) {
+    return 'NETWORK_ERROR';
+  }
+  
+  // Erro de validação (status 400)
+  if (error.response?.status === 400) {
+    return 'VALIDATION_ERROR';
+  }
+  
+  // Erro do servidor (status 500+)
+  if (error.response?.status >= 500) {
+    return 'SERVER_ERROR';
+  }
+  
+  return 'UNKNOWN_ERROR';
+};
+
+// Função para retry automático - SILENCIOSA
+const retryApiCall = async (fn: () => Promise<any>, retries = 2): Promise<any> => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries > 0 && getErrorType(error) === 'NETWORK_ERROR') {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return retryApiCall(fn, retries - 1);
+    }
+    throw error;
+  }
+};
 
 export default function Contacto() {
+  const { showAlert, AlertContainer } = useAlert();
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
-    telefone: "",
+    telefone: "", 
     assunto: "",
     mensagem: ""
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Função para validar telefone (9 dígitos, começando com 9)
+  const validateTelefone = (telefone: string): boolean => {
+    const numbers = telefone.replace(/\D/g, '');
+    const telefoneRegex = /^9\d{8}$/;
+    return telefoneRegex.test(numbers);
+  };
+
+  // Função para formatar telefone enquanto digita
+  const formatTelefone = (value: string): string => {
+    const numbers = value.replace(/\D/g, '');
+    
+    // Garantir que começa com 9
+    let formatted = numbers;
+    if (formatted.length > 0 && formatted[0] !== '9') {
+      formatted = '9' + formatted.slice(1);
+    }
+    
+    // Limitar a 9 dígitos
+    formatted = formatted.slice(0, 9);
+    
+    // Formatar visualmente: 9XX XXX XXX
+    if (formatted.length <= 3) {
+      return formatted;
+    } else if (formatted.length <= 6) {
+      return `${formatted.slice(0, 3)} ${formatted.slice(3)}`;
+    } else {
+      return `${formatted.slice(0, 3)} ${formatted.slice(3, 6)} ${formatted.slice(6)}`;
+    }
+  };
+
+  // Handler para input do telefone
+  const handleTelefoneInput = (value: string) => {
+    const formatted = formatTelefone(value);
+    setFormData(prev => ({ ...prev, telefone: formatted }));
+    
+    // Limpar erro do telefone quando usuário começar a digitar
+    if (errors.telefone) {
+      setErrors(prev => ({ ...prev, telefone: '' }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simular envio
-    setTimeout(() => {
+    setErrors({});
+
+    // Validação do telefone antes de enviar
+    const telefoneNumbers = formData.telefone.replace(/\D/g, '');
+    if (!validateTelefone(formData.telefone)) {
+      setErrors(prev => ({ 
+        ...prev, 
+        telefone: 'Telefone deve ter 9 dígitos e começar com 9 (ex: 923 456 789)' 
+      }));
+      showAlert("Por favor, corrija o número de telefone.", "warning");
       setIsLoading(false);
-      alert("Mensagem enviada com sucesso! Entraremos em contacto em breve.");
-      setFormData({ nome: "", email: "", telefone: "", assunto: "", mensagem: "" });
-    }, 2000);
+      return;
+    }
+
+    try {
+      // Mapear dados para o formato da API
+      const apiData = {
+        fullName: formData.nome,
+        phone: telefoneNumbers,
+        email: formData.email,
+        subject: subjectMapping[formData.assunto as keyof typeof subjectMapping] || formData.assunto,
+        message: formData.mensagem
+      };
+
+      // Função de requisição com timeout
+      const makeRequest = async () => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+          const response = await api.post('/v1/Support/SendEmail', apiData, {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          return response;
+        } catch (error: any) {
+          clearTimeout(timeoutId);
+          if (error.name === 'AbortError') {
+            throw new Error('TIMEOUT_ERROR');
+          }
+          throw error;
+        }
+      };
+
+      // Executar requisição com retry automático
+      const response = await retryApiCall(makeRequest);
+
+      if (response.data?.success) {
+        showAlert("Mensagem enviada com sucesso! Entraremos em contacto em breve.", "success");
+        setFormData({ nome: "", email: "", telefone: "", assunto: "", mensagem: "" });
+      } else {
+        showAlert("Erro ao enviar mensagem. Tente novamente.", "error");
+      }
+
+    } catch (error: any) {
+      // ⭐⭐ REMOVIDO COMPLETAMENTE O console.error ⭐⭐
+      // Nenhum log no console - tratamento totalmente silencioso
+
+      const errorType = getErrorType(error);
+
+      switch (errorType) {
+        case 'NETWORK_ERROR':
+          showAlert("Erro de conexão. Verifique sua internet e tente novamente.", "error");
+          break;
+
+        case 'TIMEOUT_ERROR':
+          showAlert("Tempo de espera esgotado. O servidor está demorando para responder.", "error");
+          break;
+
+        case 'VALIDATION_ERROR':
+          if (error.response?.data?.errors) {
+            const validationErrors: Record<string, string> = {};
+            error.response.data.errors.forEach((err: string) => {
+              if (err.includes('Full name') || err.includes('Nome')) validationErrors.nome = err;
+              else if (err.includes('Email') || err.includes('E-mail')) validationErrors.email = err;
+              else if (err.includes('Phone') || err.includes('Telefone')) validationErrors.telefone = err;
+              else if (err.includes('Subject') || err.includes('Assunto')) validationErrors.assunto = err;
+              else if (err.includes('Message') || err.includes('Mensagem')) validationErrors.mensagem = err;
+            });
+            setErrors(validationErrors);
+            showAlert("Por favor, corrija os erros no formulário.", "warning");
+          } else {
+            showAlert("Dados inválidos. Verifique as informações do formulário.", "warning");
+          }
+          break;
+
+        case 'SERVER_ERROR':
+          showAlert("Servidor indisponível no momento. Tente novamente em alguns instantes.", "error");
+          break;
+
+        default:
+          if (error.response?.data?.message) {
+            showAlert(error.response.data.message, "error");
+          } else {
+            showAlert("Erro inesperado ao enviar mensagem. Tente novamente mais tarde.", "error");
+          }
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'telefone') {
+      handleTelefoneInput(value);
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+      // Limpar erro do campo quando usuário começar a digitar
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: '' }));
+      }
+    }
   };
 
   const contactInfo = [
@@ -39,7 +233,7 @@ export default function Contacto() {
     },
     {
       icon: FaPhone,
-      title: "Telefone",
+      title: "Telefone", 
       info: "+244 222 123 456",
       link: "tel:+244222123456",
       color: "text-blue-500"
@@ -47,7 +241,7 @@ export default function Contacto() {
     {
       icon: FaEnvelope,
       title: "Email",
-      info: "info@condominio-osvaldomj.ao",
+      info: "info@condominio-osvaldomj.ao", 
       link: "mailto:info@condominio-osvaldomj.ao",
       color: "text-orange-500"
     },
@@ -69,6 +263,8 @@ export default function Contacto() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <AlertContainer />
+      
       <div className="max-w-7xl mx-auto">
         
         {/* Header Section */}
@@ -150,9 +346,17 @@ export default function Contacto() {
                     required
                     value={formData.nome}
                     onChange={(e) => handleChange('nome', e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all duration-200"
+                    className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${
+                      errors.nome ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
+                    }`}
                     placeholder="Seu nome completo"
                   />
+                  {errors.nome && (
+                    <p className="text-red-500 text-sm mt-1 flex items-center">
+                      <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                      {errors.nome}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
@@ -164,9 +368,22 @@ export default function Contacto() {
                     required
                     value={formData.telefone}
                     onChange={(e) => handleChange('telefone', e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all duration-200"
-                    placeholder="+244 XXX XXX XXX"
+                    className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${
+                      errors.telefone ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
+                    }`}
+                    placeholder="9XX XXX XXX"
+                    maxLength={11}
                   />
+                  {errors.telefone ? (
+                    <p className="text-red-500 text-sm mt-1 flex items-center">
+                      <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                      {errors.telefone}
+                    </p>
+                  ) : (
+                    <p className="text-gray-500 text-sm mt-1">
+                      Formato: 9 dígitos começando com 9
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -179,9 +396,17 @@ export default function Contacto() {
                   required
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all duration-200"
+                  className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${
+                    errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
+                  }`}
                   placeholder="seu@email.com"
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center">
+                    <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                    {errors.email}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -192,15 +417,22 @@ export default function Contacto() {
                   required
                   value={formData.assunto}
                   onChange={(e) => handleChange('assunto', e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-orange-500 transition-all duration-200"
+                  className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none transition-all duration-200 ${
+                    errors.assunto ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
+                  }`}
                 >
                   <option value="">Selecione o assunto</option>
-                  <option value="candidatura">Candidatura a Apartamento</option>
                   <option value="informacao">Informações Gerais</option>
                   <option value="visita">Agendar Visita</option>
                   <option value="suporte">Suporte Técnico</option>
                   <option value="outro">Outro</option>
                 </select>
+                {errors.assunto && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center">
+                    <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                    {errors.assunto}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -212,9 +444,17 @@ export default function Contacto() {
                   rows={6}
                   value={formData.mensagem}
                   onChange={(e) => handleChange('mensagem', e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all duration-200 resize-none"
+                  className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 resize-none ${
+                    errors.mensagem ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
+                  }`}
                   placeholder="Descreva a sua mensagem..."
                 />
+                {errors.mensagem && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center">
+                    <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                    {errors.mensagem}
+                  </p>
+                )}
               </div>
 
               <button
