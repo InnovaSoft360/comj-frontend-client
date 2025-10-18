@@ -717,7 +717,19 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2e$ts__
 ;
 const api = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].create({
     baseURL: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_CONFIG"].baseURL,
-    withCredentials: true
+    withCredentials: true,
+    timeout: 10000
+});
+// Interceptor para tratar erros de conexão
+api.interceptors.response.use((response)=>response, (error)=>{
+    if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+        // API indisponível - não quebra o frontend
+        return Promise.reject({
+            type: 'NETWORK_ERROR',
+            message: 'Servidor indisponível. Tente novamente em alguns instantes.'
+        });
+    }
+    return Promise.reject(error);
 });
 const __TURBOPACK__default__export__ = api;
 }),
@@ -730,8 +742,8 @@ __turbopack_context__.s([
     ()=>useAuth
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api.ts [app-ssr] (ecmascript)");
 'use client';
 ;
 ;
@@ -739,45 +751,97 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navi
 const useAuth = ()=>{
     const [user, setUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
+    const [isAuthenticated, setIsAuthenticated] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
-    // Verificar se o usuário está autenticado
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        checkAuth();
-    }, []);
-    const checkAuth = async ()=>{
+    // Verificar autenticação
+    const checkAuth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async ()=>{
         try {
-            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get('/v1/Users/Me');
-            if (response.data.code === 200) {
-                setUser(response.data.data);
+            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get('/v1/Auth/CheckAuth');
+            setIsAuthenticated(response.data.authenticated);
+            if (response.data.authenticated) {
+                // Buscar dados do usuário
+                const userResponse = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get('/v1/Users/Me');
+                if (userResponse.data.code === 200) {
+                    setUser(userResponse.data.data);
+                }
+            } else {
+                setUser(null);
             }
         } catch (error) {
-            console.log('Usuário não autenticado');
+            console.error('Erro ao verificar autenticação:', error);
             setUser(null);
+            setIsAuthenticated(false);
         } finally{
             setIsLoading(false);
         }
+    }, []);
+    // Login
+    const login = async (email, password)=>{
+        try {
+            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].post('/v1/Auth/Login', {
+                email,
+                password
+            });
+            const userData = response.data.data;
+            // ⭐⭐ VERIFICAÇÃO DE ROLE - SÓ ROLE 1 (CLIENT) PODE ENTRAR ⭐⭐
+            if (userData.role === 1) {
+                setUser(userData);
+                setIsAuthenticated(true);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            console.error('Erro no login:', error);
+            return false;
+        }
     };
-    const logout = async ()=>{
+    // Logout
+    const logout = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async ()=>{
         try {
             await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].post('/v1/Auth/Logout');
         } catch (error) {
             console.error('Erro no logout:', error);
         } finally{
             setUser(null);
-            // Limpar qualquer token/local storage se estiver usando
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            setIsAuthenticated(false);
             router.push('/');
         }
+    }, [
+        router
+    ]);
+    // Atualizar usuário
+    const updateUser = async (updatedUser)=>{
+        try {
+            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].put('/v1/Users/Me', updatedUser);
+            if (response.data.code === 200) {
+                setUser(response.data.data);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Erro ao atualizar usuário:', error);
+            return false;
+        }
     };
+    // Iniciais do usuário
     const getUserInitials = (user)=>{
-        return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+        return `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase();
     };
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        checkAuth();
+    }, [
+        checkAuth
+    ]);
     return {
         user,
         isLoading,
+        isAuthenticated,
+        login,
         logout,
-        getUserInitials
+        updateUser,
+        getUserInitials,
+        refreshAuth: checkAuth
     };
 };
 }),
@@ -885,7 +949,7 @@ function Header() {
     ];
     const userMenuItems = [
         {
-            href: "/user/perfil",
+            href: "/perfil",
             label: "Perfil",
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaUser"]
         },

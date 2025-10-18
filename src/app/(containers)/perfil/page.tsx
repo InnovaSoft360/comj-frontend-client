@@ -1,4 +1,4 @@
-// app/(container)/perfil/page.tsx
+// app/(containers)/perfil/page.tsx
 'use client';
 
 import { useAuth } from "@/hooks/useAuth";
@@ -8,16 +8,16 @@ import { getApiUrl } from "@/lib/config";
 import { useEffect, useState } from "react";
 
 export default function PerfilPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
 
-  // Redirecionar se não estiver logado
+  // Redirecionar se não estiver autenticado
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/login');
     }
-  }, [user, isLoading, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -55,7 +55,7 @@ export default function PerfilPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
           
-          {/* Banner com Foto - CORRIGIDO */}
+          {/* Banner com Foto */}
           <div className="h-32 bg-gradient-to-r from-orange-500 to-red-600 relative">
             <div className="absolute -bottom-12 left-6">
               <div className="relative">

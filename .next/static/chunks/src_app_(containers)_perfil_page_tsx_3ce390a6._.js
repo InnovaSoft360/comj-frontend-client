@@ -2,7 +2,7 @@
 "[project]/src/app/(containers)/perfil/page.tsx [app-client] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
-// app/(container)/perfil/page.tsx
+// app/(containers)/perfil/page.tsx
 __turbopack_context__.s([
     "default",
     ()=>PerfilPage
@@ -24,18 +24,18 @@ var _s = __turbopack_context__.k.signature();
 function PerfilPage() {
     var _user_firstName, _user_lastName;
     _s();
-    const { user, isLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useAuth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
+    const { user, isLoading, isAuthenticated } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useAuth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
     const [imageError, setImageError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    // Redirecionar se não estiver logado
+    // Redirecionar se não estiver autenticado
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "PerfilPage.useEffect": ()=>{
-            if (!isLoading && !user) {
+            if (!isLoading && !isAuthenticated) {
                 router.push('/login');
             }
         }
     }["PerfilPage.useEffect"], [
-        user,
+        isAuthenticated,
         isLoading,
         router
     ]);
@@ -402,7 +402,7 @@ function PerfilPage() {
         columnNumber: 5
     }, this);
 }
-_s(PerfilPage, "UmUsjgForU3ZCS2+mqBbur9bMvg=", false, function() {
+_s(PerfilPage, "XdPlBivHA40U07Vlc4mTaKkH/Rw=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useAuth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"],
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]

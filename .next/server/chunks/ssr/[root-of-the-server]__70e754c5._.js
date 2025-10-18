@@ -651,7 +651,7 @@ const useAuth = ()=>{
         checkAuth();
     }, [
         logout
-    ]); // ← ADICIONA logout nas dependências
+    ]);
     const login = (userData, token)=>{
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));

@@ -8,10 +8,12 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { useAlert } from "@/components/ui/customAlert";
+import { useAuth } from "@/hooks/useAuth"; // ← ADICIONAR ESTA IMPORT
 
 export default function Login() {
   const router = useRouter();
   const { showAlert, AlertContainer } = useAlert();
+  const { login } = useAuth(); // ← ADICIONAR ESTA LINHA
 
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -31,28 +33,16 @@ export default function Login() {
     }
 
     try {
-      const response = await api.post("/v1/Auth/Login", {
-        email: emailRef.current.value,
-        password: passwordRef.current.value,
-      });
+      const success = await login(emailRef.current.value, passwordRef.current.value);
 
-      const userData = response.data.data;
-
-      // ⭐⭐ VERIFICAÇÃO DE ROLE - SÓ ROLE 1 (CLIENT) PODE ENTRAR ⭐⭐
-      if (userData.role === 1) {
-        // Salvar token e dados do usuário no localStorage
-        localStorage.setItem('token', response.data.token || 'demo-token');
-        localStorage.setItem('user', JSON.stringify(userData));
-        
-        // ⭐⭐ MENSAGEM DA API ⭐⭐
-        showAlert(response.data.message || "Login realizado com sucesso!", "success");
+      if (success) {
+        showAlert("Login realizado com sucesso!", "success");
         
         // Redirecionar para página principal após 1 segundo
         setTimeout(() => {
           router.push("/");
         }, 1000);
       } else {
-        // ⭐⭐ MENSAGEM GENÉRICA PARA ROLE INVÁLIDO ⭐⭐
         showAlert("Credenciais inválidas. Verifique seus dados e tente novamente.", "error");
       }
 

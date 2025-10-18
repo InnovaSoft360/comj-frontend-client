@@ -641,7 +641,7 @@ const useAuth = ()=>{
         }
     }["useAuth.useEffect"], [
         logout
-    ]); // ← ADICIONA logout nas dependências
+    ]);
     const login = (userData, token)=>{
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
