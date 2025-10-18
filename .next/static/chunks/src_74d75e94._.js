@@ -202,7 +202,7 @@ const useAuth = ()=>{
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [isAuthenticated, setIsAuthenticated] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
-    // Verificar autenticação
+    // Verificar autenticação - SILENCIOSO
     const checkAuth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "useAuth.useCallback[checkAuth]": async ()=>{
             try {
@@ -218,7 +218,7 @@ const useAuth = ()=>{
                     setUser(null);
                 }
             } catch (error) {
-                console.error('Erro ao verificar autenticação:', error);
+                // SILENCIOSO - não loga erro no console
                 setUser(null);
                 setIsAuthenticated(false);
             } finally{
@@ -226,7 +226,7 @@ const useAuth = ()=>{
             }
         }
     }["useAuth.useCallback[checkAuth]"], []);
-    // Login
+    // Login - SILENCIOSO
     const login = async (email, password)=>{
         try {
             const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/v1/Auth/Login', {
@@ -243,17 +243,17 @@ const useAuth = ()=>{
                 return false;
             }
         } catch (error) {
-            console.error('Erro no login:', error);
+            // SILENCIOSO - não loga erro no console
             return false;
         }
     };
-    // Logout
+    // Logout - SILENCIOSO
     const logout = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "useAuth.useCallback[logout]": async ()=>{
             try {
                 await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/v1/Auth/Logout');
             } catch (error) {
-                console.error('Erro no logout:', error);
+            // SILENCIOSO - não importa se falhar o logout
             } finally{
                 setUser(null);
                 setIsAuthenticated(false);
@@ -263,7 +263,7 @@ const useAuth = ()=>{
     }["useAuth.useCallback[logout]"], [
         router
     ]);
-    // Atualizar usuário
+    // Atualizar usuário - SILENCIOSO
     const updateUser = async (updatedUser)=>{
         try {
             const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].put('/v1/Users/Me', updatedUser);
@@ -273,7 +273,7 @@ const useAuth = ()=>{
             }
             return false;
         } catch (error) {
-            console.error('Erro ao atualizar usuário:', error);
+            // SILENCIOSO - não loga erro no console
             return false;
         }
     };
