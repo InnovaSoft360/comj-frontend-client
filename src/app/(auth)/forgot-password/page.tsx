@@ -1,4 +1,3 @@
-// app/(auth)/forgot-password/page.tsx
 'use client';
 
 import { useState } from "react";
@@ -48,17 +47,27 @@ export default function ForgotPassword() {
         }, 3000);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro na recuperação de senha:", error);
       
+      const err = error as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+          status?: number;
+        };
+        request?: any;
+      };
+      
       // Mostrar mensagem de erro da API se disponível
-      if (error.response?.data?.message) {
-        showAlert(error.response.data.message, "error");
-      } else if (error.response?.status === 404) {
+      if (err.response?.data?.message) {
+        showAlert(err.response.data.message, "error");
+      } else if (err.response?.status === 404) {
         showAlert("Email não encontrado em nosso sistema.", "error");
-      } else if (error.response?.status === 400) {
+      } else if (err.response?.status === 400) {
         showAlert("Email inválido. Verifique o formato e tente novamente.", "error");
-      } else if (error.request) {
+      } else if (err.request) {
         showAlert("Erro de conexão. Verifique sua internet.", "error");
       } else {
         showAlert("Erro ao enviar instruções. Tente novamente.", "error");

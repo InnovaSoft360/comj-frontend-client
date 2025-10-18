@@ -56,47 +56,55 @@ export default function Login() {
         showAlert("Credenciais inválidas. Verifique seus dados e tente novamente.", "error");
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       // ⭐⭐ TRATAMENTO QUE USA APENAS MENSAGENS DA API ⭐⭐
       
+      const err = error as {
+        response?: {
+          data?: string | { message?: string; errors?: Record<string, unknown> };
+          status?: number;
+        };
+        request?: unknown;
+        code?: string;
+      };
+
       // DEBUG: Vamos ver o que a API está retornando
       if (process.env.NODE_ENV === 'development') {
         console.log('DEBUG - Erro completo:', {
-          status: error?.response?.status,
-          data: error?.response?.data,
-          headers: error?.response?.headers
+          status: err?.response?.status,
+          data: err?.response?.data,
         });
       }
 
       // ⭐⭐ PRIMEIRO: Verificar se é rate limiting (429) ⭐⭐
-      if (error.response?.status === 429) {
+      if (err.response?.status === 429) {
         // Rate limiting - pegar mensagem do response data ou usar mensagem específica
-        const rateLimitMessage = error.response.data || "🚫 Muitas tentativas de login! Aguarde 2 minutos antes de tentar novamente.";
-        showAlert(rateLimitMessage, "error");
+        const rateLimitMessage = err.response.data || "🚫 Muitas tentativas de login! Aguarde 2 minutos antes de tentar novamente.";
+        showAlert(rateLimitMessage as string, "error");
       } 
       // ⭐⭐ SEGUNDO: Verificar se tem mensagem específica da API ⭐⭐
-      else if (error.response?.data?.message) {
-        showAlert(error.response.data.message, "error");
+      else if (typeof err.response?.data === 'object' && err.response.data?.message) {
+        showAlert(err.response.data.message, "error");
       }
       // ⭐⭐ TERCEIRO: Verificar se é texto puro da API ⭐⭐
-      else if (typeof error.response?.data === 'string') {
-        showAlert(error.response.data, "error");
+      else if (typeof err.response?.data === 'string') {
+        showAlert(err.response.data, "error");
       }
       // ⭐⭐ QUARTO: Erros de validação ⭐⭐
-      else if (error.response?.data?.errors) {
-        const firstError = Object.values(error.response.data.errors)[0];
-        showAlert(Array.isArray(firstError) ? firstError[0] : firstError, "error");
+      else if (typeof err.response?.data === 'object' && err.response.data?.errors) {
+        const firstError = Object.values(err.response.data.errors)[0];
+        showAlert(Array.isArray(firstError) ? firstError[0] : String(firstError), "error");
       }
       // ⭐⭐ QUINTO: Erros de conexão ⭐⭐
-      else if (error.code === 'NETWORK_ERROR' || error.code === 'ECONNABORTED') {
+      else if (err.code === 'NETWORK_ERROR' || err.code === 'ECONNABORTED') {
         showAlert("Erro de conexão. Verifique sua internet e tente novamente.", "error");
       }
       // ⭐⭐ SEXTO: Request sem resposta ⭐⭐
-      else if (error.request) {
+      else if (err.request) {
         showAlert("Servidor indisponível. Tente novamente em alguns instantes.", "error");
       }
       // ⭐⭐ SÉTIMO: Unauthorized (401) - credenciais inválidas ⭐⭐
-      else if (error.response?.status === 401) {
+      else if (err.response?.status === 401) {
         showAlert("Email ou senha incorretos. Verifique suas credenciais.", "error");
       }
       // ⭐⭐ ÚLTIMO: Fallback genérico ⭐⭐

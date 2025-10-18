@@ -609,6 +609,16 @@ const useAuth = ()=>{
     const [user, setUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
+    const logout = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "useAuth.useCallback[logout]": ()=>{
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+            router.push('/');
+        }
+    }["useAuth.useCallback[logout]"], [
+        router
+    ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "useAuth.useEffect": ()=>{
             const checkAuth = {
@@ -629,17 +639,13 @@ const useAuth = ()=>{
             }["useAuth.useEffect.checkAuth"];
             checkAuth();
         }
-    }["useAuth.useEffect"], []);
+    }["useAuth.useEffect"], [
+        logout
+    ]); // ← ADICIONA logout nas dependências
     const login = (userData, token)=>{
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
-    };
-    const logout = ()=>{
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        router.push('/'); // ← MUDOU AQUI: de '/login' para '/'
     };
     const updateUser = (updatedUser)=>{
         localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -658,7 +664,7 @@ const useAuth = ()=>{
         getUserInitials
     };
 };
-_s(useAuth, "8WEfEbosx3NfLBPRVajZSQS3udc=", false, function() {
+_s(useAuth, "gBWGdhpNAqiP6RYdQeMumKvX9lg=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
     ];

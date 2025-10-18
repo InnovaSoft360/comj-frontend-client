@@ -133,19 +133,30 @@ export default function Register() {
         }, 2000);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro no registro:", error);
       
+      const err = error as {
+        response?: {
+          data?: {
+            message?: string;
+            errors?: Record<string, unknown>;
+          };
+          status?: number;
+        };
+        request?: unknown;
+      };
+
       // Mostrar mensagem de erro da API se disponível
-      if (error.response?.data?.message) {
-        showAlert(error.response.data.message, "error");
-      } else if (error.response?.data?.errors) {
+      if (err.response?.data?.message) {
+        showAlert(err.response.data.message, "error");
+      } else if (err.response?.data?.errors) {
         // Se houver múltiplos erros de validação
-        const firstError = Object.values(error.response.data.errors)[0];
-        showAlert(Array.isArray(firstError) ? firstError[0] : firstError, "error");
-      } else if (error.response?.status === 400) {
+        const firstError = Object.values(err.response.data.errors)[0];
+        showAlert(Array.isArray(firstError) ? firstError[0] : String(firstError), "error");
+      } else if (err.response?.status === 400) {
         showAlert("Dados de registro inválidos. Verifique os campos e tente novamente.", "error");
-      } else if (error.request) {
+      } else if (err.request) {
         showAlert("Erro de conexão. Verifique sua internet.", "error");
       } else {
         showAlert("Erro ao criar conta. Tente novamente.", "error");

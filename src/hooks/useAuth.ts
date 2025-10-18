@@ -1,7 +1,7 @@
 // hooks/useAuth.ts
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
@@ -17,6 +17,13 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    router.push('/');
+  }, [router]);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -36,19 +43,12 @@ export const useAuth = () => {
     };
 
     checkAuth();
-  }, []);
+  }, [logout]); // ← ADICIONA logout nas dependências
 
   const login = (userData: User, token: string) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    router.push('/'); // ← MUDOU AQUI: de '/login' para '/'
   };
 
   const updateUser = (updatedUser: User) => {
