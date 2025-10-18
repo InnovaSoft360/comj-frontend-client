@@ -9,14 +9,16 @@ import { useEffect, useState } from "react";
 import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
 import EditProfileModal from "@/components/modals/EditProfileModal";
 import UpdatePhotoModal from "@/components/modals/UpdatePhotoModal";
+import DeleteAccountModal from "@/components/modals/DeleteAccountModal";
 
 export default function PerfilPage() {
-  const { user, isLoading, isAuthenticated, refreshAuth } = useAuth();
+  const { user, isLoading, isAuthenticated, refreshAuth, logout } = useAuth();
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isUpdatePhotoModalOpen, setIsUpdatePhotoModalOpen] = useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
 
   // Redirecionar se não estiver autenticado
   useEffect(() => {
@@ -32,6 +34,14 @@ export default function PerfilPage() {
   const handlePhotoUpdated = () => {
     refreshAuth(); // Atualiza os dados do usuário
     setImageError(false); // Reset error state para mostrar nova imagem
+  };
+
+  const handleAccountDeleted = () => {
+    // Fazer logout e redirecionar para home após exclusão
+    setTimeout(() => {
+      logout();
+      router.push('/');
+    }, 1000);
   };
 
   if (isLoading) {
@@ -58,7 +68,7 @@ export default function PerfilPage() {
   const handleEditProfile = () => setIsEditProfileModalOpen(true);
   const handleChangePassword = () => setIsChangePasswordModalOpen(true);
   const handleUpdatePhoto = () => setIsUpdatePhotoModalOpen(true);
-  const handleDeleteAccount = () => console.log('Abrir modal de deleção');
+  const handleDeleteAccount = () => setIsDeleteAccountModalOpen(true);
 
   return (
     <>
@@ -75,7 +85,6 @@ export default function PerfilPage() {
             {/* Banner com Foto */}
             <div className="h-32 bg-gradient-to-r from-orange-500 to-red-600 relative">
               <div className="absolute -bottom-12 left-6">
-                {/* ✅ CORRIGIDO: Movido onClick para o container principal */}
                 <div 
                   className="relative group cursor-pointer"
                   onClick={handleUpdatePhoto}
@@ -93,7 +102,7 @@ export default function PerfilPage() {
                     )}
                   </div>
                   
-                  {/* ✅ CORRIGIDO: Overlay não interfere no clique */}
+                  {/* Overlay não interfere no clique */}
                   <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                     <FaCamera className="w-6 h-6 text-white" />
                   </div>
@@ -180,6 +189,13 @@ export default function PerfilPage() {
         onClose={() => setIsUpdatePhotoModalOpen(false)}
         user={user}
         onPhotoUpdated={handlePhotoUpdated}
+      />
+
+      <DeleteAccountModal
+        isOpen={isDeleteAccountModalOpen}
+        onClose={() => setIsDeleteAccountModalOpen(false)}
+        userId={user.id}
+        onAccountDeleted={handleAccountDeleted}
       />
     </>
   );
