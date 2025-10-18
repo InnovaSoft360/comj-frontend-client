@@ -31,21 +31,63 @@ export default function Register() {
     return biRegex.test(bi);
   };
 
-  // Handler para input do BI
+  // Handler inteligente para input do BI
   const handleBIInput = (value: string) => {
     // Remove tudo que não é letra ou número
-    let cleaned = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const cleaned = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     
-    // Limita o comprimento
-    cleaned = cleaned.slice(0, 14);
+    // Determina qual parte estamos preenchendo
+    const currentLength = cleaned.length;
     
-    // Formata visualmente: 123456789LA098
-    let formatted = cleaned;
-    if (cleaned.length > 9) {
-      formatted = cleaned.slice(0, 9) + cleaned.slice(9, 11) + (cleaned.length > 11 ? cleaned.slice(11) : '');
+    let formatted = '';
+    
+    if (currentLength <= 9) {
+      // Primeira parte: apenas números (0-9)
+      formatted = cleaned.replace(/[^0-9]/g, '');
+    } else if (currentLength <= 11) {
+      // Segunda parte: apenas letras (A-Z)
+      const numbersPart = cleaned.slice(0, 9).replace(/[^0-9]/g, '');
+      const lettersPart = cleaned.slice(9).replace(/[^A-Z]/g, '');
+      formatted = numbersPart + lettersPart;
+    } else {
+      // Terceira parte: apenas números (0-9)
+      const numbersPart = cleaned.slice(0, 9).replace(/[^0-9]/g, '');
+      const lettersPart = cleaned.slice(9, 11).replace(/[^A-Z]/g, '');
+      const finalNumbers = cleaned.slice(11).replace(/[^0-9]/g, '');
+      formatted = numbersPart + lettersPart + finalNumbers;
     }
     
+    // Limita o comprimento total
+    formatted = formatted.slice(0, 14);
+    
     setFormData(prev => ({ ...prev, bi: formatted }));
+  };
+
+  // Função para obter a máscara visual do BI
+  const getBIPlaceholder = (bi: string): string => {
+    const length = bi.length;
+    
+    if (length <= 9) {
+      // Mostra os números digitados e o resto da primeira parte
+      const filled = bi;
+      const remaining = '0'.repeat(9 - length);
+      const rest = 'XX000';
+      return filled + remaining + rest;
+    } else if (length <= 11) {
+      // Mostra números + letras digitadas e o resto
+      const numbers = bi.slice(0, 9);
+      const letters = bi.slice(9);
+      const remainingLetters = 'X'.repeat(2 - letters.length);
+      const finalNumbers = '000';
+      return numbers + letters + remainingLetters + finalNumbers;
+    } else {
+      // Mostra tudo preenchido até onde foi
+      const numbers = bi.slice(0, 9);
+      const letters = bi.slice(9, 11);
+      const finalNumbers = bi.slice(11);
+      const remainingNumbers = '0'.repeat(3 - finalNumbers.length);
+      return numbers + letters + finalNumbers + remainingNumbers;
+    }
   };
 
   // Função para validar senha
@@ -284,12 +326,36 @@ export default function Register() {
                   value={formData.bi}
                   onChange={(e) => handleBIInput(e.target.value)}
                   disabled={isLoading}
-                  placeholder="123456789LA098"
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono"
+                  placeholder={getBIPlaceholder(formData.bi)}
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono tracking-wider"
                   maxLength={14}
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Formato: 9 números + 2 letras + 3 números</p>
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-xs text-gray-500">
+                  Formato: <span className="font-mono">000000000XX000</span>
+                </p>
+                {formData.bi.length > 0 && (
+                  <p className="text-xs font-medium">
+                    {formData.bi.length}/14
+                  </p>
+                )}
+              </div>
+              
+              {/* Indicador visual das partes */}
+              <div className="flex text-xs text-gray-400 mt-2 space-x-1">
+                <span className={formData.bi.length >= 9 ? "text-green-600 font-medium" : ""}>
+                  9 números
+                </span>
+                <span>•</span>
+                <span className={formData.bi.length >= 11 ? "text-green-600 font-medium" : ""}>
+                  2 letras
+                </span>
+                <span>•</span>
+                <span className={formData.bi.length >= 14 ? "text-green-600 font-medium" : ""}>
+                  3 números
+                </span>
+              </div>
             </div>
 
             {/* Password Row */}
