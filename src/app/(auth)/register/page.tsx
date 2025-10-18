@@ -34,7 +34,7 @@ export default function Register() {
   // Handler inteligente para input do BI
   const handleBIInput = (value: string) => {
     // Remove tudo que não é letra ou número
-    let cleaned = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const cleaned = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     
     // Determina qual parte estamos preenchendo
     const currentLength = cleaned.length;
@@ -66,7 +66,6 @@ export default function Register() {
   // Função para obter a máscara visual do BI
   const getBIPlaceholder = (bi: string): string => {
     const length = bi.length;
-    let placeholder = '000000000XX000';
     
     if (length <= 9) {
       // Mostra os números digitados e o resto da primeira parte
