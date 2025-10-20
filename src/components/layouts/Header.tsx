@@ -7,6 +7,7 @@ import Image from "next/image";
 import { FaUser, FaFileAlt, FaSignOutAlt, FaChevronDown, FaWhatsapp } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { getApiUrl } from "@/lib/config";
+import { WHATSAPP_CONFIG } from "@/constants/whatsapp";
 
 // Interface para o usuário
 interface User {
@@ -88,10 +89,6 @@ export default function Header() {
     { href: "/candidatura", label: "Minha Candidatura", icon: FaFileAlt },
   ];
 
-  const whatsappNumber = "935751955";
-  const whatsappMessage = "Olá! Gostaria de mais informações sobre o Condomínio Osvaldo MJ.";
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-
   return (
     <header className="bg-white dark:bg-gray-900 shadow-lg sticky top-0 z-50 transition-colors duration-300">
       {/* Top Bar - Apenas WhatsApp */}
@@ -100,13 +97,13 @@ export default function Header() {
           <div className="flex justify-end items-center py-2 text-sm">
             {/* WhatsApp Contact - No canto direito */}
             <a 
-              href={whatsappUrl}
+              href={WHATSAPP_CONFIG.urls.withMessage}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200 group"
             >
               <FaWhatsapp className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">+244 935 751 955</span>
+              <span className="font-medium">{WHATSAPP_CONFIG.display.formattedNumber}</span>
               <span className="hidden sm:inline opacity-90">- Fale connosco</span>
             </a>
           </div>

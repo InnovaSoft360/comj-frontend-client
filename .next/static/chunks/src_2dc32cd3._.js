@@ -128,6 +128,15 @@ function ChangePasswordModal(param) {
     ]); // ✅ resetState agora é estável
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        // Validações em português
+        if (formData.newPassword.length < 6) {
+            alert("A nova senha deve ter pelo menos 6 caracteres.");
+            return;
+        }
+        if (formData.newPassword !== formData.confirmNewPassword) {
+            alert("As senhas não coincidem!");
+            return;
+        }
         const success = await changePassword({
             id: userId,
             currentPassword: formData.currentPassword,
@@ -189,12 +198,12 @@ function ChangePasswordModal(param) {
                                         className: "w-5 h-5 text-orange-600 dark:text-orange-400"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                        lineNumber: 92,
+                                        lineNumber: 103,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 91,
+                                    lineNumber: 102,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -204,7 +213,7 @@ function ChangePasswordModal(param) {
                                             children: "Alterar Senha"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 95,
+                                            lineNumber: 106,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -212,19 +221,19 @@ function ChangePasswordModal(param) {
                                             children: "Digite sua senha atual e a nova senha"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 98,
+                                            lineNumber: 109,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 94,
+                                    lineNumber: 105,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                            lineNumber: 90,
+                            lineNumber: 101,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -235,18 +244,18 @@ function ChangePasswordModal(param) {
                                 className: "w-5 h-5 text-gray-500 dark:text-gray-400"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                lineNumber: 109,
+                                lineNumber: 120,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                            lineNumber: 104,
+                            lineNumber: 115,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                    lineNumber: 89,
+                    lineNumber: 100,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -260,7 +269,7 @@ function ChangePasswordModal(param) {
                                     className: "w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 118,
+                                    lineNumber: 129,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -270,42 +279,53 @@ function ChangePasswordModal(param) {
                                             children: "Senha alterada com sucesso!"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 120,
+                                            lineNumber: 131,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-green-700 dark:text-green-400 text-sm",
-                                            children: "Redirecionando..."
+                                            children: "A redirecionar..."
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 123,
+                                            lineNumber: 134,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 119,
+                                    lineNumber: 130,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                            lineNumber: 117,
+                            lineNumber: 128,
                             columnNumber: 13
                         }, this),
                         error && !success && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 className: "text-red-800 dark:text-red-300 text-sm",
-                                children: error
-                            }, void 0, false, {
+                                children: [
+                                    error === 'Current password is incorrect' && 'Senha atual incorreta',
+                                    error === 'New password must be different from current password' && 'A nova senha deve ser diferente da senha atual',
+                                    error === 'Password must be at least 6 characters' && 'A senha deve ter pelo menos 6 caracteres',
+                                    error === 'Passwords do not match' && 'As senhas não coincidem',
+                                    ![
+                                        'Current password is incorrect',
+                                        'New password must be different from current password',
+                                        'Password must be at least 6 characters',
+                                        'Passwords do not match'
+                                    ].includes(error || '') && (error || 'Erro ao alterar senha')
+                                ]
+                            }, void 0, true, {
                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                lineNumber: 133,
+                                lineNumber: 144,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                            lineNumber: 132,
+                            lineNumber: 143,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -315,7 +335,7 @@ function ChangePasswordModal(param) {
                                     children: "Senha Atual *"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 141,
+                                    lineNumber: 161,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -331,7 +351,7 @@ function ChangePasswordModal(param) {
                                             disabled: isLoading || success
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 145,
+                                            lineNumber: 165,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -343,30 +363,30 @@ function ChangePasswordModal(param) {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 160,
+                                                lineNumber: 180,
                                                 columnNumber: 40
                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaEye"], {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 160,
+                                                lineNumber: 180,
                                                 columnNumber: 77
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 154,
+                                            lineNumber: 174,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 144,
+                                    lineNumber: 164,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                            lineNumber: 140,
+                            lineNumber: 160,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -376,7 +396,7 @@ function ChangePasswordModal(param) {
                                     children: "Nova Senha *"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 167,
+                                    lineNumber: 187,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -392,7 +412,7 @@ function ChangePasswordModal(param) {
                                             disabled: isLoading || success
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 171,
+                                            lineNumber: 191,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -404,38 +424,38 @@ function ChangePasswordModal(param) {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 186,
+                                                lineNumber: 206,
                                                 columnNumber: 36
                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaEye"], {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 186,
+                                                lineNumber: 206,
                                                 columnNumber: 73
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 180,
+                                            lineNumber: 200,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 170,
+                                    lineNumber: 190,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     className: "text-xs text-gray-500 dark:text-gray-400 mt-1",
-                                    children: "Mínimo 6 caracteres"
+                                    children: "Mínimo 6 caracteres, letra maiúscula, minúscula e número"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 189,
+                                    lineNumber: 209,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                            lineNumber: 166,
+                            lineNumber: 186,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -445,7 +465,7 @@ function ChangePasswordModal(param) {
                                     children: "Confirmar Nova Senha *"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 196,
+                                    lineNumber: 216,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -461,7 +481,7 @@ function ChangePasswordModal(param) {
                                             disabled: isLoading || success
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 200,
+                                            lineNumber: 220,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -473,31 +493,112 @@ function ChangePasswordModal(param) {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 215,
+                                                lineNumber: 235,
                                                 columnNumber: 40
                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaEye"], {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 215,
+                                                lineNumber: 235,
                                                 columnNumber: 77
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                            lineNumber: 209,
+                                            lineNumber: 229,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 199,
+                                    lineNumber: 219,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                            lineNumber: 195,
+                            lineNumber: 215,
                             columnNumber: 11
+                        }, this),
+                        formData.newPassword && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "text-sm font-medium text-blue-800 dark:text-blue-300 mb-2",
+                                    children: "Requisitos da senha:"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
+                                    lineNumber: 243,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                                    className: "text-xs text-blue-700 dark:text-blue-400 space-y-1",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            className: "flex items-center ".concat(formData.newPassword.length >= 6 ? 'text-green-600' : ''),
+                                            children: [
+                                                formData.newPassword.length >= 6 ? '✅' : '❌',
+                                                " Mínimo 6 caracteres"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
+                                            lineNumber: 247,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            className: "flex items-center ".concat(/[A-Z]/.test(formData.newPassword) ? 'text-green-600' : ''),
+                                            children: [
+                                                /[A-Z]/.test(formData.newPassword) ? '✅' : '❌',
+                                                " Pelo menos uma letra maiúscula"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
+                                            lineNumber: 250,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            className: "flex items-center ".concat(/[a-z]/.test(formData.newPassword) ? 'text-green-600' : ''),
+                                            children: [
+                                                /[a-z]/.test(formData.newPassword) ? '✅' : '❌',
+                                                " Pelo menos uma letra minúscula"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
+                                            lineNumber: 253,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            className: "flex items-center ".concat(/[0-9]/.test(formData.newPassword) ? 'text-green-600' : ''),
+                                            children: [
+                                                /[0-9]/.test(formData.newPassword) ? '✅' : '❌',
+                                                " Pelo menos um número"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
+                                            lineNumber: 256,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                            className: "flex items-center ".concat(formData.newPassword === formData.confirmNewPassword && formData.confirmNewPassword ? 'text-green-600' : ''),
+                                            children: [
+                                                formData.newPassword === formData.confirmNewPassword && formData.confirmNewPassword ? '✅' : '❌',
+                                                " Senhas coincidem"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
+                                            lineNumber: 259,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
+                                    lineNumber: 246,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
+                            lineNumber: 242,
+                            columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "flex space-x-3 pt-4",
@@ -510,12 +611,12 @@ function ChangePasswordModal(param) {
                                     children: "Cancelar"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 222,
+                                    lineNumber: 268,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                     type: "submit",
-                                    disabled: isLoading || success,
+                                    disabled: isLoading || success || formData.newPassword.length < 6 || formData.newPassword !== formData.confirmNewPassword || !/[A-Z]/.test(formData.newPassword) || !/[a-z]/.test(formData.newPassword) || !/[0-9]/.test(formData.newPassword),
                                     className: "flex-1 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-red-700 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2",
                                     children: isLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                         children: [
@@ -523,14 +624,14 @@ function ChangePasswordModal(param) {
                                                 className: "w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 238,
+                                                lineNumber: 290,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 children: "Alterando..."
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 239,
+                                                lineNumber: 291,
                                                 columnNumber: 19
                                             }, this)
                                         ]
@@ -540,14 +641,14 @@ function ChangePasswordModal(param) {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 243,
+                                                lineNumber: 295,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 children: "Sucesso!"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                                lineNumber: 244,
+                                                lineNumber: 296,
                                                 columnNumber: 19
                                             }, this)
                                         ]
@@ -555,35 +656,35 @@ function ChangePasswordModal(param) {
                                         children: "Alterar Senha"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                        lineNumber: 247,
+                                        lineNumber: 299,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                                    lineNumber: 231,
+                                    lineNumber: 277,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                            lineNumber: 221,
+                            lineNumber: 267,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-                    lineNumber: 114,
+                    lineNumber: 125,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-            lineNumber: 84,
+            lineNumber: 95,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/modals/ChangePasswordModal.tsx",
-        lineNumber: 83,
+        lineNumber: 94,
         columnNumber: 5
     }, this);
 }
@@ -691,6 +792,33 @@ function EditProfileModal(param) {
         lastName: ''
     });
     const { updateProfile, isLoading, error, success, resetState } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useUpdateProfile$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useUpdateProfile"])();
+    // Função para formatar nome (PRIMEIRA maiúscula, RESTO minúscula)
+    const formatName = (name)=>{
+        if (!name) return "";
+        // Remove espaços e trim
+        const cleaned = name.trim().replace(/\s+/g, '');
+        // PRIMEIRA LETRA MAIÚSCULA, RESTO SEMPRE MINÚSCULA
+        if (cleaned.length > 0) {
+            return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+        }
+        return cleaned;
+    };
+    // Função para validar e formatar nome em tempo real
+    const handleNameChange = (field, value)=>{
+        // Remove espaços automaticamente
+        const withoutSpaces = value.replace(/\s+/g, '');
+        // Aplica a formatação (PRIMEIRA MAIÚSCULA, RESTO MINÚSCULA)
+        const formatted = formatName(withoutSpaces);
+        setFormData((prev)=>({
+                ...prev,
+                [field]: formatted
+            }));
+    };
+    // Função para validar nome (SIMPLES - só verifica comprimento)
+    const validateName = (name)=>{
+        // Só verifica o comprimento - entre 2 e 20 caracteres
+        return name.length >= 2 && name.length <= 20;
+    };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "EditProfileModal.useEffect": ()=>{
             if (isOpen && user) {
@@ -708,6 +836,15 @@ function EditProfileModal(param) {
     ]);
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        // Validações do frontend
+        if (!validateName(formData.firstName)) {
+            alert("Nome deve ter entre 2 e 20 caracteres.");
+            return;
+        }
+        if (!validateName(formData.lastName)) {
+            alert("Sobrenome deve ter entre 2 e 20 caracteres.");
+            return;
+        }
         const success = await updateProfile({
             id: user.id,
             firstName: formData.firstName,
@@ -719,12 +856,6 @@ function EditProfileModal(param) {
                 onClose();
             }, 1500);
         }
-    };
-    const handleChange = (field, value)=>{
-        setFormData((prev)=>({
-                ...prev,
-                [field]: value
-            }));
     };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "EditProfileModal.useEffect": ()=>{
@@ -767,12 +898,12 @@ function EditProfileModal(param) {
                                         className: "w-5 h-5 text-orange-600 dark:text-orange-400"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                        lineNumber: 83,
+                                        lineNumber: 122,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 82,
+                                    lineNumber: 121,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -782,7 +913,7 @@ function EditProfileModal(param) {
                                             children: "Editar Perfil"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                            lineNumber: 86,
+                                            lineNumber: 125,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -790,19 +921,19 @@ function EditProfileModal(param) {
                                             children: "Atualize suas informações pessoais"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                            lineNumber: 89,
+                                            lineNumber: 128,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 85,
+                                    lineNumber: 124,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                            lineNumber: 81,
+                            lineNumber: 120,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -813,18 +944,18 @@ function EditProfileModal(param) {
                                 className: "w-5 h-5 text-gray-500 dark:text-gray-400"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                lineNumber: 100,
+                                lineNumber: 139,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                            lineNumber: 95,
+                            lineNumber: 134,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                    lineNumber: 80,
+                    lineNumber: 119,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -838,7 +969,7 @@ function EditProfileModal(param) {
                                     className: "w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 109,
+                                    lineNumber: 148,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -847,18 +978,18 @@ function EditProfileModal(param) {
                                         children: "Perfil atualizado com sucesso!"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                        lineNumber: 111,
+                                        lineNumber: 150,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 110,
+                                    lineNumber: 149,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                            lineNumber: 108,
+                            lineNumber: 147,
                             columnNumber: 13
                         }, this),
                         error && !success && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -868,12 +999,12 @@ function EditProfileModal(param) {
                                 children: error
                             }, void 0, false, {
                                 fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                lineNumber: 121,
+                                lineNumber: 160,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                            lineNumber: 120,
+                            lineNumber: 159,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -883,26 +1014,52 @@ function EditProfileModal(param) {
                                     children: "Nome *"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 129,
+                                    lineNumber: 168,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                     type: "text",
                                     required: true,
                                     value: formData.firstName,
-                                    onChange: (e)=>handleChange('firstName', e.target.value),
+                                    onChange: (e)=>handleNameChange('firstName', e.target.value),
+                                    onBlur: (e)=>{
+                                        // Garante formatação ao sair do campo
+                                        handleNameChange('firstName', e.target.value);
+                                    },
+                                    onKeyDown: (e)=>{
+                                        // Se tentar digitar espaço, previne
+                                        if (e.key === ' ') {
+                                            e.preventDefault();
+                                        }
+                                    },
                                     className: "w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
                                     placeholder: "Seu nome",
                                     disabled: isLoading || success
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 132,
+                                    lineNumber: 171,
                                     columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "text-xs text-gray-500 mt-1",
+                                    children: "2-20 caracteres (Primeira maiúscula, resto minúscula)"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/modals/EditProfileModal.tsx",
+                                    lineNumber: 190,
+                                    columnNumber: 13
+                                }, this),
+                                formData.firstName && !validateName(formData.firstName) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "text-xs text-red-600 mt-1",
+                                    children: "Nome deve ter entre 2 e 20 caracteres"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/modals/EditProfileModal.tsx",
+                                    lineNumber: 194,
+                                    columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                            lineNumber: 128,
+                            lineNumber: 167,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -912,26 +1069,52 @@ function EditProfileModal(param) {
                                     children: "Sobrenome *"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 145,
+                                    lineNumber: 202,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                     type: "text",
                                     required: true,
                                     value: formData.lastName,
-                                    onChange: (e)=>handleChange('lastName', e.target.value),
+                                    onChange: (e)=>handleNameChange('lastName', e.target.value),
+                                    onBlur: (e)=>{
+                                        // Garante formatação ao sair do campo
+                                        handleNameChange('lastName', e.target.value);
+                                    },
+                                    onKeyDown: (e)=>{
+                                        // Se tentar digitar espaço, previne
+                                        if (e.key === ' ') {
+                                            e.preventDefault();
+                                        }
+                                    },
                                     className: "w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
                                     placeholder: "Seu sobrenome",
                                     disabled: isLoading || success
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 148,
+                                    lineNumber: 205,
                                     columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "text-xs text-gray-500 mt-1",
+                                    children: "2-20 caracteres (Primeira maiúscula, resto minúscula)"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/modals/EditProfileModal.tsx",
+                                    lineNumber: 224,
+                                    columnNumber: 13
+                                }, this),
+                                formData.lastName && !validateName(formData.lastName) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "text-xs text-red-600 mt-1",
+                                    children: "Sobrenome deve ter entre 2 e 20 caracteres"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/modals/EditProfileModal.tsx",
+                                    lineNumber: 228,
+                                    columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                            lineNumber: 144,
+                            lineNumber: 201,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -945,12 +1128,12 @@ function EditProfileModal(param) {
                                     children: "Cancelar"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 161,
+                                    lineNumber: 236,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                     type: "submit",
-                                    disabled: isLoading || success,
+                                    disabled: isLoading || success || !validateName(formData.firstName) || !validateName(formData.lastName),
                                     className: "flex-1 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-red-700 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2",
                                     children: isLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                         children: [
@@ -958,14 +1141,14 @@ function EditProfileModal(param) {
                                                 className: "w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                                lineNumber: 177,
+                                                lineNumber: 252,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 children: "Atualizando..."
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                                lineNumber: 178,
+                                                lineNumber: 253,
                                                 columnNumber: 19
                                             }, this)
                                         ]
@@ -975,14 +1158,14 @@ function EditProfileModal(param) {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                                lineNumber: 182,
+                                                lineNumber: 257,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 children: "Sucesso!"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                                lineNumber: 183,
+                                                lineNumber: 258,
                                                 columnNumber: 19
                                             }, this)
                                         ]
@@ -990,35 +1173,35 @@ function EditProfileModal(param) {
                                         children: "Atualizar"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                        lineNumber: 186,
+                                        lineNumber: 261,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                                    lineNumber: 170,
+                                    lineNumber: 245,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                            lineNumber: 160,
+                            lineNumber: 235,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-                    lineNumber: 105,
+                    lineNumber: 144,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-            lineNumber: 75,
+            lineNumber: 114,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/modals/EditProfileModal.tsx",
-        lineNumber: 74,
+        lineNumber: 113,
         columnNumber: 5
     }, this);
 }

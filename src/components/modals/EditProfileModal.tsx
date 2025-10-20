@@ -21,6 +21,38 @@ export default function EditProfileModal({ isOpen, onClose, user, onProfileUpdat
   
   const { updateProfile, isLoading, error, success, resetState } = useUpdateProfile();
 
+  // Função para formatar nome (PRIMEIRA maiúscula, RESTO minúscula)
+  const formatName = (name: string): string => {
+    if (!name) return "";
+    
+    // Remove espaços e trim
+    const cleaned = name.trim().replace(/\s+/g, '');
+    
+    // PRIMEIRA LETRA MAIÚSCULA, RESTO SEMPRE MINÚSCULA
+    if (cleaned.length > 0) {
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+    }
+    
+    return cleaned;
+  };
+
+  // Função para validar e formatar nome em tempo real
+  const handleNameChange = (field: 'firstName' | 'lastName', value: string) => {
+    // Remove espaços automaticamente
+    const withoutSpaces = value.replace(/\s+/g, '');
+    
+    // Aplica a formatação (PRIMEIRA MAIÚSCULA, RESTO MINÚSCULA)
+    const formatted = formatName(withoutSpaces);
+    
+    setFormData(prev => ({ ...prev, [field]: formatted }));
+  };
+
+  // Função para validar nome (SIMPLES - só verifica comprimento)
+  const validateName = (name: string): boolean => {
+    // Só verifica o comprimento - entre 2 e 20 caracteres
+    return name.length >= 2 && name.length <= 20;
+  };
+
   useEffect(() => {
     if (isOpen && user) {
       resetState();
@@ -34,6 +66,17 @@ export default function EditProfileModal({ isOpen, onClose, user, onProfileUpdat
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validações do frontend
+    if (!validateName(formData.firstName)) {
+      alert("Nome deve ter entre 2 e 20 caracteres.");
+      return;
+    }
+
+    if (!validateName(formData.lastName)) {
+      alert("Sobrenome deve ter entre 2 e 20 caracteres.");
+      return;
+    }
+
     const success = await updateProfile({
       id: user.id,
       firstName: formData.firstName,
@@ -46,10 +89,6 @@ export default function EditProfileModal({ isOpen, onClose, user, onProfileUpdat
         onClose();
       }, 1500);
     }
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   useEffect(() => {
@@ -133,11 +172,29 @@ export default function EditProfileModal({ isOpen, onClose, user, onProfileUpdat
               type="text"
               required
               value={formData.firstName}
-              onChange={(e) => handleChange('firstName', e.target.value)}
+              onChange={(e) => handleNameChange('firstName', e.target.value)}
+              onBlur={(e) => {
+                // Garante formatação ao sair do campo
+                handleNameChange('firstName', e.target.value);
+              }}
+              onKeyDown={(e) => {
+                // Se tentar digitar espaço, previne
+                if (e.key === ' ') {
+                  e.preventDefault();
+                }
+              }}
               className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               placeholder="Seu nome"
               disabled={isLoading || success}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              2-20 caracteres (Primeira maiúscula, resto minúscula)
+            </p>
+            {formData.firstName && !validateName(formData.firstName) && (
+              <p className="text-xs text-red-600 mt-1">
+                Nome deve ter entre 2 e 20 caracteres
+              </p>
+            )}
           </div>
 
           {/* Sobrenome */}
@@ -149,11 +206,29 @@ export default function EditProfileModal({ isOpen, onClose, user, onProfileUpdat
               type="text"
               required
               value={formData.lastName}
-              onChange={(e) => handleChange('lastName', e.target.value)}
+              onChange={(e) => handleNameChange('lastName', e.target.value)}
+              onBlur={(e) => {
+                // Garante formatação ao sair do campo
+                handleNameChange('lastName', e.target.value);
+              }}
+              onKeyDown={(e) => {
+                // Se tentar digitar espaço, previne
+                if (e.key === ' ') {
+                  e.preventDefault();
+                }
+              }}
               className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               placeholder="Seu sobrenome"
               disabled={isLoading || success}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              2-20 caracteres (Primeira maiúscula, resto minúscula)
+            </p>
+            {formData.lastName && !validateName(formData.lastName) && (
+              <p className="text-xs text-red-600 mt-1">
+                Sobrenome deve ter entre 2 e 20 caracteres
+              </p>
+            )}
           </div>
 
           {/* Botões */}
@@ -169,7 +244,7 @@ export default function EditProfileModal({ isOpen, onClose, user, onProfileUpdat
             
             <button
               type="submit"
-              disabled={isLoading || success}
+              disabled={isLoading || success || !validateName(formData.firstName) || !validateName(formData.lastName)}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-red-700 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               {isLoading ? (

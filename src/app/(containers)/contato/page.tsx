@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FaWhatsapp, FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaExclamationTriangle } from "react-icons/fa";
 import api from "@/lib/api";
 import { useAlert } from "@/components/ui/customAlert";
+import { WHATSAPP_CONFIG } from "@/constants/whatsapp";
 
 // Mapeamento dos assuntos para valores em inglês
 const subjectMapping = {
@@ -271,8 +272,8 @@ export default function Contacto() {
     {
       icon: FaWhatsapp,
       title: "WhatsApp",
-      info: "+244 935 751 955",
-      link: "https://wa.me/244935751955",
+      info: WHATSAPP_CONFIG.display.formattedNumber,
+      link: WHATSAPP_CONFIG.urls.withMessage,
       color: "text-green-500"
     },
     {
@@ -361,7 +362,7 @@ export default function Contacto() {
                 <h3 className="text-2xl font-bold mb-2">Contacto de Emergência</h3>
                 <p className="text-orange-100 mb-4">Disponível 24/7 para situações urgentes</p>
                 <a
-                  href="https://wa.me/244935751955"
+                  href={WHATSAPP_CONFIG.urls.withMessage}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center space-x-2 bg-white text-orange-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
@@ -543,7 +544,7 @@ export default function Contacto() {
               },
               {
                 pergunta: "Posso agendar uma visita?",
-                resposta: "Sim, pode agendar uma visita através do nosso WhatsApp ou formulário de contacto."
+                resposta: `Sim, pode agendar uma visita através do nosso ${WHATSAPP_CONFIG.display.buttonText} ou formulário de contacto.`
               }
             ].map((faq, index) => (
               <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
