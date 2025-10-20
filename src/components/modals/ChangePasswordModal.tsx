@@ -41,6 +41,17 @@ export default function ChangePasswordModal({ isOpen, onClose, userId }: ChangeP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validações em português
+    if (formData.newPassword.length < 6) {
+      alert("A nova senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    if (formData.newPassword !== formData.confirmNewPassword) {
+      alert("As senhas não coincidem!");
+      return;
+    }
+
     const success = await changePassword({
       id: userId,
       currentPassword: formData.currentPassword,
@@ -121,7 +132,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userId }: ChangeP
                   Senha alterada com sucesso!
                 </p>
                 <p className="text-green-700 dark:text-green-400 text-sm">
-                  Redirecionando...
+                  A redirecionar...
                 </p>
               </div>
             </div>
@@ -131,7 +142,16 @@ export default function ChangePasswordModal({ isOpen, onClose, userId }: ChangeP
           {error && !success && (
             <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-red-800 dark:text-red-300 text-sm">
-                {error}
+                {error === 'Current password is incorrect' && 'Senha atual incorreta'}
+                {error === 'New password must be different from current password' && 'A nova senha deve ser diferente da senha atual'}
+                {error === 'Password must be at least 6 characters' && 'A senha deve ter pelo menos 6 caracteres'}
+                {error === 'Passwords do not match' && 'As senhas não coincidem'}
+                {![
+                  'Current password is incorrect',
+                  'New password must be different from current password', 
+                  'Password must be at least 6 characters',
+                  'Passwords do not match'
+                ].includes(error || '') && (error || 'Erro ao alterar senha')}
               </p>
             </div>
           )}
@@ -187,7 +207,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userId }: ChangeP
               </button>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Mínimo 6 caracteres
+              Mínimo 6 caracteres, letra maiúscula, minúscula e número
             </p>
           </div>
 
@@ -217,6 +237,32 @@ export default function ChangePasswordModal({ isOpen, onClose, userId }: ChangeP
             </div>
           </div>
 
+          {/* Validação de senha em tempo real */}
+          {formData.newPassword && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
+                Requisitos da senha:
+              </p>
+              <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                <li className={`flex items-center ${formData.newPassword.length >= 6 ? 'text-green-600' : ''}`}>
+                  {formData.newPassword.length >= 6 ? '✅' : '❌'} Mínimo 6 caracteres
+                </li>
+                <li className={`flex items-center ${/[A-Z]/.test(formData.newPassword) ? 'text-green-600' : ''}`}>
+                  {/[A-Z]/.test(formData.newPassword) ? '✅' : '❌'} Pelo menos uma letra maiúscula
+                </li>
+                <li className={`flex items-center ${/[a-z]/.test(formData.newPassword) ? 'text-green-600' : ''}`}>
+                  {/[a-z]/.test(formData.newPassword) ? '✅' : '❌'} Pelo menos uma letra minúscula
+                </li>
+                <li className={`flex items-center ${/[0-9]/.test(formData.newPassword) ? 'text-green-600' : ''}`}>
+                  {/[0-9]/.test(formData.newPassword) ? '✅' : '❌'} Pelo menos um número
+                </li>
+                <li className={`flex items-center ${formData.newPassword === formData.confirmNewPassword && formData.confirmNewPassword ? 'text-green-600' : ''}`}>
+                  {formData.newPassword === formData.confirmNewPassword && formData.confirmNewPassword ? '✅' : '❌'} Senhas coincidem
+                </li>
+              </ul>
+            </div>
+          )}
+
           {/* Botões */}
           <div className="flex space-x-3 pt-4">
             <button
@@ -230,7 +276,13 @@ export default function ChangePasswordModal({ isOpen, onClose, userId }: ChangeP
             
             <button
               type="submit"
-              disabled={isLoading || success}
+              disabled={isLoading || success || 
+                formData.newPassword.length < 6 ||
+                formData.newPassword !== formData.confirmNewPassword ||
+                !/[A-Z]/.test(formData.newPassword) ||
+                !/[a-z]/.test(formData.newPassword) ||
+                !/[0-9]/.test(formData.newPassword)
+              }
               className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-red-700 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               {isLoading ? (

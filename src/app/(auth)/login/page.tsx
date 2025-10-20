@@ -4,22 +4,35 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaEnvelope } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { useAlert } from "@/components/ui/customAlert";
-import { useAuth } from "@/hooks/useAuth"; // ← ADICIONAR ESTA IMPORT
+import { useAuth } from "@/hooks/useAuth";
+import { WHATSAPP_CONFIG } from "@/constants/whatsapp";
 
 export default function Login() {
   const router = useRouter();
   const { showAlert, AlertContainer } = useAlert();
-  const { login } = useAuth(); // ← ADICIONAR ESTA LINHA
+  const { login } = useAuth();
 
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+
+  // Função para validar e formatar email (sempre minúsculo)
+  const handleEmailChange = (value: string) => {
+    const cleaned = value.toLowerCase().trim();
+    setEmail(cleaned);
+    
+    // Atualiza também a ref para o submit
+    if (emailRef.current) {
+      emailRef.current.value = cleaned;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -138,15 +151,23 @@ export default function Login() {
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 E-mail
               </label>
-              <input
-                type="email"
-                id="email"
-                ref={emailRef}
-                required
-                disabled={isLoading}
-                placeholder="seu@email.com"
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  id="email"
+                  ref={emailRef}
+                  value={email}
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  onBlur={(e) => handleEmailChange(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  placeholder="seu@email.com"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed lowercase"
+                />
+              </div>
             </div>
 
             {/* Password Input */}
@@ -161,7 +182,7 @@ export default function Login() {
                   ref={passwordRef}
                   required
                   disabled={isLoading}
-                  placeholder="Sua senha"
+                  placeholder="••••••••"
                   className="w-full px-4 py-3 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <button
@@ -173,6 +194,9 @@ export default function Login() {
                   {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
                 </button>
               </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Sua senha está segura e protegida
+              </p>
             </div>
 
             {/* Submit Button */}
@@ -217,12 +241,12 @@ export default function Login() {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Precisa de ajuda?{" "}
             <a 
-              href="https://wa.me/244935751955" 
+              href={WHATSAPP_CONFIG.urls.withMessage}
               target="_blank" 
               rel="noopener noreferrer"
               className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors duration-200"
             >
-              Fale connosco no WhatsApp
+              {WHATSAPP_CONFIG.display.buttonText}
             </a>
           </p>
         </div>

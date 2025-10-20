@@ -261,20 +261,7 @@ export default function Home() {
                     </p>
                   </motion.div>
 
-                  {/* CTA Button */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.9 }}
-                    className="flex justify-center mt-8 sm:mt-12"
-                  >
-                    <Link
-                      href="/candidatar"
-                      className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 transform"
-                    >
-                      Candidatar-se Agora
-                    </Link>
-                  </motion.div>
+                  
                 </motion.div>
               </AnimatePresence>
             </div>

@@ -8,6 +8,7 @@ import { FaArrowLeft, FaEnvelope } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { useAlert } from "@/components/ui/customAlert";
+import { WHATSAPP_CONFIG } from "@/constants/whatsapp";
 
 export default function ForgotPassword() {
   const router = useRouter();
@@ -15,6 +16,12 @@ export default function ForgotPassword() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
+
+  // Função para validar e formatar email (sempre minúsculo)
+  const handleEmailChange = (value: string) => {
+    const cleaned = value.toLowerCase().trim();
+    setEmail(cleaned);
+  };
 
   // Função para validar email
   const validateEmail = (email: string): boolean => {
@@ -128,12 +135,18 @@ export default function ForgotPassword() {
                   id="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  onBlur={(e) => handleEmailChange(e.target.value)}
                   disabled={isLoading}
                   placeholder="seu@email.com"
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed lowercase"
                 />
               </div>
+              {email && !validateEmail(email) && (
+                <p className="text-xs text-red-600 mt-1">
+                  Por favor, insira um email válido
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
@@ -172,12 +185,12 @@ export default function ForgotPassword() {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Não recebeu o email?{" "}
             <a 
-              href="https://wa.me/244935751955" 
+              href={WHATSAPP_CONFIG.urls.withMessage}
               target="_blank" 
               rel="noopener noreferrer"
               className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors duration-200"
             >
-              Contacte-nos no WhatsApp
+              {WHATSAPP_CONFIG.display.contactText}
             </a>
           </p>
         </div>

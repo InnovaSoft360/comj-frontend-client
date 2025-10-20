@@ -8,6 +8,7 @@ import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaIdCard } from "react-icons/fa"
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { useAlert } from "@/components/ui/customAlert";
+import { WHATSAPP_CONFIG } from "@/constants/whatsapp";
 
 export default function Register() {
   const router = useRouter();
@@ -25,6 +26,38 @@ export default function Register() {
     confirmPassword: ""
   });
 
+  // Função para formatar nome (PRIMEIRA maiúscula, RESTO minúscula)
+  const formatName = (name: string): string => {
+    if (!name) return "";
+    
+    // Remove espaços e trim
+    const cleaned = name.trim().replace(/\s+/g, '');
+    
+    // PRIMEIRA LETRA MAIÚSCULA, RESTO SEMPRE MINÚSCULA
+    if (cleaned.length > 0) {
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+    }
+    
+    return cleaned;
+  };
+
+  // Função para validar e formatar nome em tempo real
+  const handleNameChange = (field: 'firstName' | 'lastName', value: string) => {
+    // Remove espaços automaticamente
+    const withoutSpaces = value.replace(/\s+/g, '');
+    
+    // Aplica a formatação (PRIMEIRA MAIÚSCULA, RESTO MINÚSCULA)
+    const formatted = formatName(withoutSpaces);
+    
+    setFormData(prev => ({ ...prev, [field]: formatted }));
+  };
+
+  // Função para validar email (sempre minúsculo)
+  const handleEmailChange = (value: string) => {
+    const cleaned = value.toLowerCase().trim();
+    setFormData(prev => ({ ...prev, email: cleaned }));
+  };
+
   // Função para validar BI
   const validateBI = (bi: string): boolean => {
     const biRegex = /^[0-9]{9}[A-Z]{2}[0-9]{3}$/;
@@ -33,33 +66,25 @@ export default function Register() {
 
   // Handler inteligente para input do BI
   const handleBIInput = (value: string) => {
-    // Remove tudo que não é letra ou número
     const cleaned = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    
-    // Determina qual parte estamos preenchendo
     const currentLength = cleaned.length;
     
     let formatted = '';
     
     if (currentLength <= 9) {
-      // Primeira parte: apenas números (0-9)
       formatted = cleaned.replace(/[^0-9]/g, '');
     } else if (currentLength <= 11) {
-      // Segunda parte: apenas letras (A-Z)
       const numbersPart = cleaned.slice(0, 9).replace(/[^0-9]/g, '');
       const lettersPart = cleaned.slice(9).replace(/[^A-Z]/g, '');
       formatted = numbersPart + lettersPart;
     } else {
-      // Terceira parte: apenas números (0-9)
       const numbersPart = cleaned.slice(0, 9).replace(/[^0-9]/g, '');
       const lettersPart = cleaned.slice(9, 11).replace(/[^A-Z]/g, '');
       const finalNumbers = cleaned.slice(11).replace(/[^0-9]/g, '');
       formatted = numbersPart + lettersPart + finalNumbers;
     }
     
-    // Limita o comprimento total
     formatted = formatted.slice(0, 14);
-    
     setFormData(prev => ({ ...prev, bi: formatted }));
   };
 
@@ -68,20 +93,17 @@ export default function Register() {
     const length = bi.length;
     
     if (length <= 9) {
-      // Mostra os números digitados e o resto da primeira parte
       const filled = bi;
       const remaining = '0'.repeat(9 - length);
       const rest = 'XX000';
       return filled + remaining + rest;
     } else if (length <= 11) {
-      // Mostra números + letras digitadas e o resto
       const numbers = bi.slice(0, 9);
       const letters = bi.slice(9);
       const remainingLetters = 'X'.repeat(2 - letters.length);
       const finalNumbers = '000';
       return numbers + letters + remainingLetters + finalNumbers;
     } else {
-      // Mostra tudo preenchido até onde foi
       const numbers = bi.slice(0, 9);
       const letters = bi.slice(9, 11);
       const finalNumbers = bi.slice(11);
@@ -113,10 +135,16 @@ export default function Register() {
     return { isValid: errors.length === 0, errors };
   };
 
-  // Função para validar nome
+  // Função para validar nome (SIMPLES - só verifica comprimento)
   const validateName = (name: string): boolean => {
-    const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
-    return nameRegex.test(name) && name.length >= 2 && name.length <= 50;
+    // Só verifica o comprimento - entre 2 e 20 caracteres
+    return name.length >= 2 && name.length <= 20;
+  };
+
+  // Função para validar email
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -124,15 +152,21 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      // Validações do frontend (para melhor UX)
+      // Validações do frontend
       if (!validateName(formData.firstName)) {
-        showAlert("Nome deve conter apenas letras e ter entre 2 e 50 caracteres", "warning");
+        showAlert("Nome deve ter entre 2 e 20 caracteres.", "warning");
         setIsLoading(false);
         return;
       }
 
       if (!validateName(formData.lastName)) {
-        showAlert("Sobrenome deve conter apenas letras e ter entre 2 e 50 caracteres", "warning");
+        showAlert("Sobrenome deve ter entre 2 e 20 caracteres.", "warning");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!validateEmail(formData.email)) {
+        showAlert("Por favor, insira um email válido", "warning");
         setIsLoading(false);
         return;
       }
@@ -169,15 +203,12 @@ export default function Register() {
       if (response.data.code === 200) {
         showAlert("Conta criada com sucesso! Você será redirecionado para o login.", "success");
         
-        // Redirecionar para login após 2 segundos
         setTimeout(() => {
           router.push("/login");
         }, 2000);
       }
 
     } catch (error: unknown) {
-      // SILENCIOSO - não loga erro no console
-      
       const err = error as {
         response?: {
           data?: {
@@ -189,11 +220,9 @@ export default function Register() {
         request?: unknown;
       };
 
-      // Mostrar mensagem de erro da API se disponível
       if (err.response?.data?.message) {
         showAlert(err.response.data.message, "error");
       } else if (err.response?.data?.errors) {
-        // Se houver múltiplos erros de validação
         const firstError = Object.values(err.response.data.errors)[0];
         showAlert(Array.isArray(firstError) ? firstError[0] : String(firstError), "error");
       } else if (err.response?.status === 400) {
@@ -206,10 +235,6 @@ export default function Register() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -255,13 +280,30 @@ export default function Register() {
                     id="firstName"
                     required
                     value={formData.firstName}
-                    onChange={(e) => handleChange('firstName', e.target.value)}
+                    onChange={(e) => handleNameChange('firstName', e.target.value)}
+                    onBlur={(e) => {
+                      // Garante formatação ao sair do campo
+                      handleNameChange('firstName', e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      // Se tentar digitar espaço, previne
+                      if (e.key === ' ') {
+                        e.preventDefault();
+                      }
+                    }}
                     disabled={isLoading}
-                    placeholder="Seu nome"
+                    placeholder="Ex: João"
                     className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Apenas letras (2-50 caracteres)</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  2-20 caracteres (Primeira maiúscula, resto minúscula)
+                </p>
+                {formData.firstName && !validateName(formData.firstName) && (
+                  <p className="text-xs text-red-600 mt-1">
+                    Nome deve ter entre 2 e 20 caracteres
+                  </p>
+                )}
               </div>
 
               {/* Last Name */}
@@ -278,37 +320,60 @@ export default function Register() {
                     id="lastName"
                     required
                     value={formData.lastName}
-                    onChange={(e) => handleChange('lastName', e.target.value)}
+                    onChange={(e) => handleNameChange('lastName', e.target.value)}
+                    onBlur={(e) => {
+                      // Garante formatação ao sair do campo
+                      handleNameChange('lastName', e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      // Se tentar digitar espaço, previne
+                      if (e.key === ' ') {
+                        e.preventDefault();
+                      }
+                    }}
                     disabled={isLoading}
-                    placeholder="Seu sobrenome"
+                    placeholder="Ex: Silva"
                     className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Apenas letras (2-50 caracteres)</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  2-20 caracteres (Primeira maiúscula, resto minúscula)
+                </p>
+                {formData.lastName && !validateName(formData.lastName) && (
+                  <p className="text-xs text-red-600 mt-1">
+                    Sobrenome deve ter entre 2 e 20 caracteres
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Email */}
             <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  E-mail *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaEnvelope className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="email"
-                    id="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
-                    disabled={isLoading}
-                    placeholder="seu@email.com"
-                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                E-mail *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaEnvelope className="h-5 w-5 text-gray-400" />
                 </div>
+                <input
+                  type="email"
+                  id="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  onBlur={(e) => handleEmailChange(e.target.value)}
+                  disabled={isLoading}
+                  placeholder="seu@email.com"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed lowercase"
+                />
               </div>
+              {formData.email && !validateEmail(formData.email) && (
+                <p className="text-xs text-red-600 mt-1">
+                  Por favor, insira um email válido
+                </p>
+              )}
+            </div>
 
             {/* BI Number */}
             <div>
@@ -371,7 +436,7 @@ export default function Register() {
                     id="password"
                     required
                     value={formData.password}
-                    onChange={(e) => handleChange('password', e.target.value)}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                     disabled={isLoading}
                     placeholder="Sua senha"
                     className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -399,7 +464,7 @@ export default function Register() {
                     id="confirmPassword"
                     required
                     value={formData.confirmPassword}
-                    onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     disabled={isLoading}
                     placeholder="Confirme sua senha"
                     className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -454,12 +519,12 @@ export default function Register() {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Precisa de ajuda?{" "}
             <a 
-              href="https://wa.me/244935751955" 
+              href={WHATSAPP_CONFIG.urls.withMessage}
               target="_blank" 
               rel="noopener noreferrer"
               className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors duration-200"
             >
-              Fale connosco no WhatsApp
+              {WHATSAPP_CONFIG.display.buttonText}
             </a>
           </p>
         </div>
