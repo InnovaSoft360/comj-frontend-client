@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import api from '@/lib/api';
 import { useAlert } from '@/components/ui/customAlert';
-import { Application } from './useApplication';
 
 export interface UpdateApplicationData {
   id: string;
@@ -12,6 +11,16 @@ export interface UpdateApplicationData {
   documentSalaryDeclarationUrl: File | null;
   documentBankStatementUrl: File | null;
   documentLastBankReceiptUrl: File | null;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+    status?: number;
+  };
+  request?: unknown;
 }
 
 export const useUpdateApplication = () => {
@@ -97,16 +106,17 @@ export const useUpdateApplication = () => {
         showAlert(response.data.message || 'Erro ao atualizar candidatura.', 'error');
         return false;
       }
-    } catch (error: any) {
-      console.error('Erro ao atualizar candidatura:', error);
+    } catch (err: unknown) {
+      console.error('Erro ao atualizar candidatura:', err);
       
+      const apiError = err as ApiError;
       let errorMessage = 'Erro ao atualizar candidatura. Tente novamente.';
       
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.status === 500) {
+      if (apiError.response?.data?.message) {
+        errorMessage = apiError.response.data.message;
+      } else if (apiError.response?.status === 500) {
         errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
-      } else if (error.request) {
+      } else if (apiError.request) {
         errorMessage = 'Erro de conexão. Verifique sua internet.';
       }
 

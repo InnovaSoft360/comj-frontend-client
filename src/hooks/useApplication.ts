@@ -1,7 +1,7 @@
 // hooks/useApplication.ts
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
 import { useAuth } from './useAuth';
 
@@ -27,13 +27,22 @@ interface ApplicationResponse {
   data: Application | null;
 }
 
+interface ApiError {
+  response?: {
+    status?: number;
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 export const useApplication = () => {
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchApplication = async () => {
+  const fetchApplication = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -51,8 +60,9 @@ export const useApplication = () => {
       } else {
         setError(response.data.message);
       }
-    } catch (err: any) {
-      if (err.response?.status === 404) {
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      if (apiError.response?.status === 404) {
         setApplication(null); // Não tem candidatura
       } else {
         setError('Erro ao carregar candidatura');
@@ -60,13 +70,13 @@ export const useApplication = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user) {
       fetchApplication();
     }
-  }, [user]);
+  }, [user, fetchApplication]);
 
   const refetch = () => {
     fetchApplication();

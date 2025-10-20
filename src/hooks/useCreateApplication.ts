@@ -13,6 +13,16 @@ export interface CreateApplicationData {
   documentLastBankReceiptUrl: File | null;
 }
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+    status?: number;
+  };
+  request?: unknown;
+}
+
 export const useCreateApplication = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -99,16 +109,17 @@ export const useCreateApplication = () => {
         showAlert(response.data.message || 'Erro ao criar candidatura.', 'error');
         return false;
       }
-    } catch (error: any) {
-      console.error('Erro ao criar candidatura:', error);
+    } catch (err: unknown) {
+      console.error('Erro ao criar candidatura:', err);
       
+      const apiError = err as ApiError;
       let errorMessage = 'Erro ao criar candidatura. Tente novamente.';
       
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.status === 500) {
+      if (apiError.response?.data?.message) {
+        errorMessage = apiError.response.data.message;
+      } else if (apiError.response?.status === 500) {
         errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
-      } else if (error.request) {
+      } else if (apiError.request) {
         errorMessage = 'Erro de conexão. Verifique sua internet.';
       }
 
