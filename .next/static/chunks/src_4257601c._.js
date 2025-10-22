@@ -139,9 +139,15 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$ico
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/customAlert.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$whatsapp$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/constants/whatsapp.ts [app-client] (ecmascript)");
+(()=>{
+    const e = new Error("Cannot find module '@/constants/i'");
+    e.code = 'MODULE_NOT_FOUND';
+    throw e;
+})();
 ;
 var _s = __turbopack_context__.k.signature();
 'use client';
+;
 ;
 ;
 ;
@@ -222,6 +228,7 @@ function Contacto() {
     const { showAlert, AlertContainer } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAlert"])();
     const [formData, setFormData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
         nome: "",
+        sobrenome: "",
         email: "",
         telefone: "",
         assunto: "",
@@ -229,6 +236,38 @@ function Contacto() {
     });
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [errors, setErrors] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({});
+    // Função para formatar nome (PRIMEIRA maiúscula, RESTO minúscula)
+    const formatNamePart = (name)=>{
+        if (!name) return "";
+        // Remove espaços extras e trim
+        const cleaned = name.trim();
+        // PRIMEIRA LETRA MAIÚSCULA, RESTO SEMPRE MINÚSCULA
+        if (cleaned.length > 0) {
+            return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+        }
+        return cleaned;
+    };
+    // Função para juntar nome e sobrenome em FullName
+    const getFullName = ()=>{
+        const nomeFormatado = formatNamePart(formData.nome);
+        const sobrenomeFormatado = formatNamePart(formData.sobrenome);
+        if (nomeFormatado && sobrenomeFormatado) {
+            return "".concat(nomeFormatado, " ").concat(sobrenomeFormatado);
+        } else if (nomeFormatado) {
+            return nomeFormatado;
+        } else if (sobrenomeFormatado) {
+            return sobrenomeFormatado;
+        }
+        return "";
+    };
+    // Função para validar e formatar email (sempre minúsculo)
+    const handleEmailChange = (value)=>{
+        const cleaned = value.toLowerCase().trim();
+        setFormData((prev)=>({
+                ...prev,
+                email: cleaned
+            }));
+    };
     // Função para validar telefone (9 dígitos, começando com 9)
     const validateTelefone = (telefone)=>{
         const numbers = telefone.replace(/\D/g, '');
@@ -269,10 +308,48 @@ function Contacto() {
                 }));
         }
     };
+    // Função para validar nome (mínimo 2 caracteres)
+    const validateNamePart = (name)=>{
+        return name.length >= 2;
+    };
+    // Função para validar email
+    const validateEmail = (email)=>{
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
     const handleSubmit = async (e)=>{
         e.preventDefault();
         setIsLoading(true);
         setErrors({});
+        // Validações do frontend - NOME
+        if (!validateNamePart(formData.nome)) {
+            setErrors((prev)=>({
+                    ...prev,
+                    nome: 'Nome deve ter pelo menos 2 caracteres'
+                }));
+            showAlert("Por favor, corrija o nome.", "warning");
+            setIsLoading(false);
+            return;
+        }
+        // Validações do frontend - SOBRENOME (opcional mas recomendado)
+        if (formData.sobrenome && !validateNamePart(formData.sobrenome)) {
+            setErrors((prev)=>({
+                    ...prev,
+                    sobrenome: 'Sobrenome deve ter pelo menos 2 caracteres'
+                }));
+            showAlert("Por favor, corrija o sobrenome.", "warning");
+            setIsLoading(false);
+            return;
+        }
+        if (!validateEmail(formData.email)) {
+            setErrors((prev)=>({
+                    ...prev,
+                    email: 'Email inválido'
+                }));
+            showAlert("Por favor, insira um email válido.", "warning");
+            setIsLoading(false);
+            return;
+        }
         // Validação do telefone antes de enviar
         const telefoneNumbers = formData.telefone.replace(/\D/g, '');
         if (!validateTelefone(formData.telefone)) {
@@ -286,11 +363,13 @@ function Contacto() {
         }
         try {
             var _response_data;
+            // Juntar nome e sobrenome em FullName para a API
+            const fullName = getFullName();
             // Mapear dados para o formato da API
             const apiData = {
-                fullName: formData.nome,
+                fullName: fullName,
                 phone: telefoneNumbers,
-                email: formData.email,
+                email: formData.email.toLowerCase(),
                 subject: subjectMapping[formData.assunto] || formData.assunto,
                 message: formData.mensagem
             };
@@ -318,6 +397,7 @@ function Contacto() {
                 showAlert("Mensagem enviada com sucesso! Entraremos em contacto em breve.", "success");
                 setFormData({
                     nome: "",
+                    sobrenome: "",
                     email: "",
                     telefone: "",
                     assunto: "",
@@ -366,19 +446,37 @@ function Contacto() {
     const handleChange = (field, value)=>{
         if (field === 'telefone') {
             handleTelefoneInput(value);
+        } else if (field === 'email') {
+            handleEmailChange(value);
         } else {
             setFormData((prev)=>({
                     ...prev,
                     [field]: value
                 }));
-            // Limpar erro do campo quando usuário começar a digitar
-            if (errors[field]) {
-                setErrors((prev)=>({
-                        ...prev,
-                        [field]: ''
-                    }));
-            }
         }
+        // Limpar erro do campo quando usuário começar a digitar
+        if (errors[field]) {
+            setErrors((prev)=>({
+                    ...prev,
+                    [field]: ''
+                }));
+        }
+    };
+    // Handler específico para o blur dos nomes (aplica formatação final)
+    const handleNameBlur = (field, value)=>{
+        const formatted = formatNamePart(value);
+        setFormData((prev)=>({
+                ...prev,
+                [field]: formatted
+            }));
+    };
+    // Handler específico para o blur do email (aplica formatação final)
+    const handleEmailBlur = (value)=>{
+        const formatted = value.toLowerCase().trim();
+        setFormData((prev)=>({
+                ...prev,
+                email: formatted
+            }));
     };
     const contactInfo = [
         {
@@ -391,28 +489,28 @@ function Contacto() {
         {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaPhone"],
             title: "Telefone",
-            info: "+244 222 123 456",
-            link: "tel:+244222123456",
+            info: INFORMATION_CONFIG.display.formattedNumber,
+            link: INFORMATION_CONFIG.display.linkformattedNumberCall,
             color: "text-blue-500"
         },
         {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaEnvelope"],
             title: "Email",
-            info: "info@condominio-osvaldomj.ao",
-            link: "mailto:info@condominio-osvaldomj.ao",
+            info: INFORMATION_CONFIG.display.linkEmail,
+            link: INFORMATION_CONFIG.display.linkEmail,
             color: "text-orange-500"
         },
         {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaMapMarkerAlt"],
             title: "Localização",
-            info: "Zango-4, Benfica, Luanda",
+            info: "Zango-4, Benfica",
             link: "/localizacao",
             color: "text-red-500"
         },
         {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaClock"],
             title: "Horário de Atendimento",
-            info: "Seg - Sex: 8h00 - 18h00",
+            info: INFORMATION_CONFIG.display.linkInformation,
             link: "#",
             color: "text-purple-500"
         }
@@ -422,7 +520,7 @@ function Contacto() {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(AlertContainer, {}, void 0, false, {
                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                lineNumber: 311,
+                lineNumber: 418,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -440,13 +538,13 @@ function Contacto() {
                                         children: "Contacto"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                        lineNumber: 318,
+                                        lineNumber: 425,
                                         columnNumber: 22
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                lineNumber: 317,
+                                lineNumber: 424,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -454,13 +552,13 @@ function Contacto() {
                                 children: "Estamos aqui para ajudar. Entre em contacto connosco através dos nossos canais de atendimento."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                lineNumber: 320,
+                                lineNumber: 427,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                        lineNumber: 316,
+                        lineNumber: 423,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -477,7 +575,7 @@ function Contacto() {
                                                 children: "Informações de Contacto"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 330,
+                                                lineNumber: 437,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -496,12 +594,12 @@ function Contacto() {
                                                                     className: "w-6 h-6"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                    lineNumber: 346,
+                                                                    lineNumber: 453,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 345,
+                                                                lineNumber: 452,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -512,7 +610,7 @@ function Contacto() {
                                                                         children: item.title
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                        lineNumber: 349,
+                                                                        lineNumber: 456,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -520,31 +618,31 @@ function Contacto() {
                                                                         children: item.info
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                        lineNumber: 350,
+                                                                        lineNumber: 457,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 348,
+                                                                lineNumber: 455,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, index, true, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 338,
+                                                        lineNumber: 445,
                                                         columnNumber: 21
                                                     }, this);
                                                 })
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 334,
+                                                lineNumber: 441,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                        lineNumber: 329,
+                                        lineNumber: 436,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -556,7 +654,7 @@ function Contacto() {
                                                     className: "w-12 h-12 mx-auto mb-4 text-white"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                    lineNumber: 361,
+                                                    lineNumber: 468,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -564,7 +662,7 @@ function Contacto() {
                                                     children: "Contacto de Emergência"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                    lineNumber: 362,
+                                                    lineNumber: 469,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -572,7 +670,7 @@ function Contacto() {
                                                     children: "Disponível 24/7 para situações urgentes"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                    lineNumber: 363,
+                                                    lineNumber: 470,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -585,37 +683,37 @@ function Contacto() {
                                                             className: "w-5 h-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                            lineNumber: 370,
+                                                            lineNumber: 477,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Falar no WhatsApp Agora"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                            lineNumber: 371,
+                                                            lineNumber: 478,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                    lineNumber: 364,
+                                                    lineNumber: 471,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                            lineNumber: 360,
+                                            lineNumber: 467,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                        lineNumber: 359,
+                                        lineNumber: 466,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                lineNumber: 328,
+                                lineNumber: 435,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -626,7 +724,7 @@ function Contacto() {
                                         children: "Envie-nos uma Mensagem"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                        lineNumber: 379,
+                                        lineNumber: 486,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -640,45 +738,238 @@ function Contacto() {
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                                                 className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                                                                children: "Nome Completo *"
+                                                                children: "Nome *"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 386,
+                                                                lineNumber: 495,
                                                                 columnNumber: 19
                                                             }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                                type: "text",
-                                                                required: true,
-                                                                value: formData.nome,
-                                                                onChange: (e)=>handleChange('nome', e.target.value),
-                                                                className: "w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ".concat(errors.nome ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'),
-                                                                placeholder: "Seu nome completo"
-                                                            }, void 0, false, {
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "relative",
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                        className: "absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none",
+                                                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaUser"], {
+                                                                            className: "h-4 w-4 text-gray-400"
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                            lineNumber: 500,
+                                                                            columnNumber: 23
+                                                                        }, this)
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                        lineNumber: 499,
+                                                                        columnNumber: 21
+                                                                    }, this),
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                        type: "text",
+                                                                        required: true,
+                                                                        value: formData.nome,
+                                                                        onChange: (e)=>handleChange('nome', e.target.value),
+                                                                        onBlur: (e)=>handleNameBlur('nome', e.target.value),
+                                                                        className: "w-full pl-10 pr-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ".concat(errors.nome ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'),
+                                                                        placeholder: "Ex: Domingos"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                        lineNumber: 502,
+                                                                        columnNumber: 21
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 389,
+                                                                lineNumber: 498,
                                                                 columnNumber: 19
                                                             }, this),
-                                                            errors.nome && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                            errors.nome ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                                 className: "text-red-500 text-sm mt-1 flex items-center",
                                                                 children: [
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaExclamationTriangle"], {
                                                                         className: "w-3 h-3 mr-1"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                        lineNumber: 401,
+                                                                        lineNumber: 516,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     errors.nome
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 400,
+                                                                lineNumber: 515,
+                                                                columnNumber: 21
+                                                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                className: "text-gray-500 text-sm mt-1",
+                                                                children: "Primeiro nome"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                lineNumber: 520,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 385,
+                                                        lineNumber: 494,
+                                                        columnNumber: 17
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
+                                                                children: "Sobrenome"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                lineNumber: 528,
+                                                                columnNumber: 19
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "relative",
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                        className: "absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none",
+                                                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaUser"], {
+                                                                            className: "h-4 w-4 text-gray-400"
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                            lineNumber: 533,
+                                                                            columnNumber: 23
+                                                                        }, this)
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                        lineNumber: 532,
+                                                                        columnNumber: 21
+                                                                    }, this),
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                        type: "text",
+                                                                        value: formData.sobrenome,
+                                                                        onChange: (e)=>handleChange('sobrenome', e.target.value),
+                                                                        onBlur: (e)=>handleNameBlur('sobrenome', e.target.value),
+                                                                        className: "w-full pl-10 pr-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ".concat(errors.sobrenome ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'),
+                                                                        placeholder: "Ex: Nascimento"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                        lineNumber: 535,
+                                                                        columnNumber: 21
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                lineNumber: 531,
+                                                                columnNumber: 19
+                                                            }, this),
+                                                            errors.sobrenome ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                className: "text-red-500 text-sm mt-1 flex items-center",
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaExclamationTriangle"], {
+                                                                        className: "w-3 h-3 mr-1"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                        lineNumber: 548,
+                                                                        columnNumber: 23
+                                                                    }, this),
+                                                                    errors.sobrenome
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                lineNumber: 547,
+                                                                columnNumber: 21
+                                                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                className: "text-gray-500 text-sm mt-1",
+                                                                children: "Sobrenome (opcional)"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                lineNumber: 552,
+                                                                columnNumber: 21
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                        lineNumber: 527,
+                                                        columnNumber: 17
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                lineNumber: 492,
+                                                columnNumber: 15
+                                            }, this),
+                                            formData.nome && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3",
+                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                    className: "text-sm text-blue-800 dark:text-blue-300",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
+                                                            children: "Nome completo que será enviado:"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                            lineNumber: 563,
+                                                            columnNumber: 21
+                                                        }, this),
+                                                        ' ',
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                            className: "font-semibold",
+                                                            children: getFullName()
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                            lineNumber: 564,
+                                                            columnNumber: 21
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                    lineNumber: 562,
+                                                    columnNumber: 19
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                lineNumber: 561,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "grid grid-cols-1 md:grid-cols-2 gap-4",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
+                                                                children: "Email *"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                lineNumber: 571,
+                                                                columnNumber: 19
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                type: "email",
+                                                                required: true,
+                                                                value: formData.email,
+                                                                onChange: (e)=>handleChange('email', e.target.value),
+                                                                onBlur: (e)=>handleEmailBlur(e.target.value),
+                                                                className: "w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 lowercase ".concat(errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'),
+                                                                placeholder: "seu@email.com"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                lineNumber: 574,
+                                                                columnNumber: 19
+                                                            }, this),
+                                                            errors.email && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                className: "text-red-500 text-sm mt-1 flex items-center",
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaExclamationTriangle"], {
+                                                                        className: "w-3 h-3 mr-1"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                        lineNumber: 587,
+                                                                        columnNumber: 23
+                                                                    }, this),
+                                                                    errors.email
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                                lineNumber: 586,
+                                                                columnNumber: 21
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
+                                                        lineNumber: 570,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -688,7 +979,7 @@ function Contacto() {
                                                                 children: "Telefone *"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 408,
+                                                                lineNumber: 594,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -701,7 +992,7 @@ function Contacto() {
                                                                 maxLength: 11
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 411,
+                                                                lineNumber: 597,
                                                                 columnNumber: 19
                                                             }, this),
                                                             errors.telefone ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -711,78 +1002,33 @@ function Contacto() {
                                                                         className: "w-3 h-3 mr-1"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                        lineNumber: 424,
+                                                                        lineNumber: 610,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     errors.telefone
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 423,
+                                                                lineNumber: 609,
                                                                 columnNumber: 21
                                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                                 className: "text-gray-500 text-sm mt-1",
                                                                 children: "Formato: 9 dígitos começando com 9"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 428,
+                                                                lineNumber: 614,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 407,
+                                                        lineNumber: 593,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 384,
-                                                columnNumber: 15
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                                                        className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                                                        children: "Email *"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 436,
-                                                        columnNumber: 17
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                        type: "email",
-                                                        required: true,
-                                                        value: formData.email,
-                                                        onChange: (e)=>handleChange('email', e.target.value),
-                                                        className: "w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ".concat(errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'),
-                                                        placeholder: "seu@email.com"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 439,
-                                                        columnNumber: 17
-                                                    }, this),
-                                                    errors.email && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "text-red-500 text-sm mt-1 flex items-center",
-                                                        children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaExclamationTriangle"], {
-                                                                className: "w-3 h-3 mr-1"
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 451,
-                                                                columnNumber: 21
-                                                            }, this),
-                                                            errors.email
-                                                        ]
-                                                    }, void 0, true, {
-                                                        fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 450,
-                                                        columnNumber: 19
-                                                    }, this)
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 435,
+                                                lineNumber: 569,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -792,7 +1038,7 @@ function Contacto() {
                                                         children: "Assunto *"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 458,
+                                                        lineNumber: 622,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -806,7 +1052,7 @@ function Contacto() {
                                                                 children: "Selecione o assunto"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 469,
+                                                                lineNumber: 633,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -814,7 +1060,7 @@ function Contacto() {
                                                                 children: "Informações Gerais"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 470,
+                                                                lineNumber: 634,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -822,7 +1068,7 @@ function Contacto() {
                                                                 children: "Agendar Visita"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 471,
+                                                                lineNumber: 635,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -830,7 +1076,7 @@ function Contacto() {
                                                                 children: "Suporte Técnico"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 472,
+                                                                lineNumber: 636,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -838,13 +1084,13 @@ function Contacto() {
                                                                 children: "Outro"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 473,
+                                                                lineNumber: 637,
                                                                 columnNumber: 19
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 461,
+                                                        lineNumber: 625,
                                                         columnNumber: 17
                                                     }, this),
                                                     errors.assunto && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -854,20 +1100,20 @@ function Contacto() {
                                                                 className: "w-3 h-3 mr-1"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 477,
+                                                                lineNumber: 641,
                                                                 columnNumber: 21
                                                             }, this),
                                                             errors.assunto
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 476,
+                                                        lineNumber: 640,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 457,
+                                                lineNumber: 621,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -877,7 +1123,7 @@ function Contacto() {
                                                         children: "Mensagem *"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 484,
+                                                        lineNumber: 648,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
@@ -889,7 +1135,7 @@ function Contacto() {
                                                         placeholder: "Descreva a sua mensagem..."
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 487,
+                                                        lineNumber: 651,
                                                         columnNumber: 17
                                                     }, this),
                                                     errors.mensagem && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -899,20 +1145,20 @@ function Contacto() {
                                                                 className: "w-3 h-3 mr-1"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                                lineNumber: 499,
+                                                                lineNumber: 663,
                                                                 columnNumber: 21
                                                             }, this),
                                                             errors.mensagem
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                        lineNumber: 498,
+                                                        lineNumber: 662,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 483,
+                                                lineNumber: 647,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -925,14 +1171,14 @@ function Contacto() {
                                                             className: "w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                            lineNumber: 512,
+                                                            lineNumber: 676,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Enviando..."
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                            lineNumber: 513,
+                                                            lineNumber: 677,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
@@ -942,39 +1188,39 @@ function Contacto() {
                                                             className: "w-5 h-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                            lineNumber: 517,
+                                                            lineNumber: 681,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Enviar Mensagem"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                            lineNumber: 518,
+                                                            lineNumber: 682,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 505,
+                                                lineNumber: 669,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                        lineNumber: 383,
+                                        lineNumber: 490,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                lineNumber: 378,
+                                lineNumber: 485,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                        lineNumber: 325,
+                        lineNumber: 432,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -985,7 +1231,7 @@ function Contacto() {
                                 children: "Perguntas Frequentes"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                lineNumber: 528,
+                                lineNumber: 692,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1018,7 +1264,7 @@ function Contacto() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 551,
+                                                lineNumber: 715,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1029,40 +1275,40 @@ function Contacto() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                                lineNumber: 552,
+                                                lineNumber: 716,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, index, true, {
                                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                        lineNumber: 550,
+                                        lineNumber: 714,
                                         columnNumber: 15
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                                lineNumber: 531,
+                                lineNumber: 695,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                        lineNumber: 527,
+                        lineNumber: 691,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(containers)/contato/page.tsx",
-                lineNumber: 313,
+                lineNumber: 420,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(containers)/contato/page.tsx",
-        lineNumber: 310,
+        lineNumber: 417,
         columnNumber: 5
     }, this);
 }
-_s(Contacto, "vCf1HEXLqqzXNHU3V48FOdSxzuI=", false, function() {
+_s(Contacto, "waZiwunjvb8lVxI3K7U7rBn3CIg=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAlert"]
     ];

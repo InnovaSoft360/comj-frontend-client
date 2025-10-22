@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from "react";
-import { FaWhatsapp, FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaExclamationTriangle } from "react-icons/fa";
+import { FaWhatsapp, FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaExclamationTriangle, FaUser } from "react-icons/fa";
 import api from "@/lib/api";
 import { useAlert } from "@/components/ui/customAlert";
 import { WHATSAPP_CONFIG } from "@/constants/whatsapp";
+import { INFORMATION_CONFIG } from "@/constants/information";
 
 // Mapeamento dos assuntos para valores em inglês
 const subjectMapping = {
@@ -108,6 +109,7 @@ export default function Contacto() {
   const { showAlert, AlertContainer } = useAlert();
   const [formData, setFormData] = useState({
     nome: "",
+    sobrenome: "",
     email: "",
     telefone: "", 
     assunto: "",
@@ -115,6 +117,43 @@ export default function Contacto() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Função para formatar nome (PRIMEIRA maiúscula, RESTO minúscula)
+  const formatNamePart = (name: string): string => {
+    if (!name) return "";
+    
+    // Remove espaços extras e trim
+    const cleaned = name.trim();
+    
+    // PRIMEIRA LETRA MAIÚSCULA, RESTO SEMPRE MINÚSCULA
+    if (cleaned.length > 0) {
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+    }
+    
+    return cleaned;
+  };
+
+  // Função para juntar nome e sobrenome em FullName
+  const getFullName = (): string => {
+    const nomeFormatado = formatNamePart(formData.nome);
+    const sobrenomeFormatado = formatNamePart(formData.sobrenome);
+    
+    if (nomeFormatado && sobrenomeFormatado) {
+      return `${nomeFormatado} ${sobrenomeFormatado}`;
+    } else if (nomeFormatado) {
+      return nomeFormatado;
+    } else if (sobrenomeFormatado) {
+      return sobrenomeFormatado;
+    }
+    
+    return "";
+  };
+
+  // Função para validar e formatar email (sempre minúsculo)
+  const handleEmailChange = (value: string) => {
+    const cleaned = value.toLowerCase().trim();
+    setFormData(prev => ({ ...prev, email: cleaned }));
+  };
 
   // Função para validar telefone (9 dígitos, começando com 9)
   const validateTelefone = (telefone: string): boolean => {
@@ -157,10 +196,53 @@ export default function Contacto() {
     }
   };
 
+  // Função para validar nome (mínimo 2 caracteres)
+  const validateNamePart = (name: string): boolean => {
+    return name.length >= 2;
+  };
+
+  // Função para validar email
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
+
+    // Validações do frontend - NOME
+    if (!validateNamePart(formData.nome)) {
+      setErrors(prev => ({ 
+        ...prev, 
+        nome: 'Nome deve ter pelo menos 2 caracteres' 
+      }));
+      showAlert("Por favor, corrija o nome.", "warning");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validações do frontend - SOBRENOME (opcional mas recomendado)
+    if (formData.sobrenome && !validateNamePart(formData.sobrenome)) {
+      setErrors(prev => ({ 
+        ...prev, 
+        sobrenome: 'Sobrenome deve ter pelo menos 2 caracteres' 
+      }));
+      showAlert("Por favor, corrija o sobrenome.", "warning");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      setErrors(prev => ({ 
+        ...prev, 
+        email: 'Email inválido' 
+      }));
+      showAlert("Por favor, insira um email válido.", "warning");
+      setIsLoading(false);
+      return;
+    }
 
     // Validação do telefone antes de enviar
     const telefoneNumbers = formData.telefone.replace(/\D/g, '');
@@ -175,11 +257,14 @@ export default function Contacto() {
     }
 
     try {
+      // Juntar nome e sobrenome em FullName para a API
+      const fullName = getFullName();
+      
       // Mapear dados para o formato da API
       const apiData = {
-        fullName: formData.nome,
+        fullName: fullName, // "Domingos Nascimento"
         phone: telefoneNumbers,
-        email: formData.email,
+        email: formData.email.toLowerCase(), // Email sempre minúsculo
         subject: subjectMapping[formData.assunto as keyof typeof subjectMapping] || formData.assunto,
         message: formData.mensagem
       };
@@ -209,7 +294,14 @@ export default function Contacto() {
 
       if (response.data?.success) {
         showAlert("Mensagem enviada com sucesso! Entraremos em contacto em breve.", "success");
-        setFormData({ nome: "", email: "", telefone: "", assunto: "", mensagem: "" });
+        setFormData({ 
+          nome: "", 
+          sobrenome: "", 
+          email: "", 
+          telefone: "", 
+          assunto: "", 
+          mensagem: "" 
+        });
       } else {
         showAlert("Erro ao enviar mensagem. Tente novamente.", "error");
       }
@@ -259,13 +351,28 @@ export default function Contacto() {
   const handleChange = (field: string, value: string) => {
     if (field === 'telefone') {
       handleTelefoneInput(value);
+    } else if (field === 'email') {
+      handleEmailChange(value);
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));
-      // Limpar erro do campo quando usuário começar a digitar
-      if (errors[field]) {
-        setErrors(prev => ({ ...prev, [field]: '' }));
-      }
     }
+    
+    // Limpar erro do campo quando usuário começar a digitar
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  // Handler específico para o blur dos nomes (aplica formatação final)
+  const handleNameBlur = (field: 'nome' | 'sobrenome', value: string) => {
+    const formatted = formatNamePart(value);
+    setFormData(prev => ({ ...prev, [field]: formatted }));
+  };
+
+  // Handler específico para o blur do email (aplica formatação final)
+  const handleEmailBlur = (value: string) => {
+    const formatted = value.toLowerCase().trim();
+    setFormData(prev => ({ ...prev, email: formatted }));
   };
 
   const contactInfo = [
@@ -279,28 +386,28 @@ export default function Contacto() {
     {
       icon: FaPhone,
       title: "Telefone", 
-      info: "+244 222 123 456",
-      link: "tel:+244222123456",
+      info: INFORMATION_CONFIG.display.formattedNumber,
+      link: INFORMATION_CONFIG.display.linkformattedNumberCall,
       color: "text-blue-500"
     },
     {
       icon: FaEnvelope,
       title: "Email",
-      info: "info@condominio-osvaldomj.ao", 
-      link: "mailto:info@condominio-osvaldomj.ao",
+      info: INFORMATION_CONFIG.display.linkEmail, 
+      link: INFORMATION_CONFIG.display.linkEmail,
       color: "text-orange-500"
     },
     {
       icon: FaMapMarkerAlt,
       title: "Localização",
-      info: "Zango-4, Benfica, Luanda",
+      info: INFORMATION_CONFIG.display.linkLocalization,
       link: "/localizacao",
       color: "text-red-500"
     },
     {
       icon: FaClock,
       title: "Horário de Atendimento",
-      info: "Seg - Sex: 8h00 - 18h00",
+      info: INFORMATION_CONFIG.display.linkInformation,
       link: "#",
       color: "text-purple-500"
     }
@@ -362,7 +469,7 @@ export default function Contacto() {
                 <h3 className="text-2xl font-bold mb-2">Contacto de Emergência</h3>
                 <p className="text-orange-100 mb-4">Disponível 24/7 para situações urgentes</p>
                 <a
-                  href={WHATSAPP_CONFIG.urls.withMessage}
+                  href={WHATSAPP_CONFIG.urls.withMessageEmargencia}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center space-x-2 bg-white text-orange-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
@@ -381,25 +488,104 @@ export default function Contacto() {
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Nome e Sobrenome em linha */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Nome */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nome Completo *
+                    Nome *
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.nome}
-                    onChange={(e) => handleChange('nome', e.target.value)}
-                    className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${
-                      errors.nome ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
-                    }`}
-                    placeholder="Seu nome completo"
-                  />
-                  {errors.nome && (
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaUser className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={formData.nome}
+                      onChange={(e) => handleChange('nome', e.target.value)}
+                      onBlur={(e) => handleNameBlur('nome', e.target.value)}
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${
+                        errors.nome ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
+                      }`}
+                      placeholder="Ex: Domingos"
+                    />
+                  </div>
+                  {errors.nome ? (
                     <p className="text-red-500 text-sm mt-1 flex items-center">
                       <FaExclamationTriangle className="w-3 h-3 mr-1" />
                       {errors.nome}
+                    </p>
+                  ) : (
+                    <p className="text-gray-500 text-sm mt-1">
+                      Primeiro nome
+                    </p>
+                  )}
+                </div>
+
+                {/* Sobrenome */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Sobrenome
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaUser className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.sobrenome}
+                      onChange={(e) => handleChange('sobrenome', e.target.value)}
+                      onBlur={(e) => handleNameBlur('sobrenome', e.target.value)}
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${
+                        errors.sobrenome ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
+                      }`}
+                      placeholder="Ex: Nascimento"
+                    />
+                  </div>
+                  {errors.sobrenome ? (
+                    <p className="text-red-500 text-sm mt-1 flex items-center">
+                      <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                      {errors.sobrenome}
+                    </p>
+                  ) : (
+                    <p className="text-gray-500 text-sm mt-1">
+                      Sobrenome (opcional)
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Preview do FullName */}
+              {formData.nome && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                  <p className="text-sm text-blue-800 dark:text-blue-300">
+                    <strong>Nome completo que será enviado:</strong>{' '}
+                    <span className="font-semibold">{getFullName()}</span>
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => handleChange('email', e.target.value)}
+                    onBlur={(e) => handleEmailBlur(e.target.value)}
+                    className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 lowercase ${
+                      errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
+                    }`}
+                    placeholder="seu@email.com"
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1 flex items-center">
+                      <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                      {errors.email}
                     </p>
                   )}
                 </div>
@@ -430,28 +616,6 @@ export default function Contacto() {
                     </p>
                   )}
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  className={`w-full px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${
-                    errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-orange-500'
-                  }`}
-                  placeholder="seu@email.com"
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1 flex items-center">
-                    <FaExclamationTriangle className="w-3 h-3 mr-1" />
-                    {errors.email}
-                  </p>
-                )}
               </div>
 
               <div>

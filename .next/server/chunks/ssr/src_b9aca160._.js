@@ -103,6 +103,24 @@ const useAlert = ()=>{
 };
 const __TURBOPACK__default__export__ = CustomAlert;
 }),
+"[project]/src/constants/information.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "INFORMATION_CONFIG",
+    ()=>INFORMATION_CONFIG
+]);
+const INFORMATION_CONFIG = {
+    display: {
+        // Número formatado para exibição
+        formattedNumber: "+244 953 145 856",
+        linkformattedNumberCall: "tel:+244953145856",
+        linkEmail: "osvaldomj.contact@gmail.com",
+        linkInformation: "Seg - Sex: 8h00 - 18h00",
+        linkLocalization: "Zango-4 • Benfica"
+    }
+};
+}),
 "[project]/src/app/(containers)/contato/page.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
@@ -116,11 +134,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$ico
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/customAlert.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$whatsapp$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/constants/whatsapp.ts [app-ssr] (ecmascript)");
-(()=>{
-    const e = new Error("Cannot find module '@/constants/i'");
-    e.code = 'MODULE_NOT_FOUND';
-    throw e;
-})();
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$information$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/constants/information.ts [app-ssr] (ecmascript)");
 'use client';
 ;
 ;
@@ -458,28 +472,28 @@ function Contacto() {
         {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaPhone"],
             title: "Telefone",
-            info: INFORMATION_CONFIG.display.formattedNumber,
-            link: INFORMATION_CONFIG.display.linkformattedNumberCall,
+            info: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$information$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["INFORMATION_CONFIG"].display.formattedNumber,
+            link: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$information$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["INFORMATION_CONFIG"].display.linkformattedNumberCall,
             color: "text-blue-500"
         },
         {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaEnvelope"],
             title: "Email",
-            info: INFORMATION_CONFIG.display.linkEmail,
-            link: INFORMATION_CONFIG.display.linkEmail,
+            info: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$information$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["INFORMATION_CONFIG"].display.linkEmail,
+            link: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$information$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["INFORMATION_CONFIG"].display.linkEmail,
             color: "text-orange-500"
         },
         {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaMapMarkerAlt"],
             title: "Localização",
-            info: "Zango-4, Benfica",
+            info: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$information$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["INFORMATION_CONFIG"].display.linkLocalization,
             link: "/localizacao",
             color: "text-red-500"
         },
         {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaClock"],
             title: "Horário de Atendimento",
-            info: INFORMATION_CONFIG.display.linkInformation,
+            info: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$information$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["INFORMATION_CONFIG"].display.linkInformation,
             link: "#",
             color: "text-purple-500"
         }
@@ -643,7 +657,7 @@ function Contacto() {
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
-                                                    href: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$whatsapp$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["WHATSAPP_CONFIG"].urls.withMessage,
+                                                    href: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$whatsapp$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["WHATSAPP_CONFIG"].urls.withMessageEmargencia,
                                                     target: "_blank",
                                                     rel: "noopener noreferrer",
                                                     className: "inline-flex items-center space-x-2 bg-white text-orange-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg",
@@ -1280,4 +1294,4 @@ function Contacto() {
 }),
 ];
 
-//# sourceMappingURL=src_10b99419._.js.map
+//# sourceMappingURL=src_b9aca160._.js.map
