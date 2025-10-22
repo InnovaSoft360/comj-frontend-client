@@ -19,7 +19,7 @@ const useApplication = ()=>{
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useAuth$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
-    const fetchApplication = async ()=>{
+    const fetchApplication = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async ()=>{
         if (!user) return;
         try {
             setIsLoading(true);
@@ -33,7 +33,8 @@ const useApplication = ()=>{
                 setError(response.data.message);
             }
         } catch (err) {
-            if (err.response?.status === 404) {
+            const apiError = err;
+            if (apiError.response?.status === 404) {
                 setApplication(null); // Não tem candidatura
             } else {
                 setError('Erro ao carregar candidatura');
@@ -41,13 +42,16 @@ const useApplication = ()=>{
         } finally{
             setIsLoading(false);
         }
-    };
+    }, [
+        user
+    ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         if (user) {
             fetchApplication();
         }
     }, [
-        user
+        user,
+        fetchApplication
     ]);
     const refetch = ()=>{
         fetchApplication();
@@ -272,14 +276,15 @@ const useCreateApplication = ()=>{
                 showAlert(response.data.message || 'Erro ao criar candidatura.', 'error');
                 return false;
             }
-        } catch (error) {
-            console.error('Erro ao criar candidatura:', error);
+        } catch (err) {
+            console.error('Erro ao criar candidatura:', err);
+            const apiError = err;
             let errorMessage = 'Erro ao criar candidatura. Tente novamente.';
-            if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-            } else if (error.response?.status === 500) {
+            if (apiError.response?.data?.message) {
+                errorMessage = apiError.response.data.message;
+            } else if (apiError.response?.status === 500) {
                 errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
-            } else if (error.request) {
+            } else if (apiError.request) {
                 errorMessage = 'Erro de conexão. Verifique sua internet.';
             }
             showAlert(errorMessage, 'error');
@@ -895,14 +900,15 @@ const useUpdateApplication = ()=>{
                 showAlert(response.data.message || 'Erro ao atualizar candidatura.', 'error');
                 return false;
             }
-        } catch (error) {
-            console.error('Erro ao atualizar candidatura:', error);
+        } catch (err) {
+            console.error('Erro ao atualizar candidatura:', err);
+            const apiError = err;
             let errorMessage = 'Erro ao atualizar candidatura. Tente novamente.';
-            if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-            } else if (error.response?.status === 500) {
+            if (apiError.response?.data?.message) {
+                errorMessage = apiError.response.data.message;
+            } else if (apiError.response?.status === 500) {
                 errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
-            } else if (error.request) {
+            } else if (apiError.request) {
                 errorMessage = 'Erro de conexão. Verifique sua internet.';
             }
             showAlert(errorMessage, 'error');

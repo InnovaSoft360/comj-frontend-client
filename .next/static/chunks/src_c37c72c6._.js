@@ -21,30 +21,35 @@ const useApplication = ()=>{
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useAuth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
-    const fetchApplication = async ()=>{
-        if (!user) return;
-        try {
-            setIsLoading(true);
-            setError(null);
-            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("/v1/Applications/GetByUserId?UserId=".concat(user.id));
-            if (response.data.code === 200 && response.data.data) {
-                setApplication(response.data.data);
-            } else if (response.data.code === 404) {
-                setApplication(null); // Não tem candidatura
-            } else {
-                setError(response.data.message);
+    const fetchApplication = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "useApplication.useCallback[fetchApplication]": async ()=>{
+            if (!user) return;
+            try {
+                setIsLoading(true);
+                setError(null);
+                const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("/v1/Applications/GetByUserId?UserId=".concat(user.id));
+                if (response.data.code === 200 && response.data.data) {
+                    setApplication(response.data.data);
+                } else if (response.data.code === 404) {
+                    setApplication(null); // Não tem candidatura
+                } else {
+                    setError(response.data.message);
+                }
+            } catch (err) {
+                var _apiError_response;
+                const apiError = err;
+                if (((_apiError_response = apiError.response) === null || _apiError_response === void 0 ? void 0 : _apiError_response.status) === 404) {
+                    setApplication(null); // Não tem candidatura
+                } else {
+                    setError('Erro ao carregar candidatura');
+                }
+            } finally{
+                setIsLoading(false);
             }
-        } catch (err) {
-            var _err_response;
-            if (((_err_response = err.response) === null || _err_response === void 0 ? void 0 : _err_response.status) === 404) {
-                setApplication(null); // Não tem candidatura
-            } else {
-                setError('Erro ao carregar candidatura');
-            }
-        } finally{
-            setIsLoading(false);
         }
-    };
+    }["useApplication.useCallback[fetchApplication]"], [
+        user
+    ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "useApplication.useEffect": ()=>{
             if (user) {
@@ -52,7 +57,8 @@ const useApplication = ()=>{
             }
         }
     }["useApplication.useEffect"], [
-        user
+        user,
+        fetchApplication
     ]);
     const refetch = ()=>{
         fetchApplication();
@@ -65,7 +71,7 @@ const useApplication = ()=>{
         hasApplication: !!application
     };
 };
-_s(useApplication, "AW9x6gSfdMRp2znQoLE8D3LmbIw=", false, function() {
+_s(useApplication, "2I6s5ioOPnYEHGjeYr0DaWWdJMA=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useAuth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"]
     ];
@@ -310,15 +316,16 @@ const useCreateApplication = ()=>{
                 showAlert(response.data.message || 'Erro ao criar candidatura.', 'error');
                 return false;
             }
-        } catch (error) {
-            var _error_response_data, _error_response, _error_response1;
-            console.error('Erro ao criar candidatura:', error);
+        } catch (err) {
+            var _apiError_response_data, _apiError_response, _apiError_response1;
+            console.error('Erro ao criar candidatura:', err);
+            const apiError = err;
             let errorMessage = 'Erro ao criar candidatura. Tente novamente.';
-            if ((_error_response = error.response) === null || _error_response === void 0 ? void 0 : (_error_response_data = _error_response.data) === null || _error_response_data === void 0 ? void 0 : _error_response_data.message) {
-                errorMessage = error.response.data.message;
-            } else if (((_error_response1 = error.response) === null || _error_response1 === void 0 ? void 0 : _error_response1.status) === 500) {
+            if ((_apiError_response = apiError.response) === null || _apiError_response === void 0 ? void 0 : (_apiError_response_data = _apiError_response.data) === null || _apiError_response_data === void 0 ? void 0 : _apiError_response_data.message) {
+                errorMessage = apiError.response.data.message;
+            } else if (((_apiError_response1 = apiError.response) === null || _apiError_response1 === void 0 ? void 0 : _apiError_response1.status) === 500) {
                 errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
-            } else if (error.request) {
+            } else if (apiError.request) {
                 errorMessage = 'Erro de conexão. Verifique sua internet.';
             }
             showAlert(errorMessage, 'error');
@@ -963,15 +970,16 @@ const useUpdateApplication = ()=>{
                 showAlert(response.data.message || 'Erro ao atualizar candidatura.', 'error');
                 return false;
             }
-        } catch (error) {
-            var _error_response_data, _error_response, _error_response1;
-            console.error('Erro ao atualizar candidatura:', error);
+        } catch (err) {
+            var _apiError_response_data, _apiError_response, _apiError_response1;
+            console.error('Erro ao atualizar candidatura:', err);
+            const apiError = err;
             let errorMessage = 'Erro ao atualizar candidatura. Tente novamente.';
-            if ((_error_response = error.response) === null || _error_response === void 0 ? void 0 : (_error_response_data = _error_response.data) === null || _error_response_data === void 0 ? void 0 : _error_response_data.message) {
-                errorMessage = error.response.data.message;
-            } else if (((_error_response1 = error.response) === null || _error_response1 === void 0 ? void 0 : _error_response1.status) === 500) {
+            if ((_apiError_response = apiError.response) === null || _apiError_response === void 0 ? void 0 : (_apiError_response_data = _apiError_response.data) === null || _apiError_response_data === void 0 ? void 0 : _apiError_response_data.message) {
+                errorMessage = apiError.response.data.message;
+            } else if (((_apiError_response1 = apiError.response) === null || _apiError_response1 === void 0 ? void 0 : _apiError_response1.status) === 500) {
                 errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
-            } else if (error.request) {
+            } else if (apiError.request) {
                 errorMessage = 'Erro de conexão. Verifique sua internet.';
             }
             showAlert(errorMessage, 'error');
