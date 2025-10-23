@@ -1,5 +1,5 @@
 {
-  "/(containers)/contato/page": "app/(containers)/contato/page.js",
-  "/(containers)/localizacao/page": "app/(containers)/localizacao/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(containers)/candidatura/page": "app/(containers)/candidatura/page.js",
   "/(containers)/page": "app/(containers)/page.js"
 }

@@ -19,13 +19,11 @@ import CreateApplicationModal from "@/components/modals/CreateApplicationModal";
 import EditApplicationModal from '@/components/modals/EditApplicationModal';
 import { WHATSAPP_CONFIG } from "@/constants/whatsapp";
 
-// Mapeamento de status
+// Mapeamento de status ATUALIZADO
 const STATUS_MAP = {
   1: { name: "Pendente", description: "Sua candidatura está aguardando análise inicial." },
-  2: { name: "Em Análise", description: "Sua candidatura está sendo analisada pela nossa equipe." },
-  3: { name: "Aprovada", description: "Parabéns! Sua candidatura foi aprovada." },
-  4: { name: "Rejeitada", description: "Sua candidatura precisa de algumas correções." },
-  5: { name: "Cancelada", description: "Sua candidatura foi cancelada." }
+  2: { name: "Aprovada", description: "Parabéns! Sua candidatura foi aprovada." },
+  3: { name: "Rejeitada", description: "Sua candidatura precisa de algumas correções." }
 };
 
 // Interface para as informações de status
@@ -39,12 +37,19 @@ interface StatusInfo {
 }
 
 export default function Candidatura() {
-  const { application, isLoading, hasApplication, refetch } = useApplication();
+  const { 
+    application, 
+    isLoading, 
+    refetch,
+    shouldShowCreateButton,
+    shouldShowEditButton,
+    shouldHideAllButtons 
+  } = useApplication();
   const { user } = useAuth();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Função para obter informações do status
+  // Função para obter informações do status ATUALIZADA
   const getStatusInfo = (): StatusInfo | null => {
     if (!application) return null;
 
@@ -55,29 +60,17 @@ export default function Candidatura() {
         bgColor: "bg-yellow-50",
         borderColor: "border-yellow-200",
       },
-      2: { // UnderReview
-        icon: FaClock,
-        color: "text-orange-600",
-        bgColor: "bg-orange-50",
-        borderColor: "border-orange-200",
-      },
-      3: { // Approved
+      2: { // Approved
         icon: FaCheckCircle,
         color: "text-green-600",
         bgColor: "bg-green-50",
         borderColor: "border-green-200",
       },
-      4: { // Rejected
+      3: { // Rejected
         icon: FaExclamationTriangle,
         color: "text-red-600",
         bgColor: "bg-red-50",
         borderColor: "border-red-200",
-      },
-      5: { // Cancelled
-        icon: FaExclamationTriangle,
-        color: "text-gray-600",
-        bgColor: "bg-gray-50",
-        borderColor: "border-gray-200",
       }
     };
 
@@ -94,25 +87,10 @@ export default function Candidatura() {
     };
   };
 
-  // Determinar se mostra botão de criar ou editar
-  const shouldShowCreateButton = !hasApplication;
-  
-  const shouldShowEditButton = hasApplication && 
-    application?.status === 4 && 
-    application.allowRejectedEdit; // Apenas Rejeitada com permissão para editar
-
-  // Status onde NENHUM botão aparece
-  const shouldHideAllButtons = hasApplication && 
-    (application?.status === 1 || // Pendente
-     application?.status === 2 || // Em Análise
-     application?.status === 3 || // Aprovada
-     application?.status === 5 || // Cancelada
-     (application?.status === 4 && !application.allowRejectedEdit)); // Rejeitada sem permissão
-
   const statusInfo = application ? getStatusInfo() : null;
 
   // Se não tem candidatura
-  if (!isLoading && !hasApplication) {
+  if (!isLoading && !application) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -171,10 +149,7 @@ export default function Candidatura() {
         {showCreateModal && (
           <CreateApplicationModal 
             onClose={() => setShowCreateModal(false)}
-            onSuccess={() => {
-              // Recarregar os dados da aplicação após criação bem-sucedida
-              refetch();
-            }}
+            onSuccess={() => refetch()}
           />
         )}
       </div>
@@ -209,7 +184,7 @@ export default function Candidatura() {
               </div>
             </div>
 
-            {/* Botões de ação - APENAS quando aplicável */}
+            {/* Botões de ação - ATUALIZADO */}
             {!shouldHideAllButtons && (
               <div className="flex space-x-3">
                 {shouldShowCreateButton && (
@@ -261,8 +236,8 @@ export default function Candidatura() {
                     {statusInfo.description}
                   </p>
                   
-                  {/* Mostrar remainingDays apenas para status 1 e 2 */}
-                  {(application.status === 1 || application.status === 2) && application.remainingDays > 0 && (
+                  {/* Mostrar remainingDays apenas para status 1 */}
+                  {application.status === 1 && application.remainingDays > 0 && (
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                       <strong>Tempo restante:</strong> {application.remainingDays} dia(s)
                     </p>
@@ -270,6 +245,44 @@ export default function Candidatura() {
                 </div>
               </div>
             </div>
+
+            {/* NOVO: Mensagem de comentário para status Aprovado/Rejeitado */}
+            {(application.status === 2 || application.status === 3) && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                  {application.status === 2 ? 'Aprovação' : 'Feedback da Análise'}
+                </h3>
+                
+                {application.lastReviewComment && (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {application.lastReviewComment}
+                    </p>
+                  </div>
+                )}
+                
+                {/* Mostrar datas apenas para status final */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Data de Submissão
+                    </label>
+                    <p className="text-gray-900 dark:text-white">
+                      {new Date(application.createdAt).toLocaleDateString('pt-AO')}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Data da Resposta
+                    </label>
+                    <p className="text-gray-900 dark:text-white">
+                      {new Date(application.updatedAt).toLocaleDateString('pt-AO')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Informações da Candidatura */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
@@ -319,71 +332,73 @@ export default function Candidatura() {
               </div>
             </div>
 
-            {/* Próximos Passos */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Próximos Passos
-              </h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-orange-600 dark:text-orange-400 text-sm font-semibold">1</span>
+            {/* Próximos Passos - MOSTRAR APENAS PARA PENDENTE */}
+            {application.status === 1 && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Próximos Passos
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-orange-600 dark:text-orange-400 text-sm font-semibold">1</span>
+                    </div>
+                    <div>
+                      <p className="text-gray-900 dark:text-white font-medium">
+                        Análise da Documentação
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                        Nossa equipe está analisando os documentos submetidos. Este processo pode levar até 5 dias úteis.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      Análise da Documentação
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                      Nossa equipe está analisando os documentos submetidos. Este processo pode levar até 5 dias úteis.
-                    </p>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-orange-600 dark:text-orange-400 text-sm font-semibold">2</span>
+                    </div>
+                    <div>
+                      <p className="text-gray-900 dark:text-white font-medium">
+                        Contacto para Validação
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                        Entraremos em contacto para validar informações adicionais se necessário.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-orange-600 dark:text-orange-400 text-sm font-semibold">3</span>
+                    </div>
+                    <div>
+                      <p className="text-gray-900 dark:text-white font-medium">
+                        Resposta Final
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                        Você receberá uma notificação com o resultado final da sua candidatura.
+                      </p>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-orange-600 dark:text-orange-400 text-sm font-semibold">2</span>
-                  </div>
-                  <div>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      Contacto para Validação
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                      Entraremos em contacto para validar informações adicionais se necessário.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-orange-600 dark:text-orange-400 text-sm font-semibold">3</span>
-                  </div>
-                  <div>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      Resposta Final
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                      Você receberá uma notificação com o resultado final da sua candidatura.
-                    </p>
-                  </div>
+                {/* Contact Information */}
+                <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <strong>Precisa de ajuda?</strong> Entre em contacto connosco através do WhatsApp:{" "}
+                    <a 
+                      href={WHATSAPP_CONFIG.urls.withMessage}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium"
+                    >
+                      {WHATSAPP_CONFIG.display.formattedNumber}
+                    </a>
+                  </p>
                 </div>
               </div>
-              
-              {/* Contact Information */}
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Precisa de ajuda?</strong> Entre em contacto connosco através do WhatsApp:{" "}
-                  <a 
-                    href={WHATSAPP_CONFIG.urls.withMessage}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium"
-                  >
-                    {WHATSAPP_CONFIG.display.formattedNumber}
-                  </a>
-                </p>
-              </div>
-            </div>
+            )}
           </>
         )}
       </div>
@@ -392,10 +407,7 @@ export default function Candidatura() {
       {showCreateModal && (
         <CreateApplicationModal 
           onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
-            // Recarregar os dados da aplicação após criação bem-sucedida
-            refetch();
-          }}
+          onSuccess={() => refetch()}
         />
       )}
       
@@ -403,10 +415,7 @@ export default function Candidatura() {
         <EditApplicationModal 
           application={application}
           onClose={() => setShowEditModal(false)}
-          onSuccess={() => {
-            // Recarregar os dados da aplicação após atualização bem-sucedida
-            refetch();
-          }}
+          onSuccess={() => refetch()}
         />
       )}
     </div>

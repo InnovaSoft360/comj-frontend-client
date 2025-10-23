@@ -56,12 +56,19 @@ const useApplication = ()=>{
     const refetch = ()=>{
         fetchApplication();
     };
+    // NOVA LÓGICA PARA BOTÕES
+    const shouldShowCreateButton = !application;
+    const shouldShowEditButton = application?.status === 3 && application.allowRejectedEdit;
+    const shouldHideAllButtons = application && (application.status === 1 || application.status === 2 || application.status === 3 && !application.allowRejectedEdit);
     return {
         application,
         isLoading,
         error,
         refetch,
-        hasApplication: !!application
+        hasApplication: !!application,
+        shouldShowCreateButton,
+        shouldShowEditButton,
+        shouldHideAllButtons
     };
 };
 }),
@@ -817,14 +824,16 @@ const useUpdateApplication = ()=>{
     const [isSubmitting, setIsSubmitting] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const { showAlert } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAlert"])();
     const validatePDF = (file)=>{
-        // Validar tipo de arquivo
+        if (!file) return {
+            isValid: false,
+            error: 'Arquivo não selecionado'
+        };
         if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
             return {
                 isValid: false,
                 error: 'Apenas arquivos PDF são permitidos'
             };
         }
-        // Validar tamanho (2MB máximo)
         if (file.size > 2 * 1024 * 1024) {
             return {
                 isValid: false,
@@ -836,13 +845,21 @@ const useUpdateApplication = ()=>{
         };
     };
     const updateApplication = async (data)=>{
-        // Verificar se pelo menos um arquivo foi selecionado para atualização
+        console.log('🚀 INICIANDO ATUALIZAÇÃO DA CANDIDATURA');
+        console.log('📝 ID:', data.id);
+        console.log('📁 Arquivos selecionados:', {
+            docId: data.documentIdCardUrl?.name || 'NÃO',
+            salary: data.documentSalaryDeclarationUrl?.name || 'NÃO',
+            bank: data.documentBankStatementUrl?.name || 'NÃO',
+            receipt: data.documentLastBankReceiptUrl?.name || 'NÃO'
+        });
+        // Verificar se pelo menos um arquivo foi selecionado
         const hasFilesToUpdate = data.documentIdCardUrl || data.documentSalaryDeclarationUrl || data.documentBankStatementUrl || data.documentLastBankReceiptUrl;
         if (!hasFilesToUpdate) {
             showAlert('Por favor, selecione pelo menos um documento para atualizar.', 'warning');
             return false;
         }
-        // Validar arquivos selecionados
+        // Validar arquivos
         const files = [
             {
                 file: data.documentIdCardUrl,
@@ -873,48 +890,76 @@ const useUpdateApplication = ()=>{
         setIsSubmitting(true);
         try {
             const formData = new FormData();
-            // Adicionar ID da candidatura
+            // 🔥 PARÂMETRO CORRETO: 'Id' (conforme teu backend)
             formData.append('Id', data.id);
-            // Adicionar apenas os arquivos que foram selecionados
+            console.log('✅ ID adicionado ao FormData:', data.id);
+            // 🔥🔥🔥 CORREÇÃO CRÍTICA: NÃO enviar campos vazios - apenas os arquivos selecionados
             if (data.documentIdCardUrl) {
                 formData.append('DocumentIdCardUrl', data.documentIdCardUrl);
+                console.log('✅ DocumentIdCardUrl adicionado:', data.documentIdCardUrl.name);
             }
+            // 🔥 NÃO adicionar se for null - o backend vai manter o atual
             if (data.documentSalaryDeclarationUrl) {
                 formData.append('DocumentSalaryDeclarationUrl', data.documentSalaryDeclarationUrl);
+                console.log('✅ DocumentSalaryDeclarationUrl adicionado:', data.documentSalaryDeclarationUrl.name);
             }
+            // 🔥 NÃO adicionar se for null
             if (data.documentBankStatementUrl) {
                 formData.append('DocumentBankStatementUrl', data.documentBankStatementUrl);
+                console.log('✅ DocumentBankStatementUrl adicionado:', data.documentBankStatementUrl.name);
             }
+            // 🔥 NÃO adicionar se for null
             if (data.documentLastBankReceiptUrl) {
                 formData.append('DocumentLastBankReceiptUrl', data.documentLastBankReceiptUrl);
+                console.log('✅ DocumentLastBankReceiptUrl adicionado:', data.documentLastBankReceiptUrl.name);
             }
+            // 🔥 NÃO adicionar se for null
+            // 🔥 DEBUG: Verificar conteúdo do FormData
+            console.log('📦 CONTEÚDO DO FORMDATA:');
+            for (let [key, value] of formData.entries()){
+                console.log(`  ${key}:`, value instanceof File ? `File: ${value.name}` : value);
+            }
+            console.log('🔄 ENVIANDO REQUISIÇÃO PUT...');
             const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].put('/v1/Applications/Update', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
-                }
+                },
+                timeout: 30000
             });
+            console.log('✅ RESPOSTA DO BACKEND:', response.data);
             if (response.data.code === 200) {
+                console.log('🎉 CANDIDATURA ATUALIZADA COM SUCESSO!');
                 showAlert('Candidatura atualizada com sucesso!', 'success');
                 return true;
             } else {
+                console.log('❌ Erro na resposta:', response.data.message);
                 showAlert(response.data.message || 'Erro ao atualizar candidatura.', 'error');
                 return false;
             }
         } catch (err) {
-            console.error('Erro ao atualizar candidatura:', err);
+            console.error('💥 ERRO NA REQUISIÇÃO:', err);
             const apiError = err;
             let errorMessage = 'Erro ao atualizar candidatura. Tente novamente.';
-            if (apiError.response?.data?.message) {
+            if (apiError.response?.status === 400) {
+                errorMessage = 'Dados inválidos. Verifique os arquivos e tente novamente.';
+                console.log('🔴 Bad Request - Possível problema com os parâmetros');
+            } else if (apiError.response?.status === 404) {
+                errorMessage = 'Candidatura não encontrada.';
+            } else if (apiError.response?.data?.message) {
                 errorMessage = apiError.response.data.message;
             } else if (apiError.response?.status === 500) {
                 errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
             } else if (apiError.request) {
                 errorMessage = 'Erro de conexão. Verifique sua internet.';
+            } else if (apiError.message) {
+                errorMessage = apiError.message;
             }
+            console.error('🔴 Mensagem de erro final:', errorMessage);
             showAlert(errorMessage, 'error');
             return false;
         } finally{
             setIsSubmitting(false);
+            console.log('🏁 PROCESSO DE ATUALIZAÇÃO FINALIZADO');
         }
     };
     return {
@@ -958,25 +1003,16 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
         documentBankStatementUrl: '',
         documentLastBankReceiptUrl: ''
     });
-    const [fileNames, setFileNames] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
-        documentIdCardUrl: '',
-        documentSalaryDeclarationUrl: '',
-        documentBankStatementUrl: '',
-        documentLastBankReceiptUrl: ''
-    });
     // Refs para os inputs de arquivo
     const documentIdCardRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const documentSalaryDeclarationRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const documentBankStatementRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const documentLastBankReceiptRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const handleFileChange = (field, file)=>{
+        console.log(`📁 Arquivo selecionado para ${field}:`, file?.name);
         const newFileData = {
             ...fileData,
             [field]: file
-        };
-        const newFileNames = {
-            ...fileNames,
-            [field]: file ? file.name : ''
         };
         const newFileErrors = {
             ...fileErrors,
@@ -986,30 +1022,25 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
             const validation = validatePDF(file);
             if (!validation.isValid) {
                 newFileErrors[field] = validation.error;
-                newFileNames[field] = '';
                 newFileData[field] = null;
                 // Limpar o input
                 const ref = getFileInputRef(field);
                 if (ref?.current) ref.current.value = '';
                 showAlert(validation.error, 'warning');
+            } else {
+                console.log(`✅ ${field} válido:`, file.name);
             }
         }
         setFileData(newFileData);
-        setFileNames(newFileNames);
         setFileErrors(newFileErrors);
     };
     const handleRemoveFile = (field)=>{
-        // Limpar o input file se existir
+        console.log(`🗑️ Removendo arquivo: ${field}`);
         const ref = getFileInputRef(field);
         if (ref?.current) ref.current.value = '';
-        // Atualizar estados
         setFileData((prev)=>({
                 ...prev,
                 [field]: null
-            }));
-        setFileNames((prev)=>({
-                ...prev,
-                [field]: ''
             }));
         setFileErrors((prev)=>({
                 ...prev,
@@ -1019,8 +1050,8 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
     const handleViewCurrentFile = (field)=>{
         const url = getCurrentFileUrl(field);
         if (url) {
-            // Adicionar o base URL da API se necessário
-            const fullUrl = url.startsWith('http') ? url : `https://localhost:7209${url}`;
+            const fullUrl = url.startsWith('http') ? url : `http://localhost:5211${url}`;
+            console.log(`👀 Abrindo arquivo atual: ${fullUrl}`);
             window.open(fullUrl, '_blank');
         }
     };
@@ -1028,6 +1059,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
         const file = fileData[field];
         if (file) {
             const fileURL = URL.createObjectURL(file);
+            console.log(`👀 Visualizando novo arquivo: ${file.name}`);
             window.open(fileURL, '_blank');
         }
     };
@@ -1075,14 +1107,41 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
     };
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        console.log('🎯 INICIANDO SUBMIT DO FORMULÁRIO DE EDIÇÃO');
+        console.log('🔍 Dados da aplicação:', {
+            id: application.id,
+            status: application.status,
+            allowRejectedEdit: application.allowRejectedEdit
+        });
+        // Verificar se pelo menos um arquivo foi selecionado
+        const hasFilesToUpdate = Object.values(fileData).some((file)=>file !== null);
+        if (!hasFilesToUpdate) {
+            showAlert('Por favor, selecione pelo menos um documento para atualizar.', 'warning');
+            return;
+        }
+        console.log('📦 Dados que serão enviados:', {
+            id: application.id,
+            files: Object.keys(fileData).filter((key)=>fileData[key] !== null)
+        });
         const updateData = {
             id: application.id,
             ...fileData
         };
-        const success = await updateApplication(updateData);
-        if (success) {
-            onSuccess?.();
-            onClose();
+        try {
+            console.log('🔄 Chamando updateApplication...');
+            const success = await updateApplication(updateData);
+            console.log('✅ Resultado da atualização:', success);
+            if (success) {
+                console.log('🚀 Sucesso! Fechando modal e recarregando dados...');
+                // Pequeno delay para usuário ver a mensagem de sucesso
+                setTimeout(()=>{
+                    onSuccess?.();
+                    onClose();
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('💥 Erro inesperado no handleSubmit:', error);
+            showAlert('Erro inesperado ao processar a atualização.', 'error');
         }
     };
     // Função para renderizar cada campo de arquivo
@@ -1091,22 +1150,23 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
         const hasError = !!fileErrors[field];
         const currentFileUrl = getCurrentFileUrl(field);
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700",
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                    className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
+                    className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaUpload"], {
                             className: "inline w-4 h-4 mr-2 text-orange-600"
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 178,
+                            lineNumber: 188,
                             columnNumber: 11
                         }, this),
                         label
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 177,
+                    lineNumber: 187,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1121,37 +1181,12 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                         className: "w-4 h-4 text-red-600"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 186,
+                                        lineNumber: 196,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "text-sm font-medium text-gray-900 dark:text-white",
                                         children: "Arquivo atual"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 187,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 185,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                type: "button",
-                                onClick: ()=>handleViewCurrentFile(field),
-                                className: "flex items-center space-x-1 px-2 py-1 text-blue-600 hover:text-blue-700 transition-colors text-sm",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaExternalLinkAlt"], {
-                                        className: "w-3 h-3"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 196,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        children: "Ver atual"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
                                         lineNumber: 197,
@@ -1160,22 +1195,47 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 191,
+                                lineNumber: 195,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                type: "button",
+                                onClick: ()=>handleViewCurrentFile(field),
+                                className: "flex items-center space-x-1 px-3 py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-300 rounded-md transition-colors text-sm",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaExternalLinkAlt"], {
+                                        className: "w-3 h-3"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                        lineNumber: 206,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        children: "Ver"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                        lineNumber: 207,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                lineNumber: 201,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                        lineNumber: 184,
+                        lineNumber: 194,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 183,
+                    lineNumber: 193,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "flex flex-col space-y-2",
+                    className: "flex flex-col space-y-3",
                     children: [
                         !hasNewFile && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
                             children: [
@@ -1188,84 +1248,100 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                     id: `${field}-edit`
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 206,
+                                    lineNumber: 216,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                     htmlFor: `${field}-edit`,
-                                    className: "flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-orange-500 transition-colors",
+                                    className: "flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-orange-500 transition-colors bg-white dark:bg-gray-700",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaUpload"], {
-                                            className: "w-4 h-4 mr-2 text-gray-400"
+                                            className: "w-5 h-5 mr-2 text-gray-400"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 218,
+                                            lineNumber: 228,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                            className: "text-sm text-gray-600 dark:text-gray-400",
-                                            children: "Selecionar novo PDF"
+                                            className: "text-sm text-gray-600 dark:text-gray-400 font-medium",
+                                            children: "Clique para selecionar novo PDF"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 219,
+                                            lineNumber: 229,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 214,
+                                    lineNumber: 224,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true),
                         hasError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center space-x-2 text-red-600 text-sm",
+                            className: "flex items-center space-x-2 text-red-600 text-sm p-2 bg-red-50 dark:bg-red-900/20 rounded-md",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaExclamationTriangle"], {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 229,
+                                    lineNumber: 239,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     children: fileErrors[field]
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 230,
+                                    lineNumber: 240,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 228,
+                            lineNumber: 238,
                             columnNumber: 13
                         }, this),
                         hasNewFile && !hasError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "flex items-center space-x-2",
+                                    className: "flex items-center space-x-3",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaFilePdf"], {
-                                            className: "w-4 h-4 text-red-600"
+                                            className: "w-5 h-5 text-red-600"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 238,
+                                            lineNumber: 248,
                                             columnNumber: 17
                                         }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                            className: "text-sm font-medium text-gray-900 dark:text-white",
-                                            children: fileNames[field]
-                                        }, void 0, false, {
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: "text-sm font-medium text-gray-900 dark:text-white block",
+                                                    children: fileData[field]?.name
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                    lineNumber: 250,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: "text-xs text-green-600 dark:text-green-400",
+                                                    children: "✅ Arquivo selecionado"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                    lineNumber: 253,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 239,
+                                            lineNumber: 249,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 237,
+                                    lineNumber: 247,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1274,57 +1350,59 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                             type: "button",
                                             onClick: ()=>handleViewNewFile(field),
-                                            className: "p-1 text-blue-600 hover:text-blue-700 transition-colors",
+                                            className: "p-2 text-blue-600 hover:text-blue-700 transition-colors bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 rounded-md",
+                                            title: "Visualizar arquivo",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaEye"], {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 249,
+                                                lineNumber: 265,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 244,
+                                            lineNumber: 259,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                             type: "button",
                                             onClick: ()=>handleRemoveFile(field),
-                                            className: "p-1 text-red-600 hover:text-red-700 transition-colors",
+                                            className: "p-2 text-red-600 hover:text-red-700 transition-colors bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 rounded-md",
+                                            title: "Remover arquivo",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaTrash"], {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 256,
+                                                lineNumber: 273,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 251,
+                                            lineNumber: 267,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 243,
+                                    lineNumber: 258,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 236,
+                            lineNumber: 246,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 202,
+                    lineNumber: 212,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-            lineNumber: 176,
+            lineNumber: 186,
             columnNumber: 7
         }, this);
     };
@@ -1332,7 +1410,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(AlertContainer, {}, void 0, false, {
                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                lineNumber: 268,
+                lineNumber: 285,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1341,58 +1419,84 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                     className: "bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700",
+                            className: "flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-800",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "flex-1",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
                                             className: "text-xl font-bold text-gray-900 dark:text-white",
-                                            children: "Editar Candidatura"
+                                            children: "📝 Editar Candidatura"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 276,
+                                            lineNumber: 293,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-sm text-gray-600 dark:text-gray-400 mt-1",
-                                            children: "Atualize os documentos necessários (apenas PDF, máximo 2MB cada)"
+                                            children: "Atualize os documentos que precisam de correção"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 279,
+                                            lineNumber: 296,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "mt-2 p-2 bg-orange-100 dark:bg-orange-900/30 rounded-md",
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                className: "text-xs text-orange-800 dark:text-orange-300",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
+                                                        children: "⚠️ Atenção:"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                        lineNumber: 301,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    ' Após a edição, sua candidatura voltará para "Pendente" para nova análise.'
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                lineNumber: 300,
+                                                columnNumber: 17
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                            lineNumber: 299,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 275,
+                                    lineNumber: 292,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                     onClick: onClose,
-                                    className: "p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors",
+                                    className: "p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ml-4",
+                                    disabled: isSubmitting,
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaTimes"], {
                                         className: "w-5 h-5 text-gray-500 dark:text-gray-400"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 287,
+                                        lineNumber: 310,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 283,
+                                    lineNumber: 305,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 274,
+                            lineNumber: 291,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "p-6 overflow-y-auto max-h-[calc(90vh-200px)]",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
                                 onSubmit: handleSubmit,
-                                className: "space-y-6",
+                                className: "space-y-2",
                                 children: [
                                     renderFileField('documentIdCardUrl', 'Cópia do BI'),
                                     renderFileField('documentSalaryDeclarationUrl', 'Declaração de Salário'),
@@ -1404,76 +1508,115 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                             className: "text-sm text-yellow-800 dark:text-yellow-200",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
-                                                    children: "Nota:"
+                                                    children: "💡 Dica:"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 309,
+                                                    lineNumber: 332,
                                                     columnNumber: 19
                                                 }, this),
                                                 " Apenas os documentos que você selecionar serão atualizados. Os documentos não selecionados permanecerão os mesmos."
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 308,
+                                            lineNumber: 331,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 307,
+                                        lineNumber: 330,
                                         columnNumber: 15
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        type: "submit",
-                                        disabled: isSubmitting,
-                                        className: `w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ${!isSubmitting ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl' : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'}`,
-                                        children: isSubmitting ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "flex items-center justify-center space-x-2",
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaSpinner"], {
-                                                    className: "w-4 h-4 animate-spin"
-                                                }, void 0, false, {
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "pt-4",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                type: "submit",
+                                                disabled: isSubmitting,
+                                                className: `w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ${!isSubmitting ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105' : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'}`,
+                                                children: isSubmitting ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "flex items-center justify-center space-x-2",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaSpinner"], {
+                                                            className: "w-4 h-4 animate-spin"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                            lineNumber: 350,
+                                                            columnNumber: 23
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                            children: "Atualizando candidatura..."
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                            lineNumber: 351,
+                                                            columnNumber: 23
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
                                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 326,
+                                                    lineNumber: 349,
                                                     columnNumber: 21
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    children: "Atualizando candidatura..."
-                                                }, void 0, false, {
+                                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "flex items-center justify-center space-x-2",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaUpload"], {
+                                                            className: "w-4 h-4"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                            lineNumber: 355,
+                                                            columnNumber: 23
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                            children: "Atualizar e Reenviar para Análise"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                            lineNumber: 356,
+                                                            columnNumber: 23
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
                                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 327,
+                                                    lineNumber: 354,
                                                     columnNumber: 21
                                                 }, this)
-                                            ]
-                                        }, void 0, true, {
-                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 325,
-                                            columnNumber: 19
-                                        }, this) : 'Atualizar Candidatura'
-                                    }, void 0, false, {
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                lineNumber: 339,
+                                                columnNumber: 17
+                                            }, this),
+                                            !isSubmitting && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                className: "text-xs text-gray-500 dark:text-gray-400 text-center mt-2",
+                                                children: '⚠️ Sua candidatura voltará para status "Pendente"'
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                lineNumber: 362,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 315,
+                                        lineNumber: 338,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 293,
+                                lineNumber: 316,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 292,
+                            lineNumber: 315,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 272,
+                    lineNumber: 289,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                lineNumber: 271,
+                lineNumber: 288,
                 columnNumber: 7
             }, this)
         ]
@@ -1507,35 +1650,27 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$whatsapp
 ;
 ;
 ;
-// Mapeamento de status
+// Mapeamento de status ATUALIZADO
 const STATUS_MAP = {
     1: {
         name: "Pendente",
         description: "Sua candidatura está aguardando análise inicial."
     },
     2: {
-        name: "Em Análise",
-        description: "Sua candidatura está sendo analisada pela nossa equipe."
-    },
-    3: {
         name: "Aprovada",
         description: "Parabéns! Sua candidatura foi aprovada."
     },
-    4: {
+    3: {
         name: "Rejeitada",
         description: "Sua candidatura precisa de algumas correções."
-    },
-    5: {
-        name: "Cancelada",
-        description: "Sua candidatura foi cancelada."
     }
 };
 function Candidatura() {
-    const { application, isLoading, hasApplication, refetch } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useApplication$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useApplication"])();
+    const { application, isLoading, refetch, shouldShowCreateButton, shouldShowEditButton, shouldHideAllButtons } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useApplication$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useApplication"])();
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useAuth$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
     const [showCreateModal, setShowCreateModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [showEditModal, setShowEditModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
-    // Função para obter informações do status
+    // Função para obter informações do status ATUALIZADA
     const getStatusInfo = ()=>{
         if (!application) return null;
         const statusConfig = {
@@ -1546,28 +1681,16 @@ function Candidatura() {
                 borderColor: "border-yellow-200"
             },
             2: {
-                icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaClock"],
-                color: "text-orange-600",
-                bgColor: "bg-orange-50",
-                borderColor: "border-orange-200"
-            },
-            3: {
                 icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaCheckCircle"],
                 color: "text-green-600",
                 bgColor: "bg-green-50",
                 borderColor: "border-green-200"
             },
-            4: {
+            3: {
                 icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaExclamationTriangle"],
                 color: "text-red-600",
                 bgColor: "bg-red-50",
                 borderColor: "border-red-200"
-            },
-            5: {
-                icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FaExclamationTriangle"],
-                color: "text-gray-600",
-                bgColor: "bg-gray-50",
-                borderColor: "border-gray-200"
             }
         };
         const config = statusConfig[application.status] || statusConfig[1];
@@ -1581,17 +1704,9 @@ function Candidatura() {
             description: statusInfo.description
         };
     };
-    // Determinar se mostra botão de criar ou editar
-    const shouldShowCreateButton = !hasApplication;
-    const shouldShowEditButton = hasApplication && application?.status === 4 && application.allowRejectedEdit; // Apenas Rejeitada com permissão para editar
-    // Status onde NENHUM botão aparece
-    const shouldHideAllButtons = hasApplication && (application?.status === 1 || // Pendente
-    application?.status === 2 || // Em Análise
-    application?.status === 3 || // Aprovada
-    application?.status === 5 || application?.status === 4 && !application.allowRejectedEdit); // Rejeitada sem permissão
     const statusInfo = application ? getStatusInfo() : null;
     // Se não tem candidatura
-    if (!isLoading && !hasApplication) {
+    if (!isLoading && !application) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "min-h-screen bg-gray-50 dark:bg-gray-900 py-8",
             children: [
@@ -1609,14 +1724,14 @@ function Candidatura() {
                                             className: "mr-2"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                            lineNumber: 125,
+                                            lineNumber: 103,
                                             columnNumber: 15
                                         }, this),
                                         "Voltar para o Perfil"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                    lineNumber: 121,
+                                    lineNumber: 99,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1628,12 +1743,12 @@ function Candidatura() {
                                                 className: "w-6 h-6 text-white"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 131,
+                                                lineNumber: 109,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                            lineNumber: 130,
+                                            lineNumber: 108,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1643,7 +1758,7 @@ function Candidatura() {
                                                     children: "Minha Candidatura"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                    lineNumber: 134,
+                                                    lineNumber: 112,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1651,25 +1766,25 @@ function Candidatura() {
                                                     children: "Acompanhe o status da sua candidatura ao Condomínio Osvaldo MJ"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                    lineNumber: 137,
+                                                    lineNumber: 115,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                            lineNumber: 133,
+                                            lineNumber: 111,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                    lineNumber: 129,
+                                    lineNumber: 107,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                            lineNumber: 120,
+                            lineNumber: 98,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1683,12 +1798,12 @@ function Candidatura() {
                                             className: "w-8 h-8 text-gray-400"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                            lineNumber: 148,
+                                            lineNumber: 126,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 147,
+                                        lineNumber: 125,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1696,7 +1811,7 @@ function Candidatura() {
                                         children: "Nenhuma Candidatura Encontrada"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 151,
+                                        lineNumber: 129,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1704,7 +1819,7 @@ function Candidatura() {
                                         children: "Você ainda não submeteu nenhuma candidatura. Clique no botão abaixo para criar sua primeira candidatura."
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 155,
+                                        lineNumber: 133,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1715,48 +1830,45 @@ function Candidatura() {
                                                 className: "mr-2"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 163,
+                                                lineNumber: 141,
                                                 columnNumber: 17
                                             }, this),
                                             "Criar Candidatura"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 159,
+                                        lineNumber: 137,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                lineNumber: 146,
+                                lineNumber: 124,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                            lineNumber: 145,
+                            lineNumber: 123,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                    lineNumber: 118,
+                    lineNumber: 96,
                     columnNumber: 9
                 }, this),
                 showCreateModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$modals$2f$CreateApplicationModal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                     onClose: ()=>setShowCreateModal(false),
-                    onSuccess: ()=>{
-                        // Recarregar os dados da aplicação após criação bem-sucedida
-                        refetch();
-                    }
+                    onSuccess: ()=>refetch()
                 }, void 0, false, {
                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                    lineNumber: 172,
+                    lineNumber: 150,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-            lineNumber: 117,
+            lineNumber: 95,
             columnNumber: 7
         }, this);
     }
@@ -1777,14 +1889,14 @@ function Candidatura() {
                                         className: "mr-2"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 193,
+                                        lineNumber: 168,
                                         columnNumber: 13
                                     }, this),
                                     "Voltar para o Perfil"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                lineNumber: 189,
+                                lineNumber: 164,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1799,12 +1911,12 @@ function Candidatura() {
                                                     className: "w-6 h-6 text-white"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                    lineNumber: 200,
+                                                    lineNumber: 175,
                                                     columnNumber: 17
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 199,
+                                                lineNumber: 174,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1814,7 +1926,7 @@ function Candidatura() {
                                                         children: "Minha Candidatura"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 203,
+                                                        lineNumber: 178,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1822,19 +1934,19 @@ function Candidatura() {
                                                         children: "Acompanhe o status da sua candidatura ao Condomínio Osvaldo MJ"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 206,
+                                                        lineNumber: 181,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 202,
+                                                lineNumber: 177,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 198,
+                                        lineNumber: 173,
                                         columnNumber: 13
                                     }, this),
                                     !shouldHideAllButtons && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1848,14 +1960,14 @@ function Candidatura() {
                                                         className: "mr-2"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 220,
+                                                        lineNumber: 195,
                                                         columnNumber: 21
                                                     }, this),
                                                     "Criar Candidatura"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 216,
+                                                lineNumber: 191,
                                                 columnNumber: 19
                                             }, this),
                                             shouldShowEditButton && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1866,32 +1978,32 @@ function Candidatura() {
                                                         className: "mr-2"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 230,
+                                                        lineNumber: 205,
                                                         columnNumber: 21
                                                     }, this),
                                                     "Editar Candidatura"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 226,
+                                                lineNumber: 201,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 214,
+                                        lineNumber: 189,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                lineNumber: 197,
+                                lineNumber: 172,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                        lineNumber: 188,
+                        lineNumber: 163,
                         columnNumber: 9
                     }, this),
                     isLoading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1903,7 +2015,7 @@ function Candidatura() {
                                     className: "w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                    lineNumber: 243,
+                                    lineNumber: 218,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1911,18 +2023,18 @@ function Candidatura() {
                                     children: "Carregando candidatura..."
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                    lineNumber: 244,
+                                    lineNumber: 219,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                            lineNumber: 242,
+                            lineNumber: 217,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                        lineNumber: 241,
+                        lineNumber: 216,
                         columnNumber: 11
                     }, this),
                     !isLoading && application && statusInfo && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1936,7 +2048,7 @@ function Candidatura() {
                                             className: `w-8 h-8 ${statusInfo.color}`
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                            lineNumber: 255,
+                                            lineNumber: 230,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1947,7 +2059,7 @@ function Candidatura() {
                                                     children: statusInfo.title
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                    lineNumber: 257,
+                                                    lineNumber: 232,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1955,17 +2067,17 @@ function Candidatura() {
                                                     children: statusInfo.description
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                    lineNumber: 260,
+                                                    lineNumber: 235,
                                                     columnNumber: 19
                                                 }, this),
-                                                (application.status === 1 || application.status === 2) && application.remainingDays > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                application.status === 1 && application.remainingDays > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                     className: "text-sm text-gray-500 dark:text-gray-400 mt-2",
                                                     children: [
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
                                                             children: "Tempo restante:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                            lineNumber: 267,
+                                                            lineNumber: 242,
                                                             columnNumber: 23
                                                         }, this),
                                                         " ",
@@ -1974,25 +2086,114 @@ function Candidatura() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                    lineNumber: 266,
+                                                    lineNumber: 241,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                            lineNumber: 256,
+                                            lineNumber: 231,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                    lineNumber: 254,
+                                    lineNumber: 229,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                lineNumber: 253,
+                                lineNumber: 228,
                                 columnNumber: 13
+                            }, this),
+                            (application.status === 2 || application.status === 3) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                        className: "text-lg font-semibold text-gray-900 dark:text-white mb-3",
+                                        children: application.status === 2 ? 'Aprovação' : 'Feedback da Análise'
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                        lineNumber: 252,
+                                        columnNumber: 17
+                                    }, this),
+                                    application.lastReviewComment && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-gray-700 dark:text-gray-300",
+                                            children: application.lastReviewComment
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                            lineNumber: 258,
+                                            columnNumber: 21
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                        lineNumber: 257,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                        className: "block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1",
+                                                        children: "Data de Submissão"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                                        lineNumber: 267,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                        className: "text-gray-900 dark:text-white",
+                                                        children: new Date(application.createdAt).toLocaleDateString('pt-AO')
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                                        lineNumber: 270,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                                lineNumber: 266,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                        className: "block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1",
+                                                        children: "Data da Resposta"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                                        lineNumber: 276,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                        className: "text-gray-900 dark:text-white",
+                                                        children: new Date(application.updatedAt).toLocaleDateString('pt-AO')
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                                        lineNumber: 279,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                                lineNumber: 275,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                        lineNumber: 265,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
+                                lineNumber: 251,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8",
@@ -2002,7 +2203,7 @@ function Candidatura() {
                                         children: "Informações da Candidatura"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 276,
+                                        lineNumber: 289,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2015,7 +2216,7 @@ function Candidatura() {
                                                         children: "Número do Processo"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 282,
+                                                        lineNumber: 295,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2023,13 +2224,13 @@ function Candidatura() {
                                                         children: application.id.slice(0, 8).toUpperCase()
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 285,
+                                                        lineNumber: 298,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 281,
+                                                lineNumber: 294,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2039,7 +2240,7 @@ function Candidatura() {
                                                         children: "Data de Submissão"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 291,
+                                                        lineNumber: 304,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2047,13 +2248,13 @@ function Candidatura() {
                                                         children: new Date(application.createdAt).toLocaleDateString('pt-AO')
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 294,
+                                                        lineNumber: 307,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 290,
+                                                lineNumber: 303,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2063,7 +2264,7 @@ function Candidatura() {
                                                         children: "Última Atualização"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 300,
+                                                        lineNumber: 313,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2071,13 +2272,13 @@ function Candidatura() {
                                                         children: new Date(application.updatedAt).toLocaleDateString('pt-AO')
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 303,
+                                                        lineNumber: 316,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 299,
+                                                lineNumber: 312,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2087,7 +2288,7 @@ function Candidatura() {
                                                         children: "Status"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 309,
+                                                        lineNumber: 322,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2097,7 +2298,7 @@ function Candidatura() {
                                                                 className: `w-4 h-4 ${statusInfo.color}`
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                                lineNumber: 313,
+                                                                lineNumber: 326,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2105,34 +2306,34 @@ function Candidatura() {
                                                                 children: statusInfo.title
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                                lineNumber: 314,
+                                                                lineNumber: 327,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 312,
+                                                        lineNumber: 325,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 308,
+                                                lineNumber: 321,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 280,
+                                        lineNumber: 293,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                lineNumber: 275,
+                                lineNumber: 288,
                                 columnNumber: 13
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            application.status === 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -2140,8 +2341,8 @@ function Candidatura() {
                                         children: "Próximos Passos"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 324,
-                                        columnNumber: 15
+                                        lineNumber: 338,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "space-y-4",
@@ -2156,13 +2357,13 @@ function Candidatura() {
                                                             children: "1"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                            lineNumber: 331,
-                                                            columnNumber: 21
+                                                            lineNumber: 345,
+                                                            columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 330,
-                                                        columnNumber: 19
+                                                        lineNumber: 344,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         children: [
@@ -2171,28 +2372,28 @@ function Candidatura() {
                                                                 children: "Análise da Documentação"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                                lineNumber: 334,
-                                                                columnNumber: 21
+                                                                lineNumber: 348,
+                                                                columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                                 className: "text-gray-600 dark:text-gray-400 text-sm mt-1",
                                                                 children: "Nossa equipe está analisando os documentos submetidos. Este processo pode levar até 5 dias úteis."
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                                lineNumber: 337,
-                                                                columnNumber: 21
+                                                                lineNumber: 351,
+                                                                columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 333,
-                                                        columnNumber: 19
+                                                        lineNumber: 347,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 329,
-                                                columnNumber: 17
+                                                lineNumber: 343,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "flex items-start space-x-3",
@@ -2204,13 +2405,13 @@ function Candidatura() {
                                                             children: "2"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                            lineNumber: 345,
-                                                            columnNumber: 21
+                                                            lineNumber: 359,
+                                                            columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 344,
-                                                        columnNumber: 19
+                                                        lineNumber: 358,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         children: [
@@ -2219,28 +2420,28 @@ function Candidatura() {
                                                                 children: "Contacto para Validação"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                                lineNumber: 348,
-                                                                columnNumber: 21
+                                                                lineNumber: 362,
+                                                                columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                                 className: "text-gray-600 dark:text-gray-400 text-sm mt-1",
                                                                 children: "Entraremos em contacto para validar informações adicionais se necessário."
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                                lineNumber: 351,
-                                                                columnNumber: 21
+                                                                lineNumber: 365,
+                                                                columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 347,
-                                                        columnNumber: 19
+                                                        lineNumber: 361,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 343,
-                                                columnNumber: 17
+                                                lineNumber: 357,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "flex items-start space-x-3",
@@ -2252,13 +2453,13 @@ function Candidatura() {
                                                             children: "3"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                            lineNumber: 359,
-                                                            columnNumber: 21
+                                                            lineNumber: 373,
+                                                            columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 358,
-                                                        columnNumber: 19
+                                                        lineNumber: 372,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         children: [
@@ -2267,34 +2468,34 @@ function Candidatura() {
                                                                 children: "Resposta Final"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                                lineNumber: 362,
-                                                                columnNumber: 21
+                                                                lineNumber: 376,
+                                                                columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                                 className: "text-gray-600 dark:text-gray-400 text-sm mt-1",
                                                                 children: "Você receberá uma notificação com o resultado final da sua candidatura."
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                                lineNumber: 365,
-                                                                columnNumber: 21
+                                                                lineNumber: 379,
+                                                                columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                        lineNumber: 361,
-                                                        columnNumber: 19
+                                                        lineNumber: 375,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                lineNumber: 357,
-                                                columnNumber: 17
+                                                lineNumber: 371,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 328,
-                                        columnNumber: 15
+                                        lineNumber: 342,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg",
@@ -2305,8 +2506,8 @@ function Candidatura() {
                                                     children: "Precisa de ajuda?"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                    lineNumber: 375,
-                                                    columnNumber: 19
+                                                    lineNumber: 389,
+                                                    columnNumber: 21
                                                 }, this),
                                                 " Entre em contacto connosco através do WhatsApp:",
                                                 " ",
@@ -2318,61 +2519,55 @@ function Candidatura() {
                                                     children: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$whatsapp$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["WHATSAPP_CONFIG"].display.formattedNumber
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                                    lineNumber: 376,
-                                                    columnNumber: 19
+                                                    lineNumber: 390,
+                                                    columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                            lineNumber: 374,
-                                            columnNumber: 17
+                                            lineNumber: 388,
+                                            columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                        lineNumber: 373,
-                                        columnNumber: 15
+                                        lineNumber: 387,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                                lineNumber: 323,
-                                columnNumber: 13
+                                lineNumber: 337,
+                                columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                lineNumber: 186,
+                lineNumber: 161,
                 columnNumber: 7
             }, this),
             showCreateModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$modals$2f$CreateApplicationModal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                 onClose: ()=>setShowCreateModal(false),
-                onSuccess: ()=>{
-                    // Recarregar os dados da aplicação após criação bem-sucedida
-                    refetch();
-                }
+                onSuccess: ()=>refetch()
             }, void 0, false, {
                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                lineNumber: 393,
+                lineNumber: 408,
                 columnNumber: 9
             }, this),
             showEditModal && application && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$modals$2f$EditApplicationModal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                 application: application,
                 onClose: ()=>setShowEditModal(false),
-                onSuccess: ()=>{
-                    // Recarregar os dados da aplicação após atualização bem-sucedida
-                    refetch();
-                }
+                onSuccess: ()=>refetch()
             }, void 0, false, {
                 fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-                lineNumber: 403,
+                lineNumber: 415,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(containers)/candidatura/page.tsx",
-        lineNumber: 185,
+        lineNumber: 160,
         columnNumber: 5
     }, this);
 }

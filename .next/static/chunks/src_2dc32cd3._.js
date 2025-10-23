@@ -1337,8 +1337,8 @@ function UpdatePhotoModal(param) {
                 return;
             }
             // Validar tamanho (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('A imagem deve ter no máximo 5MB.');
+            if (file.size > 1 * 1024 * 1024) {
+                alert('A imagem deve ter no máximo 1MB.');
                 return;
             }
             setSelectedFile(file);
