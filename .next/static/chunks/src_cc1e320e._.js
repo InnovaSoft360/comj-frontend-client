@@ -895,9 +895,8 @@ const useUpdateApplication = ()=>{
     const { showAlert } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAlert"])();
     const validatePDF = (file)=>{
         if (!file) return {
-            isValid: false,
-            error: 'Arquivo não selecionado'
-        };
+            isValid: true
+        }; // Arquivo vazio é válido (não vai atualizar)
         if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
             return {
                 isValid: false,
@@ -915,22 +914,14 @@ const useUpdateApplication = ()=>{
         };
     };
     const updateApplication = async (data)=>{
-        var _data_documentIdCardUrl, _data_documentSalaryDeclarationUrl, _data_documentBankStatementUrl, _data_documentLastBankReceiptUrl;
-        console.log('🚀 INICIANDO ATUALIZAÇÃO DA CANDIDATURA');
-        console.log('📝 ID:', data.id);
-        console.log('📁 Arquivos selecionados:', {
-            docId: ((_data_documentIdCardUrl = data.documentIdCardUrl) === null || _data_documentIdCardUrl === void 0 ? void 0 : _data_documentIdCardUrl.name) || 'NÃO',
-            salary: ((_data_documentSalaryDeclarationUrl = data.documentSalaryDeclarationUrl) === null || _data_documentSalaryDeclarationUrl === void 0 ? void 0 : _data_documentSalaryDeclarationUrl.name) || 'NÃO',
-            bank: ((_data_documentBankStatementUrl = data.documentBankStatementUrl) === null || _data_documentBankStatementUrl === void 0 ? void 0 : _data_documentBankStatementUrl.name) || 'NÃO',
-            receipt: ((_data_documentLastBankReceiptUrl = data.documentLastBankReceiptUrl) === null || _data_documentLastBankReceiptUrl === void 0 ? void 0 : _data_documentLastBankReceiptUrl.name) || 'NÃO'
-        });
+        console.log('🔄 Iniciando atualização...', data.id);
         // Verificar se pelo menos um arquivo foi selecionado
         const hasFilesToUpdate = data.documentIdCardUrl || data.documentSalaryDeclarationUrl || data.documentBankStatementUrl || data.documentLastBankReceiptUrl;
         if (!hasFilesToUpdate) {
             showAlert('Por favor, selecione pelo menos um documento para atualizar.', 'warning');
             return false;
         }
-        // Validar arquivos
+        // Validar arquivos selecionados
         const files = [
             {
                 file: data.documentIdCardUrl,
@@ -961,77 +952,73 @@ const useUpdateApplication = ()=>{
         setIsSubmitting(true);
         try {
             const formData = new FormData();
-            // 🔥 PARÂMETRO CORRETO: 'Id' (conforme teu backend)
+            // 🔥 CORREÇÃO: Enviar como multipart form data CORRETAMENTE
             formData.append('Id', data.id);
-            console.log('✅ ID adicionado ao FormData:', data.id);
-            // 🔥🔥🔥 CORREÇÃO CRÍTICA: NÃO enviar campos vazios - apenas os arquivos selecionados
+            // 🔥 CORREÇÃO: Enviar apenas os arquivos que foram selecionados
+            // Se não foi selecionado, não envia o campo
             if (data.documentIdCardUrl) {
                 formData.append('DocumentIdCardUrl', data.documentIdCardUrl);
-                console.log('✅ DocumentIdCardUrl adicionado:', data.documentIdCardUrl.name);
+                console.log('📄 Enviando DocumentIdCardUrl:', data.documentIdCardUrl.name);
             }
-            // 🔥 NÃO adicionar se for null - o backend vai manter o atual
             if (data.documentSalaryDeclarationUrl) {
                 formData.append('DocumentSalaryDeclarationUrl', data.documentSalaryDeclarationUrl);
-                console.log('✅ DocumentSalaryDeclarationUrl adicionado:', data.documentSalaryDeclarationUrl.name);
+                console.log('📄 Enviando DocumentSalaryDeclarationUrl:', data.documentSalaryDeclarationUrl.name);
             }
-            // 🔥 NÃO adicionar se for null
             if (data.documentBankStatementUrl) {
                 formData.append('DocumentBankStatementUrl', data.documentBankStatementUrl);
-                console.log('✅ DocumentBankStatementUrl adicionado:', data.documentBankStatementUrl.name);
+                console.log('📄 Enviando DocumentBankStatementUrl:', data.documentBankStatementUrl.name);
             }
-            // 🔥 NÃO adicionar se for null
             if (data.documentLastBankReceiptUrl) {
                 formData.append('DocumentLastBankReceiptUrl', data.documentLastBankReceiptUrl);
-                console.log('✅ DocumentLastBankReceiptUrl adicionado:', data.documentLastBankReceiptUrl.name);
+                console.log('📄 Enviando DocumentLastBankReceiptUrl:', data.documentLastBankReceiptUrl.name);
             }
-            // 🔥 NÃO adicionar se for null
-            // 🔥 DEBUG: Verificar conteúdo do FormData
-            console.log('📦 CONTEÚDO DO FORMDATA:');
-            for (let [key, value] of formData.entries()){
-                console.log("  ".concat(key, ":"), value instanceof File ? "File: ".concat(value.name) : value);
+            console.log('📦 FormData preparado. Campos:', Array.from(formData.keys()));
+            // 🔥 TESTE: Vamos ver exatamente o que está sendo enviado
+            for (const [key, value] of formData.entries()){
+                if (value instanceof File) {
+                    console.log("🔍 ".concat(key, ": File - ").concat(value.name, " (").concat(value.size, " bytes)"));
+                } else {
+                    console.log("🔍 ".concat(key, ":"), value);
+                }
             }
-            console.log('🔄 ENVIANDO REQUISIÇÃO PUT...');
+            console.log('🚀 Enviando requisição PUT...');
             const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].put('/v1/Applications/Update', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
-                },
-                timeout: 30000
+                }
             });
-            console.log('✅ RESPOSTA DO BACKEND:', response.data);
+            console.log('✅ Resposta do servidor:', response.data);
             if (response.data.code === 200) {
-                console.log('🎉 CANDIDATURA ATUALIZADA COM SUCESSO!');
-                showAlert('Candidatura atualizada com sucesso!', 'success');
+                showAlert('Candidatura atualizada com sucesso! Agora ela voltou para análise.', 'success');
                 return true;
             } else {
-                console.log('❌ Erro na resposta:', response.data.message);
                 showAlert(response.data.message || 'Erro ao atualizar candidatura.', 'error');
                 return false;
             }
-        } catch (err) {
-            var _apiError_response, _apiError_response1, _apiError_response_data, _apiError_response2, _apiError_response3;
-            console.error('💥 ERRO NA REQUISIÇÃO:', err);
-            const apiError = err;
-            let errorMessage = 'Erro ao atualizar candidatura. Tente novamente.';
-            if (((_apiError_response = apiError.response) === null || _apiError_response === void 0 ? void 0 : _apiError_response.status) === 400) {
-                errorMessage = 'Dados inválidos. Verifique os arquivos e tente novamente.';
-                console.log('🔴 Bad Request - Possível problema com os parâmetros');
-            } else if (((_apiError_response1 = apiError.response) === null || _apiError_response1 === void 0 ? void 0 : _apiError_response1.status) === 404) {
-                errorMessage = 'Candidatura não encontrada.';
-            } else if ((_apiError_response2 = apiError.response) === null || _apiError_response2 === void 0 ? void 0 : (_apiError_response_data = _apiError_response2.data) === null || _apiError_response_data === void 0 ? void 0 : _apiError_response_data.message) {
-                errorMessage = apiError.response.data.message;
-            } else if (((_apiError_response3 = apiError.response) === null || _apiError_response3 === void 0 ? void 0 : _apiError_response3.status) === 500) {
-                errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
-            } else if (apiError.request) {
-                errorMessage = 'Erro de conexão. Verifique sua internet.';
-            } else if (apiError.message) {
-                errorMessage = apiError.message;
+        } catch (error) {
+            var _error_response, _error_response_data, _error_response1;
+            console.error('💥 Erro completo:', error);
+            // 🔥 DEBUG DETALHADO do erro 400
+            if (error.response) {
+                console.error('📊 Dados da resposta de erro:', {
+                    status: error.response.status,
+                    data: error.response.data,
+                    headers: error.response.headers
+                });
             }
-            console.error('🔴 Mensagem de erro final:', errorMessage);
+            let errorMessage = 'Erro ao atualizar candidatura. Tente novamente.';
+            if (((_error_response = error.response) === null || _error_response === void 0 ? void 0 : _error_response.status) === 400) {
+                errorMessage = 'Dados inválidos. Verifique se todos os documentos estão no formato correto.';
+                if (error.response.data) {
+                    console.error('🔴 Detalhes do erro 400:', error.response.data);
+                }
+            } else if ((_error_response1 = error.response) === null || _error_response1 === void 0 ? void 0 : (_error_response_data = _error_response1.data) === null || _error_response_data === void 0 ? void 0 : _error_response_data.message) {
+                errorMessage = error.response.data.message;
+            }
             showAlert(errorMessage, 'error');
             return false;
         } finally{
             setIsSubmitting(false);
-            console.log('🏁 PROCESSO DE ATUALIZAÇÃO FINALIZADO');
         }
     };
     return {
@@ -1049,6 +1036,48 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
 }),
+"[project]/src/hooks/useApplicationData.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+// hooks/useApplicationData.ts
+__turbopack_context__.s([
+    "useApplicationData",
+    ()=>useApplicationData
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api.ts [app-client] (ecmascript)");
+var _s = __turbopack_context__.k.signature();
+'use client';
+;
+;
+const useApplicationData = ()=>{
+    _s();
+    const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const getCurrentApplicationData = async (applicationId)=>{
+        try {
+            setIsLoading(true);
+            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("/v1/Applications/GetById?ApplicationId=".concat(applicationId));
+            if (response.data.code === 200 && response.data.data) {
+                return response.data.data;
+            }
+            return null;
+        } catch (error) {
+            console.error('Erro ao buscar dados da aplicação:', error);
+            return null;
+        } finally{
+            setIsLoading(false);
+        }
+    };
+    return {
+        isLoading,
+        getCurrentApplicationData
+    };
+};
+_s(useApplicationData, "EmvgwIb3cHpoFpeP+WmEDbjx4y4=");
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
+}
+}),
 "[project]/src/components/modals/EditApplicationModal.tsx [app-client] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
@@ -1061,6 +1090,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/react-icons/fa/index.mjs [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useUpdateApplication$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/useUpdateApplication.ts [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useApplicationData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/useApplicationData.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/customAlert.tsx [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
@@ -1069,10 +1099,12 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
+;
 function EditApplicationModal(param) {
     let { application, onClose, onSuccess } = param;
     _s();
     const { isSubmitting, updateApplication, validatePDF } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useUpdateApplication$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useUpdateApplication"])();
+    const { getCurrentApplicationData } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useApplicationData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useApplicationData"])();
     const { showAlert, AlertContainer } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAlert"])();
     const [fileData, setFileData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
         documentIdCardUrl: null,
@@ -1091,8 +1123,20 @@ function EditApplicationModal(param) {
     const documentSalaryDeclarationRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const documentBankStatementRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const documentLastBankReceiptRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    // 🔥 CARREGAR DADOS ATUAIS AO ABRIR O MODAL
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "EditApplicationModal.useEffect": ()=>{
+            console.log('📋 Dados atuais da aplicação:', {
+                id: application.id,
+                status: application.status,
+                allowRejectedEdit: application.allowRejectedEdit
+            });
+        }
+    }["EditApplicationModal.useEffect"], [
+        application
+    ]);
     const handleFileChange = (field, file)=>{
-        console.log("📁 Arquivo selecionado para ".concat(field, ":"), file === null || file === void 0 ? void 0 : file.name);
+        console.log('📁 Arquivo selecionado:', field, file === null || file === void 0 ? void 0 : file.name);
         const newFileData = {
             ...fileData,
             [field]: file
@@ -1106,19 +1150,16 @@ function EditApplicationModal(param) {
             if (!validation.isValid) {
                 newFileErrors[field] = validation.error;
                 newFileData[field] = null;
-                // Limpar o input
                 const ref = getFileInputRef(field);
                 if (ref === null || ref === void 0 ? void 0 : ref.current) ref.current.value = '';
                 showAlert(validation.error, 'warning');
-            } else {
-                console.log("✅ ".concat(field, " válido:"), file.name);
             }
         }
         setFileData(newFileData);
         setFileErrors(newFileErrors);
     };
     const handleRemoveFile = (field)=>{
-        console.log("🗑️ Removendo arquivo: ".concat(field));
+        console.log('🗑️ Removendo arquivo:', field);
         const ref = getFileInputRef(field);
         if (ref === null || ref === void 0 ? void 0 : ref.current) ref.current.value = '';
         setFileData((prev)=>({
@@ -1133,17 +1174,8 @@ function EditApplicationModal(param) {
     const handleViewCurrentFile = (field)=>{
         const url = getCurrentFileUrl(field);
         if (url) {
-            const fullUrl = url.startsWith('http') ? url : "http://localhost:5211".concat(url);
-            console.log("👀 Abrindo arquivo atual: ".concat(fullUrl));
+            const fullUrl = url.startsWith('http') ? url : "https://localhost:7209".concat(url);
             window.open(fullUrl, '_blank');
-        }
-    };
-    const handleViewNewFile = (field)=>{
-        const file = fileData[field];
-        if (file) {
-            const fileURL = URL.createObjectURL(file);
-            console.log("👀 Visualizando novo arquivo: ".concat(file.name));
-            window.open(fileURL, '_blank');
         }
     };
     const getFileInputRef = (field)=>{
@@ -1190,41 +1222,30 @@ function EditApplicationModal(param) {
     };
     const handleSubmit = async (e)=>{
         e.preventDefault();
-        console.log('🎯 INICIANDO SUBMIT DO FORMULÁRIO DE EDIÇÃO');
-        console.log('🔍 Dados da aplicação:', {
-            id: application.id,
-            status: application.status,
-            allowRejectedEdit: application.allowRejectedEdit
-        });
+        console.log('🎯 Iniciando envio do formulário...');
+        // Verificar se a candidatura pode ser editada
+        if (application.status !== 3 || !application.allowRejectedEdit) {
+            showAlert('Esta candidatura não pode ser editada no momento.', 'error');
+            return;
+        }
         // Verificar se pelo menos um arquivo foi selecionado
         const hasFilesToUpdate = Object.values(fileData).some((file)=>file !== null);
         if (!hasFilesToUpdate) {
             showAlert('Por favor, selecione pelo menos um documento para atualizar.', 'warning');
             return;
         }
-        console.log('📦 Dados que serão enviados:', {
-            id: application.id,
-            files: Object.keys(fileData).filter((key)=>fileData[key] !== null)
-        });
         const updateData = {
             id: application.id,
             ...fileData
         };
-        try {
-            console.log('🔄 Chamando updateApplication...');
-            const success = await updateApplication(updateData);
-            console.log('✅ Resultado da atualização:', success);
-            if (success) {
-                console.log('🚀 Sucesso! Fechando modal e recarregando dados...');
-                // Pequeno delay para usuário ver a mensagem de sucesso
-                setTimeout(()=>{
-                    onSuccess === null || onSuccess === void 0 ? void 0 : onSuccess();
-                    onClose();
-                }, 1000);
-            }
-        } catch (error) {
-            console.error('💥 Erro inesperado no handleSubmit:', error);
-            showAlert('Erro inesperado ao processar a atualização.', 'error');
+        console.log('📤 Dados para atualização:', updateData);
+        const success = await updateApplication(updateData);
+        if (success) {
+            console.log('🚀 Sucesso! Fechando modal...');
+            setTimeout(()=>{
+                onSuccess === null || onSuccess === void 0 ? void 0 : onSuccess();
+                onClose();
+            }, 1500);
         }
     };
     // Função para renderizar cada campo de arquivo
@@ -1234,23 +1255,23 @@ function EditApplicationModal(param) {
         const hasError = !!fileErrors[field];
         const currentFileUrl = getCurrentFileUrl(field);
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-            className: "mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700",
+            className: "mb-6",
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                    className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3",
+                    className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaUpload"], {
                             className: "inline w-4 h-4 mr-2 text-orange-600"
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 188,
+                            lineNumber: 176,
                             columnNumber: 11
                         }, this),
                         label
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 187,
+                    lineNumber: 175,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1265,7 +1286,7 @@ function EditApplicationModal(param) {
                                         className: "w-4 h-4 text-red-600"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 196,
+                                        lineNumber: 184,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1273,53 +1294,53 @@ function EditApplicationModal(param) {
                                         children: "Arquivo atual"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 197,
+                                        lineNumber: 185,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 195,
+                                lineNumber: 183,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                 type: "button",
                                 onClick: ()=>handleViewCurrentFile(field),
-                                className: "flex items-center space-x-1 px-3 py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-300 rounded-md transition-colors text-sm",
+                                className: "flex items-center space-x-1 px-2 py-1 text-blue-600 hover:text-blue-700 transition-colors text-sm",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaExternalLinkAlt"], {
                                         className: "w-3 h-3"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 206,
+                                        lineNumber: 194,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        children: "Ver"
+                                        children: "Ver atual"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 207,
+                                        lineNumber: 195,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 201,
+                                lineNumber: 189,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                        lineNumber: 194,
+                        lineNumber: 182,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 193,
+                    lineNumber: 181,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "flex flex-col space-y-3",
+                    className: "flex flex-col space-y-2",
                     children: [
                         !hasNewFile && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                             children: [
@@ -1335,100 +1356,84 @@ function EditApplicationModal(param) {
                                     id: "".concat(field, "-edit")
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 216,
+                                    lineNumber: 204,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                     htmlFor: "".concat(field, "-edit"),
-                                    className: "flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-orange-500 transition-colors bg-white dark:bg-gray-700",
+                                    className: "flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-orange-500 transition-colors",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaUpload"], {
-                                            className: "w-5 h-5 mr-2 text-gray-400"
+                                            className: "w-4 h-4 mr-2 text-gray-400"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 228,
+                                            lineNumber: 216,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                            className: "text-sm text-gray-600 dark:text-gray-400 font-medium",
-                                            children: "Clique para selecionar novo PDF"
+                                            className: "text-sm text-gray-600 dark:text-gray-400",
+                                            children: "Selecionar novo PDF"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 229,
+                                            lineNumber: 217,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 224,
+                                    lineNumber: 212,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true),
                         hasError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center space-x-2 text-red-600 text-sm p-2 bg-red-50 dark:bg-red-900/20 rounded-md",
+                            className: "flex items-center space-x-2 text-red-600 text-sm",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaExclamationTriangle"], {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 239,
+                                    lineNumber: 227,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     children: fileErrors[field]
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 240,
+                                    lineNumber: 228,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 238,
+                            lineNumber: 226,
                             columnNumber: 13
                         }, this),
                         hasNewFile && !hasError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "flex items-center space-x-3",
+                                    className: "flex items-center space-x-2",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaFilePdf"], {
-                                            className: "w-5 h-5 text-red-600"
+                                            className: "w-4 h-4 text-red-600"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 248,
+                                            lineNumber: 236,
                                             columnNumber: 17
                                         }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    className: "text-sm font-medium text-gray-900 dark:text-white block",
-                                                    children: (_fileData_field = fileData[field]) === null || _fileData_field === void 0 ? void 0 : _fileData_field.name
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 250,
-                                                    columnNumber: 19
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    className: "text-xs text-green-600 dark:text-green-400",
-                                                    children: "✅ Arquivo selecionado"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 253,
-                                                    columnNumber: 19
-                                                }, this)
-                                            ]
-                                        }, void 0, true, {
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "text-sm font-medium text-gray-900 dark:text-white",
+                                            children: (_fileData_field = fileData[field]) === null || _fileData_field === void 0 ? void 0 : _fileData_field.name
+                                        }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 249,
+                                            lineNumber: 237,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 247,
+                                    lineNumber: 235,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1436,60 +1441,64 @@ function EditApplicationModal(param) {
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                             type: "button",
-                                            onClick: ()=>handleViewNewFile(field),
-                                            className: "p-2 text-blue-600 hover:text-blue-700 transition-colors bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 rounded-md",
-                                            title: "Visualizar arquivo",
+                                            onClick: ()=>{
+                                                const file = fileData[field];
+                                                if (file) {
+                                                    const fileURL = URL.createObjectURL(file);
+                                                    window.open(fileURL, '_blank');
+                                                }
+                                            },
+                                            className: "p-1 text-blue-600 hover:text-blue-700 transition-colors",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaEye"], {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 265,
+                                                lineNumber: 253,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 259,
+                                            lineNumber: 242,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                             type: "button",
                                             onClick: ()=>handleRemoveFile(field),
-                                            className: "p-2 text-red-600 hover:text-red-700 transition-colors bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 rounded-md",
-                                            title: "Remover arquivo",
+                                            className: "p-1 text-red-600 hover:text-red-700 transition-colors",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaTrash"], {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 273,
+                                                lineNumber: 260,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 267,
+                                            lineNumber: 255,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 258,
+                                    lineNumber: 241,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 246,
+                            lineNumber: 234,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 212,
+                    lineNumber: 200,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-            lineNumber: 186,
+            lineNumber: 174,
             columnNumber: 7
         }, this);
     };
@@ -1497,7 +1506,7 @@ function EditApplicationModal(param) {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(AlertContainer, {}, void 0, false, {
                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                lineNumber: 285,
+                lineNumber: 272,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1506,84 +1515,67 @@ function EditApplicationModal(param) {
                     className: "bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-800",
+                            className: "flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "flex-1",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
                                             className: "text-xl font-bold text-gray-900 dark:text-white",
-                                            children: "📝 Editar Candidatura"
+                                            children: "Editar Candidatura"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 293,
+                                            lineNumber: 280,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-sm text-gray-600 dark:text-gray-400 mt-1",
-                                            children: "Atualize os documentos que precisam de correção"
+                                            children: "Atualize os documentos necessários (apenas PDF, máximo 2MB cada)"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 296,
+                                            lineNumber: 283,
                                             columnNumber: 15
                                         }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "mt-2 p-2 bg-orange-100 dark:bg-orange-900/30 rounded-md",
-                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "text-xs text-orange-800 dark:text-orange-300",
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
-                                                        children: "⚠️ Atenção:"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                        lineNumber: 301,
-                                                        columnNumber: 19
-                                                    }, this),
-                                                    ' Após a edição, sua candidatura voltará para "Pendente" para nova análise.'
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 300,
-                                                columnNumber: 17
-                                            }, this)
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-sm text-orange-600 font-medium mt-1",
+                                            children: '⚠️ Após a edição, sua candidatura voltará para "Pendente" para nova análise.'
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 299,
+                                            lineNumber: 286,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 292,
+                                    lineNumber: 279,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                     onClick: onClose,
-                                    className: "p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ml-4",
+                                    className: "p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors",
                                     disabled: isSubmitting,
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaTimes"], {
                                         className: "w-5 h-5 text-gray-500 dark:text-gray-400"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 310,
+                                        lineNumber: 295,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 305,
+                                    lineNumber: 290,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 291,
+                            lineNumber: 278,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "p-6 overflow-y-auto max-h-[calc(90vh-200px)]",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
                                 onSubmit: handleSubmit,
-                                className: "space-y-2",
+                                className: "space-y-4",
                                 children: [
                                     renderFileField('documentIdCardUrl', 'Cópia do BI'),
                                     renderFileField('documentSalaryDeclarationUrl', 'Declaração de Salário'),
@@ -1591,127 +1583,108 @@ function EditApplicationModal(param) {
                                     renderFileField('documentLastBankReceiptUrl', 'Último Recibo Bancário'),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg",
-                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-sm text-yellow-800 dark:text-yellow-200",
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
-                                                    children: "💡 Dica:"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 332,
-                                                    columnNumber: 19
-                                                }, this),
-                                                " Apenas os documentos que você selecionar serão atualizados. Os documentos não selecionados permanecerão os mesmos."
-                                            ]
-                                        }, void 0, true, {
-                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 331,
-                                            columnNumber: 17
-                                        }, this)
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 330,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "pt-4",
                                         children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                type: "submit",
-                                                disabled: isSubmitting,
-                                                className: "w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ".concat(!isSubmitting ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105' : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'),
-                                                children: isSubmitting ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                    className: "flex items-center justify-center space-x-2",
-                                                    children: [
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaSpinner"], {
-                                                            className: "w-4 h-4 animate-spin"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                            lineNumber: 350,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                            children: "Atualizando candidatura..."
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                            lineNumber: 351,
-                                                            columnNumber: 23
-                                                        }, this)
-                                                    ]
-                                                }, void 0, true, {
-                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 349,
-                                                    columnNumber: 21
-                                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                    className: "flex items-center justify-center space-x-2",
-                                                    children: [
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaUpload"], {
-                                                            className: "w-4 h-4"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                            lineNumber: 355,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                            children: "Atualizar e Reenviar para Análise"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                            lineNumber: 356,
-                                                            columnNumber: 23
-                                                        }, this)
-                                                    ]
-                                                }, void 0, true, {
-                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 354,
-                                                    columnNumber: 21
-                                                }, this)
-                                            }, void 0, false, {
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                className: "text-sm text-yellow-800 dark:text-yellow-200",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
+                                                        children: "Nota:"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                        lineNumber: 317,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    " Apenas os documentos que você selecionar serão atualizados. Os documentos não selecionados permanecerão os mesmos."
+                                                ]
+                                            }, void 0, true, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 339,
+                                                lineNumber: 316,
                                                 columnNumber: 17
                                             }, this),
-                                            !isSubmitting && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "text-xs text-gray-500 dark:text-gray-400 text-center mt-2",
-                                                children: '⚠️ Sua candidatura voltará para status "Pendente"'
-                                            }, void 0, false, {
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                className: "text-sm text-yellow-800 dark:text-yellow-200 mt-2",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
+                                                        children: "⚠️ Atenção:"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                        lineNumber: 321,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    ' Após a edição, sua candidatura voltará para status "Pendente" para ser reavaliada pela nossa equipe.'
+                                                ]
+                                            }, void 0, true, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 362,
-                                                columnNumber: 19
+                                                lineNumber: 320,
+                                                columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 338,
+                                        lineNumber: 315,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        type: "submit",
+                                        disabled: isSubmitting,
+                                        className: "w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ".concat(!isSubmitting ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl' : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'),
+                                        children: isSubmitting ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "flex items-center justify-center space-x-2",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaSpinner"], {
+                                                    className: "w-4 h-4 animate-spin"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                    lineNumber: 337,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    children: "Atualizando candidatura..."
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                                    lineNumber: 338,
+                                                    columnNumber: 21
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                            lineNumber: 336,
+                                            columnNumber: 19
+                                        }, this) : 'Atualizar e Reenviar para Análise'
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
+                                        lineNumber: 326,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 316,
+                                lineNumber: 301,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 315,
+                            lineNumber: 300,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 289,
+                    lineNumber: 276,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                lineNumber: 288,
+                lineNumber: 275,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true);
 }
-_s(EditApplicationModal, "tPwmqfJ3ABTBnPFu9pBELnslMio=", false, function() {
+_s(EditApplicationModal, "ClVyIXekEAaFOwv6I5lQJgB1m40=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useUpdateApplication$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useUpdateApplication"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useApplicationData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useApplicationData"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$customAlert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAlert"]
     ];
 });
@@ -2687,4 +2660,4 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 }),
 ]);
 
-//# sourceMappingURL=src_c37c72c6._.js.map
+//# sourceMappingURL=src_cc1e320e._.js.map

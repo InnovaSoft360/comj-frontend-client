@@ -82,11 +82,22 @@ export const useApplication = () => {
     fetchApplication();
   };
 
+  // NOVA LÓGICA PARA BOTÕES
+  const shouldShowCreateButton = !application;
+  const shouldShowEditButton = application?.status === 3 && application.allowRejectedEdit;
+  const shouldHideAllButtons = application && 
+    (application.status === 1 || 
+     application.status === 2 || 
+     (application.status === 3 && !application.allowRejectedEdit));
+
   return {
     application,
     isLoading,
     error,
     refetch,
     hasApplication: !!application,
+    shouldShowCreateButton,
+    shouldShowEditButton,
+    shouldHideAllButtons
   };
 };
