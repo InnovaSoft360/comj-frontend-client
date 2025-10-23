@@ -120,16 +120,6 @@ export default function EditApplicationModal({ application, onClose, onSuccess }
     }
   };
 
-  const getFieldLabel = (field: string): string => {
-    switch (field) {
-      case 'documentIdCardUrl': return 'Cópia do BI';
-      case 'documentSalaryDeclarationUrl': return 'Declaração de Salário';
-      case 'documentBankStatementUrl': return 'Extrato Bancário';
-      case 'documentLastBankReceiptUrl': return 'Último Recibo Bancário';
-      default: return '';
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('🎯 INICIANDO SUBMIT DO FORMULÁRIO DE EDIÇÃO');
@@ -180,7 +170,6 @@ export default function EditApplicationModal({ application, onClose, onSuccess }
   const renderFileField = (field: keyof typeof fileData, label: string) => {
     const hasNewFile = !!fileData[field];
     const hasError = !!fileErrors[field];
-    const currentFileUrl = getCurrentFileUrl(field);
 
     return (
       <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -298,7 +287,7 @@ export default function EditApplicationModal({ application, onClose, onSuccess }
               </p>
               <div className="mt-2 p-2 bg-orange-100 dark:bg-orange-900/30 rounded-md">
                 <p className="text-xs text-orange-800 dark:text-orange-300">
-                  <strong>⚠️ Atenção:</strong> Após a edição, sua candidatura voltará para "Pendente" para nova análise.
+                  <strong>⚠️ Atenção:</strong> Após a edição, sua candidatura voltará para &quot;Pendente&quot; para nova análise.
                 </p>
               </div>
             </div>
@@ -360,7 +349,7 @@ export default function EditApplicationModal({ application, onClose, onSuccess }
                 
                 {!isSubmitting && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                    ⚠️ Sua candidatura voltará para status "Pendente"
+                    ⚠️ Sua candidatura voltará para status &quot;Pendente&quot;
                   </p>
                 )}
               </div>

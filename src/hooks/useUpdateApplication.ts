@@ -117,7 +117,7 @@ export const useUpdateApplication = () => {
 
       // 🔥 DEBUG: Verificar conteúdo do FormData
       console.log('📦 CONTEÚDO DO FORMDATA:');
-      for (let [key, value] of formData.entries()) {
+      for (const [key, value] of formData.entries()) {
         console.log(`  ${key}:`, value instanceof File ? `File: ${value.name}` : value);
       }
 
