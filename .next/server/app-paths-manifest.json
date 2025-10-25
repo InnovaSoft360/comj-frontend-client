@@ -1,5 +1,4 @@
 {
   "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(containers)/candidatura/page": "app/(containers)/candidatura/page.js",
   "/(containers)/page": "app/(containers)/page.js"
 }

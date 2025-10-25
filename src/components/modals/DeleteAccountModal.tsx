@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaTimes, FaExclamationTriangle, FaCheck, FaTrash } from 'react-icons/fa';
+import { FaTimes, FaExclamationTriangle, FaCheck, FaTrash, FaSignOutAlt } from 'react-icons/fa';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
 
 interface DeleteAccountModalProps {
@@ -45,6 +45,9 @@ export default function DeleteAccountModal({ isOpen, onClose, userId, onAccountD
       setTimeout(() => {
         onAccountDeleted();
         onClose();
+        
+        // Redirecionar para a página inicial após exclusão
+        // window.location.href = '/';
       }, 2000);
     }
   };
@@ -109,7 +112,7 @@ export default function DeleteAccountModal({ isOpen, onClose, userId, onAccountD
                   Conta excluída com sucesso!
                 </p>
                 <p className="text-green-700 dark:text-green-400 text-sm">
-                  Redirecionando...
+                  Você foi desconectado automaticamente.
                 </p>
               </div>
             </div>
@@ -135,6 +138,7 @@ export default function DeleteAccountModal({ isOpen, onClose, userId, onAccountD
                   <li>• Todos os seus dados serão permanentemente excluídos</li>
                   <li>• Sua candidatura será cancelada</li>
                   <li>• Não será possível recuperar a conta</li>
+                  <li>• Você será desconectado automaticamente</li>
                   <li>• Esta ação não pode ser desfeita</li>
                 </ul>
               </div>
@@ -189,8 +193,8 @@ export default function DeleteAccountModal({ isOpen, onClose, userId, onAccountD
                 </>
               ) : (
                 <>
-                  <FaTrash className="w-4 h-4" />
-                  <span>Excluir Conta</span>
+                  <FaSignOutAlt className="w-4 h-4" />
+                  <span>Excluir e Sair</span>
                 </>
               )}
             </button>

@@ -1759,14 +1759,49 @@ const useDeleteAccount = ()=>{
             setSuccess(false);
         }
     }["useDeleteAccount.useCallback[resetState]"], []);
+    // Função para verificar se o usuário está autenticado
+    const checkAuthStatus = async ()=>{
+        try {
+            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get('/v1/Auth/CheckAuth');
+            return response.data.authenticated;
+        } catch (error) {
+            console.error('Erro ao verificar status de autenticação:', error);
+            return false;
+        }
+    };
+    // Função para fazer logout
+    const performLogout = async ()=>{
+        try {
+            await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/v1/Auth/Logout');
+            console.log('✅ Logout realizado com sucesso após exclusão da conta');
+            return true;
+        } catch (error) {
+            console.error('❌ Erro ao fazer logout:', error);
+            // Mesmo se o logout falhar, não impedimos o fluxo
+            return true;
+        }
+    };
     const deleteAccount = async (userId)=>{
         setIsLoading(true);
         setError(null);
         setSuccess(false);
         try {
+            // Primeiro verifica se o usuário está autenticado
+            const isAuthenticated = await checkAuthStatus();
+            console.log('🔐 Status de autenticação:', isAuthenticated);
+            // Faz a requisição para excluir a conta
             const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].delete("/v1/Users/Delete?Id=".concat(userId));
             if (response.data.code === 200) {
                 setSuccess(true);
+                // Se o usuário estava autenticado, faz logout automaticamente
+                if (isAuthenticated) {
+                    console.log('🚪 Usuário estava autenticado, realizando logout automático...');
+                    await performLogout();
+                    // Força um refresh na página para garantir que todos os estados sejam limpos
+                    setTimeout(()=>{
+                        window.location.reload();
+                    }, 1000);
+                }
                 return true;
             } else {
                 setError(response.data.message || 'Erro ao excluir conta');
@@ -1854,6 +1889,8 @@ function DeleteAccountModal(param) {
             setTimeout(()=>{
                 onAccountDeleted();
                 onClose();
+            // Redirecionar para a página inicial após exclusão
+            // window.location.href = '/';
             }, 2000);
         }
     };
@@ -1898,12 +1935,12 @@ function DeleteAccountModal(param) {
                                         className: "w-5 h-5 text-red-600 dark:text-red-400"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                        lineNumber: 80,
+                                        lineNumber: 83,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                    lineNumber: 79,
+                                    lineNumber: 82,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1913,7 +1950,7 @@ function DeleteAccountModal(param) {
                                             children: "Excluir Conta"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 83,
+                                            lineNumber: 86,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1921,19 +1958,19 @@ function DeleteAccountModal(param) {
                                             children: "Ação irreversível - Tenha cuidado"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 86,
+                                            lineNumber: 89,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                    lineNumber: 82,
+                                    lineNumber: 85,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                            lineNumber: 78,
+                            lineNumber: 81,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1944,18 +1981,18 @@ function DeleteAccountModal(param) {
                                 className: "w-5 h-5 text-gray-500 dark:text-gray-400"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                lineNumber: 97,
+                                lineNumber: 100,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                            lineNumber: 92,
+                            lineNumber: 95,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                    lineNumber: 77,
+                    lineNumber: 80,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -1969,7 +2006,7 @@ function DeleteAccountModal(param) {
                                     className: "w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                    lineNumber: 106,
+                                    lineNumber: 109,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1979,27 +2016,27 @@ function DeleteAccountModal(param) {
                                             children: "Conta excluída com sucesso!"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 108,
+                                            lineNumber: 111,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-green-700 dark:text-green-400 text-sm",
-                                            children: "Redirecionando..."
+                                            children: "Você foi desconectado automaticamente."
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 111,
+                                            lineNumber: 114,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                    lineNumber: 107,
+                                    lineNumber: 110,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                            lineNumber: 105,
+                            lineNumber: 108,
                             columnNumber: 13
                         }, this),
                         error && !success && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2009,12 +2046,12 @@ function DeleteAccountModal(param) {
                                 children: error
                             }, void 0, false, {
                                 fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                lineNumber: 121,
+                                lineNumber: 124,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                            lineNumber: 120,
+                            lineNumber: 123,
                             columnNumber: 13
                         }, this),
                         !success && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -2027,7 +2064,7 @@ function DeleteAccountModal(param) {
                                             children: "⚠️ Atenção: Esta ação é irreversível!"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 131,
+                                            lineNumber: 134,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -2037,40 +2074,47 @@ function DeleteAccountModal(param) {
                                                     children: "• Todos os seus dados serão permanentemente excluídos"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                    lineNumber: 135,
+                                                    lineNumber: 138,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                     children: "• Sua candidatura será cancelada"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                    lineNumber: 136,
+                                                    lineNumber: 139,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                     children: "• Não será possível recuperar a conta"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                    lineNumber: 137,
+                                                    lineNumber: 140,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                                    children: "• Você será desconectado automaticamente"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
+                                                    lineNumber: 141,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                     children: "• Esta ação não pode ser desfeita"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                    lineNumber: 138,
+                                                    lineNumber: 142,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 134,
+                                            lineNumber: 137,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                    lineNumber: 130,
+                                    lineNumber: 133,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2084,14 +2128,14 @@ function DeleteAccountModal(param) {
                                                     children: requiredText
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                    lineNumber: 145,
+                                                    lineNumber: 149,
                                                     columnNumber: 26
                                                 }, this),
                                                 " para confirmar:"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 144,
+                                            lineNumber: 148,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2103,7 +2147,7 @@ function DeleteAccountModal(param) {
                                             disabled: isLoading || success
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 147,
+                                            lineNumber: 151,
                                             columnNumber: 17
                                         }, this),
                                         confirmationText && !isConfirmed && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2111,13 +2155,13 @@ function DeleteAccountModal(param) {
                                             children: "O texto deve corresponder exatamente"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                            lineNumber: 156,
+                                            lineNumber: 160,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                    lineNumber: 143,
+                                    lineNumber: 147,
                                     columnNumber: 15
                                 }, this)
                             ]
@@ -2133,7 +2177,7 @@ function DeleteAccountModal(param) {
                                     children: "Cancelar"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                    lineNumber: 166,
+                                    lineNumber: 170,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2146,14 +2190,14 @@ function DeleteAccountModal(param) {
                                                 className: "w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                lineNumber: 182,
+                                                lineNumber: 186,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 children: "Excluindo..."
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                lineNumber: 183,
+                                                lineNumber: 187,
                                                 columnNumber: 19
                                             }, this)
                                         ]
@@ -2163,61 +2207,61 @@ function DeleteAccountModal(param) {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                lineNumber: 187,
+                                                lineNumber: 191,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 children: "Excluído!"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                lineNumber: 188,
+                                                lineNumber: 192,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                         children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaTrash"], {
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaSignOutAlt"], {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                lineNumber: 192,
+                                                lineNumber: 196,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                children: "Excluir Conta"
+                                                children: "Excluir e Sair"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                                lineNumber: 193,
+                                                lineNumber: 197,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                                    lineNumber: 175,
+                                    lineNumber: 179,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                            lineNumber: 165,
+                            lineNumber: 169,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-                    lineNumber: 102,
+                    lineNumber: 105,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-            lineNumber: 72,
+            lineNumber: 75,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/modals/DeleteAccountModal.tsx",
-        lineNumber: 71,
+        lineNumber: 74,
         columnNumber: 5
     }, this);
 }

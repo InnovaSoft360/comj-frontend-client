@@ -916,7 +916,7 @@ const useUpdateApplication = ()=>{
             // 🔥 NÃO adicionar se for null
             // 🔥 DEBUG: Verificar conteúdo do FormData
             console.log('📦 CONTEÚDO DO FORMDATA:');
-            for (let [key, value] of formData.entries()){
+            for (const [key, value] of formData.entries()){
                 console.log(`  ${key}:`, value instanceof File ? `File: ${value.name}` : value);
             }
             console.log('🔄 ENVIANDO REQUISIÇÃO PUT...');
@@ -1091,20 +1091,6 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                 return '';
         }
     };
-    const getFieldLabel = (field)=>{
-        switch(field){
-            case 'documentIdCardUrl':
-                return 'Cópia do BI';
-            case 'documentSalaryDeclarationUrl':
-                return 'Declaração de Salário';
-            case 'documentBankStatementUrl':
-                return 'Extrato Bancário';
-            case 'documentLastBankReceiptUrl':
-                return 'Último Recibo Bancário';
-            default:
-                return '';
-        }
-    };
     const handleSubmit = async (e)=>{
         e.preventDefault();
         console.log('🎯 INICIANDO SUBMIT DO FORMULÁRIO DE EDIÇÃO');
@@ -1148,7 +1134,6 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
     const renderFileField = (field, label)=>{
         const hasNewFile = !!fileData[field];
         const hasError = !!fileErrors[field];
-        const currentFileUrl = getCurrentFileUrl(field);
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700",
             children: [
@@ -1159,14 +1144,14 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                             className: "inline w-4 h-4 mr-2 text-orange-600"
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 188,
+                            lineNumber: 177,
                             columnNumber: 11
                         }, this),
                         label
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 187,
+                    lineNumber: 176,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1181,7 +1166,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                         className: "w-4 h-4 text-red-600"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 196,
+                                        lineNumber: 185,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1189,13 +1174,13 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                         children: "Arquivo atual"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 197,
+                                        lineNumber: 186,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 195,
+                                lineNumber: 184,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1207,31 +1192,31 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                         className: "w-3 h-3"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 206,
+                                        lineNumber: 195,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         children: "Ver"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 207,
+                                        lineNumber: 196,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 201,
+                                lineNumber: 190,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                        lineNumber: 194,
+                        lineNumber: 183,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 193,
+                    lineNumber: 182,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1248,7 +1233,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                     id: `${field}-edit`
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 216,
+                                    lineNumber: 205,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1259,7 +1244,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                             className: "w-5 h-5 mr-2 text-gray-400"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 228,
+                                            lineNumber: 217,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1267,13 +1252,13 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                             children: "Clique para selecionar novo PDF"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 229,
+                                            lineNumber: 218,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 224,
+                                    lineNumber: 213,
                                     columnNumber: 15
                                 }, this)
                             ]
@@ -1285,20 +1270,20 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 239,
+                                    lineNumber: 228,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     children: fileErrors[field]
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 240,
+                                    lineNumber: 229,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 238,
+                            lineNumber: 227,
                             columnNumber: 13
                         }, this),
                         hasNewFile && !hasError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1311,7 +1296,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                             className: "w-5 h-5 text-red-600"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 248,
+                                            lineNumber: 237,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1321,7 +1306,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                     children: fileData[field]?.name
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 250,
+                                                    lineNumber: 239,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1329,19 +1314,19 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                     children: "✅ Arquivo selecionado"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 253,
+                                                    lineNumber: 242,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 249,
+                                            lineNumber: 238,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 247,
+                                    lineNumber: 236,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1356,12 +1341,12 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 265,
+                                                lineNumber: 254,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 259,
+                                            lineNumber: 248,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1373,36 +1358,36 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 273,
+                                                lineNumber: 262,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 267,
+                                            lineNumber: 256,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 258,
+                                    lineNumber: 247,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 246,
+                            lineNumber: 235,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 212,
+                    lineNumber: 201,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-            lineNumber: 186,
+            lineNumber: 175,
             columnNumber: 7
         }, this);
     };
@@ -1410,7 +1395,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(AlertContainer, {}, void 0, false, {
                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                lineNumber: 285,
+                lineNumber: 274,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1429,7 +1414,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                             children: "📝 Editar Candidatura"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 293,
+                                            lineNumber: 282,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1437,7 +1422,7 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                             children: "Atualize os documentos que precisam de correção"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 296,
+                                            lineNumber: 285,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1449,25 +1434,25 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                         children: "⚠️ Atenção:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                        lineNumber: 301,
+                                                        lineNumber: 290,
                                                         columnNumber: 19
                                                     }, this),
                                                     ' Após a edição, sua candidatura voltará para "Pendente" para nova análise.'
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 300,
+                                                lineNumber: 289,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 299,
+                                            lineNumber: 288,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 292,
+                                    lineNumber: 281,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1478,18 +1463,18 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                         className: "w-5 h-5 text-gray-500 dark:text-gray-400"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 310,
+                                        lineNumber: 299,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                    lineNumber: 305,
+                                    lineNumber: 294,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 291,
+                            lineNumber: 280,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1511,19 +1496,19 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                     children: "💡 Dica:"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 332,
+                                                    lineNumber: 321,
                                                     columnNumber: 19
                                                 }, this),
                                                 " Apenas os documentos que você selecionar serão atualizados. Os documentos não selecionados permanecerão os mesmos."
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                            lineNumber: 331,
+                                            lineNumber: 320,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 330,
+                                        lineNumber: 319,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1540,20 +1525,20 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                             className: "w-4 h-4 animate-spin"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                            lineNumber: 350,
+                                                            lineNumber: 339,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Atualizando candidatura..."
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                            lineNumber: 351,
+                                                            lineNumber: 340,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 349,
+                                                    lineNumber: 338,
                                                     columnNumber: 21
                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     className: "flex items-center justify-center space-x-2",
@@ -1562,25 +1547,25 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                             className: "w-4 h-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                            lineNumber: 355,
+                                                            lineNumber: 344,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             children: "Atualizar e Reenviar para Análise"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                            lineNumber: 356,
+                                                            lineNumber: 345,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                    lineNumber: 354,
+                                                    lineNumber: 343,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 339,
+                                                lineNumber: 328,
                                                 columnNumber: 17
                                             }, this),
                                             !isSubmitting && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1588,35 +1573,35 @@ function EditApplicationModal({ application, onClose, onSuccess }) {
                                                 children: '⚠️ Sua candidatura voltará para status "Pendente"'
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                                lineNumber: 362,
+                                                lineNumber: 351,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                        lineNumber: 338,
+                                        lineNumber: 327,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                                lineNumber: 316,
+                                lineNumber: 305,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                            lineNumber: 315,
+                            lineNumber: 304,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                    lineNumber: 289,
+                    lineNumber: 278,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/modals/EditApplicationModal.tsx",
-                lineNumber: 288,
+                lineNumber: 277,
                 columnNumber: 7
             }, this)
         ]
